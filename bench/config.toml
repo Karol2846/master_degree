@@ -1,0 +1,18 @@
+[general]
+warmup_runs = 3
+benchmark_runs = 10
+resource_monitor_runs = 5
+resource_sample_interval_ms = 10
+
+[paths]
+java_jar = "java/target/degree.jar"
+rust_binary = "rust/target/release/rust.exe"
+results_dir = "results"
+
+[java]
+java_home = "C:\\Users\\karol\\.jdks\\openjdk-25.0.2"
+jvm_args = ["-Xms512m", "-Xmx8g"]
+
+[scenarios.scenario1]
+name = "CPU - Mandelbrot"
+description = "Mandelbrot set 4096x4096 -> PPM"

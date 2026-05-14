@@ -1,0 +1,344 @@
+"""
+Generate publication-quality comparison charts from benchmark results.
+
+Usage:
+    python bench/visualize.py                         # all charts
+    python bench/visualize.py --charts timing ram      # specific charts
+    python bench/visualize.py --format pdf png         # both formats
+"""
+
+import argparse
+import sys
+from pathlib import Path
+
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import numpy as np
+import seaborn as sns
+
+from utils import get_project_root, load_config, load_json, results_path
+
+JAVA_COLOR = "#E24A33"
+RUST_COLOR = "#348ABD"
+
+SCENARIO_LABELS = {
+    "scenario1": "CPU\nMandelbrot",
+    "scenario2": "I/O\nCSV Processing",
+    "scenario3": "Concurrency\nParticle Sim",
+    "scenario4": "Memory\nIoT Streaming",
+}
+
+
+def setup_style():
+    plt.rcParams.update({
+        "font.family": "serif",
+        "font.serif": ["Times New Roman", "DejaVu Serif"],
+        "font.size": 11,
+        "axes.labelsize": 12,
+        "axes.titlesize": 13,
+        "xtick.labelsize": 10,
+        "ytick.labelsize": 10,
+        "legend.fontsize": 10,
+        "figure.figsize": (6.5, 4.0),
+        "figure.dpi": 300,
+        "savefig.dpi": 300,
+        "savefig.bbox": "tight",
+        "savefig.pad_inches": 0.1,
+        "axes.grid": True,
+        "grid.alpha": 0.3,
+        "axes.spines.top": False,
+        "axes.spines.right": False,
+    })
+
+
+def save_chart(fig, path, formats):
+    for fmt in formats:
+        out = Path(str(path).rsplit(".", 1)[0] + f".{fmt}")
+        fig.savefig(out)
+        print(f"  Saved: {out}")
+    plt.close(fig)
+
+
+def chart_execution_time(config, formats):
+    path = results_path(config, "parsed", "timing.json")
+    if not path.exists():
+        print("  Skipping execution time chart (no timing data)")
+        return
+
+    timing = load_json(path)
+    scenarios = list(timing.keys())
+    x = np.arange(len(scenarios))
+    width = 0.35
+
+    java_means = [timing[s]["java"]["mean"] for s in scenarios]
+    java_stds = [timing[s]["java"]["stddev"] for s in scenarios]
+    rust_means = [timing[s]["rust"]["mean"] for s in scenarios]
+    rust_stds = [timing[s]["rust"]["stddev"] for s in scenarios]
+
+    fig, ax = plt.subplots(figsize=(max(6.5, len(scenarios) * 2.5), 4.5))
+
+    bars_j = ax.bar(x - width / 2, java_means, width, yerr=java_stds,
+                    label="Java 25", color=JAVA_COLOR, capsize=4,
+                    edgecolor="black", linewidth=0.5)
+    bars_r = ax.bar(x + width / 2, rust_means, width, yerr=rust_stds,
+                    label="Rust", color=RUST_COLOR, capsize=4,
+                    edgecolor="black", linewidth=0.5)
+
+    ax.set_ylabel("Execution Time (s)")
+    ax.set_title("Execution Time Comparison: Java vs Rust")
+    ax.set_xticks(x)
+    ax.set_xticklabels([SCENARIO_LABELS.get(s, s) for s in scenarios])
+    ax.legend()
+
+    for bar in list(bars_j) + list(bars_r):
+        h = bar.get_height()
+        ax.annotate(f"{h:.2f}s",
+                    xy=(bar.get_x() + bar.get_width() / 2, h),
+                    xytext=(0, 4), textcoords="offset points",
+                    ha="center", fontsize=8)
+
+    save_chart(fig, results_path(config, "charts", "execution_time.pdf"), formats)
+
+
+def chart_peak_ram(config, formats):
+    path = results_path(config, "parsed", "resources.json")
+    if not path.exists():
+        print("  Skipping peak RAM chart (no resource data)")
+        return
+
+    resources = load_json(path)
+    scenarios = list(resources.keys())
+    x = np.arange(len(scenarios))
+    width = 0.35
+
+    java_peaks = []
+    rust_peaks = []
+    for s in scenarios:
+        j = resources[s].get("java", {}).get("memory", {})
+        r = resources[s].get("rust", {}).get("memory", {})
+        java_peaks.append(j.get("peak_rss_bytes_mean", 0) / (1024 ** 2))
+        rust_peaks.append(r.get("peak_rss_bytes_mean", 0) / (1024 ** 2))
+
+    fig, ax = plt.subplots(figsize=(max(6.5, len(scenarios) * 2.5), 4.5))
+
+    bars_j = ax.bar(x - width / 2, java_peaks, width,
+                    label="Java 25", color=JAVA_COLOR,
+                    edgecolor="black", linewidth=0.5)
+    bars_r = ax.bar(x + width / 2, rust_peaks, width,
+                    label="Rust", color=RUST_COLOR,
+                    edgecolor="black", linewidth=0.5)
+
+    ax.set_ylabel("Peak RSS (MB)")
+    ax.set_title("Peak Memory Usage Comparison: Java vs Rust")
+    ax.set_xticks(x)
+    ax.set_xticklabels([SCENARIO_LABELS.get(s, s) for s in scenarios])
+    ax.legend()
+
+    for bar in list(bars_j) + list(bars_r):
+        h = bar.get_height()
+        ax.annotate(f"{h:.0f} MB",
+                    xy=(bar.get_x() + bar.get_width() / 2, h),
+                    xytext=(0, 4), textcoords="offset points",
+                    ha="center", fontsize=8)
+
+    save_chart(fig, results_path(config, "charts", "peak_ram.pdf"), formats)
+
+
+def chart_ram_over_time(config, formats):
+    path = results_path(config, "parsed", "resources.json")
+    if not path.exists():
+        print("  Skipping RAM-over-time charts (no resource data)")
+        return
+
+    resources = load_json(path)
+
+    for scenario_id, data in resources.items():
+        java_ts = data.get("java", {}).get("median_run_timeseries", [])
+        rust_ts = data.get("rust", {}).get("median_run_timeseries", [])
+
+        if not java_ts and not rust_ts:
+            continue
+
+        fig, ax = plt.subplots(figsize=(8, 4))
+
+        if java_ts:
+            jt = [s["timestamp_ms"] / 1000 for s in java_ts]
+            jr = [s["rss_bytes"] / (1024 ** 2) for s in java_ts]
+            ax.plot(jt, jr, color=JAVA_COLOR, label="Java 25", alpha=0.8, linewidth=1)
+
+        if rust_ts:
+            rt = [s["timestamp_ms"] / 1000 for s in rust_ts]
+            rr = [s["rss_bytes"] / (1024 ** 2) for s in rust_ts]
+            ax.plot(rt, rr, color=RUST_COLOR, label="Rust", alpha=0.8, linewidth=1)
+
+        label = SCENARIO_LABELS.get(scenario_id, scenario_id).replace("\n", " - ")
+        ax.set_xlabel("Time (s)")
+        ax.set_ylabel("RSS Memory (MB)")
+        ax.set_title(f"Memory Usage Over Time: {label}")
+        ax.legend()
+
+        save_chart(fig, results_path(config, "charts", f"ram_over_time_{scenario_id}.pdf"), formats)
+
+
+def chart_gc_histogram(config, formats):
+    parsed_dir = results_path(config, "parsed")
+    gc_files = list(parsed_dir.glob("gc_pauses_*.json"))
+
+    if not gc_files:
+        print("  Skipping GC histogram (no GC data)")
+        return
+
+    for gc_file in gc_files:
+        gc_data = load_json(gc_file)
+        scenario_id = gc_file.stem.replace("gc_pauses_", "")
+
+        if not gc_data["pauses"]:
+            continue
+
+        fig, ax = plt.subplots(figsize=(7, 4))
+
+        type_colors = {
+            "Young": "#4CAF50",
+            "Mixed": "#FFC107",
+            "Full": "#F44336",
+            "Old": "#9C27B0",
+        }
+
+        all_durations = [p["pause_duration_ms"] for p in gc_data["pauses"]]
+
+        for pause_type, color in type_colors.items():
+            durations = [p["pause_duration_ms"] for p in gc_data["pauses"]
+                         if p["pause_type"] == pause_type]
+            if durations:
+                ax.hist(durations, bins=min(50, max(10, len(durations) // 2)),
+                        alpha=0.7, label=f"{pause_type} ({len(durations)})",
+                        color=color, edgecolor="black", linewidth=0.3)
+
+        summary = gc_data["summary"]
+        ax.axvline(summary["mean_pause_ms"], color="black", linestyle="--",
+                   label=f"Mean ({summary['mean_pause_ms']:.2f} ms)")
+        ax.axvline(summary["p99_pause_ms"], color="red", linestyle=":",
+                   label=f"P99 ({summary['p99_pause_ms']:.2f} ms)")
+
+        ax.set_xlabel("Pause Duration (ms)")
+        ax.set_ylabel("Count")
+        label = SCENARIO_LABELS.get(scenario_id, scenario_id).replace("\n", " - ")
+        ax.set_title(f"GC Pause Duration Distribution: {label}")
+        ax.legend()
+
+        save_chart(fig, results_path(config, "charts", f"gc_pause_histogram_{scenario_id}.pdf"), formats)
+
+
+def chart_gc_timeline(config, formats):
+    parsed_dir = results_path(config, "parsed")
+    gc_files = list(parsed_dir.glob("gc_pauses_*.json"))
+
+    if not gc_files:
+        print("  Skipping GC timeline (no GC data)")
+        return
+
+    for gc_file in gc_files:
+        gc_data = load_json(gc_file)
+        scenario_id = gc_file.stem.replace("gc_pauses_", "")
+
+        if not gc_data["pauses"]:
+            continue
+
+        fig, ax = plt.subplots(figsize=(10, 4))
+
+        type_colors = {
+            "Young": "#4CAF50",
+            "Mixed": "#FFC107",
+            "Full": "#F44336",
+            "Old": "#9C27B0",
+        }
+
+        for pause_type, color in type_colors.items():
+            pts = [(p["timestamp_s"], p["pause_duration_ms"])
+                   for p in gc_data["pauses"] if p["pause_type"] == pause_type]
+            if pts:
+                xs, ys = zip(*pts)
+                ax.scatter(xs, ys, c=color, label=pause_type, s=15, alpha=0.7, edgecolors="none")
+
+        ax.set_xlabel("Time (s)")
+        ax.set_ylabel("Pause Duration (ms)")
+        label = SCENARIO_LABELS.get(scenario_id, scenario_id).replace("\n", " - ")
+        ax.set_title(f"GC Pause Events Over Time: {label}")
+        ax.legend()
+
+        save_chart(fig, results_path(config, "charts", f"gc_pause_timeline_{scenario_id}.pdf"), formats)
+
+
+def chart_binary_size(config, formats):
+    path = results_path(config, "raw", "binary_sizes.json")
+    if not path.exists():
+        print("  Skipping binary size chart (no build data)")
+        return
+
+    sizes = load_json(path)
+    java_kb = sizes["java_jar_bytes"] / 1024
+    rust_kb = sizes["rust_exe_bytes"] / 1024
+
+    fig, ax = plt.subplots(figsize=(5, 4))
+
+    bars = ax.bar(["Java JAR", "Rust EXE"], [java_kb, rust_kb],
+                  color=[JAVA_COLOR, RUST_COLOR],
+                  edgecolor="black", linewidth=0.5)
+
+    ax.set_ylabel("Size (KB)")
+    ax.set_title("Binary Size Comparison")
+
+    for bar in bars:
+        h = bar.get_height()
+        unit = "KB" if h < 1024 else "MB"
+        val = h if h < 1024 else h / 1024
+        ax.annotate(f"{val:.1f} {unit}",
+                    xy=(bar.get_x() + bar.get_width() / 2, h),
+                    xytext=(0, 4), textcoords="offset points",
+                    ha="center", fontsize=9)
+
+    save_chart(fig, results_path(config, "charts", "binary_size.pdf"), formats)
+
+
+CHART_FUNCTIONS = {
+    "timing": chart_execution_time,
+    "ram": chart_peak_ram,
+    "ram_time": chart_ram_over_time,
+    "gc_hist": chart_gc_histogram,
+    "gc_timeline": chart_gc_timeline,
+    "binary": chart_binary_size,
+}
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Generate benchmark charts")
+    parser.add_argument("--charts", nargs="+", default=None,
+                        choices=list(CHART_FUNCTIONS.keys()),
+                        help="Which charts to generate (default: all)")
+    parser.add_argument("--format", nargs="+", default=["pdf"],
+                        choices=["pdf", "png", "svg"],
+                        help="Output formats (default: pdf)")
+    parser.add_argument("--config", default=None, help="Path to config.toml")
+
+    args = parser.parse_args()
+    config = load_config(args.config)
+
+    setup_style()
+
+    charts = args.charts or list(CHART_FUNCTIONS.keys())
+    formats = args.format
+
+    print(f"Generating charts: {charts}")
+    print(f"Formats: {formats}\n")
+
+    for chart_name in charts:
+        print(f"Chart: {chart_name}")
+        CHART_FUNCTIONS[chart_name](config, formats)
+        print()
+
+    print("Done.")
+
+
+if __name__ == "__main__":
+    main()
