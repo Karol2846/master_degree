@@ -1,16 +1,17 @@
-# Research Scenarios: Java vs Rust
+Zdecydowałem się na implementację wyłącznie w oparciu o biblioteki standardowe obu języków (brak zewnętrznych zależności).
+Dodatkowo, aby przyspieszyć proces tworzenia kodu - chciałbym użyć narzędzi Ai.
+W związku z tym pominę metryki związane z czasem programowania i złożonością kodu.
+W samych badaniach skupię się stricte na metrykach maszynowych
+(czas wykonania, szczytowe zużycie RAM, rozmiar pliku wykonywalnego, linie kodu, złożoność kodu (SonarQube), czas wykonania pracy - generowanie, prompty itd)
 
-## 1. CPU-Intensive Workload
-**Task:** Generating the Mandelbrot set and saving it to the raw PPM format (due to the lack of built-in image compression support in the Rust standard library).
-
-## 2. I/O-Intensive Workload
-**Task:** Sequential processing of a large CSV file (e.g., 5 GB of transaction data).
-* Parsing rows,
-* Applying a simple filter (searching for the largest transactions),
-* Saving matching records to a new file.
-
-## 3. Concurrency and Memory Management
-**Task:** An in-memory stream processing engine (IoT simulation).
-* Asynchronous reception of millions of events,
-* Anomaly filtering and multi-threaded aggregation (moving average).
-* **Main goal:** Investigating throughput and comparing latency spikes caused by the Garbage Collector in Java against the determinism of the Ownership model in Rust.
+Wybrałem 4 następujące scenariusze badawcze:
+1. **Obciążenie CPU**: Generowanie zbioru Mandelbrota z zapisem do surowego formatu PPM
+   (ze względu na brak wbudowanej obsługi kompresji obrazów w standardowej bibliotece Rusta).
+2. Obciążenie I/O: Sekwencyjne przetwarzanie pliku CSV (np. 5 GB danych transakcyjnych).
+   Parsowanie wierszy, nałożenie prostego filtru (szukanie największych transakcji) i zapis pasujących rekordów do nowego pliku.
+3. Współbierzność: równoległe przetwarzanie obliczeń.
+   Symulacja w której równolegle jest liczone kilka rzeczy dla jednego wyniku - np. symulacja 5000 cząstek, które muszę ze sobą reagować.
+4. **Zarządzanie pamięcią**: Działający w pamięci silnik przetwarzania strumieniowego (symulacja IoT).
+   Odbiór milionów zdarzeń, filtrowanie anomalii i agregacja (średnia krocząca).
+   Głównym celem jest zbadanie przepustowości oraz zestawienie wahań opóźnień (latency spikes)
+   powodowanych przez Garbage Collector w Javie z determinizmem modelu Ownership w Rust-cie.
