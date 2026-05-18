@@ -3,4 +3,12 @@ name = "rust"
 version = "0.1.0"
 edition = "2024"
 
+[[bin]]
+name = "mandelbrot"
+path = "src/mandelbrot/main.rs"
+
+[[bin]]
+name = "streaming"
+path = "src/streaming/main.rs"
+
 [dependencies]

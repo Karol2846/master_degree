@@ -10,7 +10,7 @@ pub const IM_MIN: f64 = -1.5_f64;
 pub const IM_MAX: f64 = 1.5_f64;
 pub const OUTPUT_PATH: &str = "output/mandelbrot.ppm";
 
-pub fn run() -> std::io::Result<()> {
+fn main() -> std::io::Result<()> {
     let mut buf = vec![0u8; WIDTH * HEIGHT * 3];
     generate::generate(&mut buf);
     ppm::write_ppm(OUTPUT_PATH, WIDTH, HEIGHT, &buf)?;
