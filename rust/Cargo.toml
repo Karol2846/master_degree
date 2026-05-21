@@ -11,4 +11,8 @@ path = "src/mandelbrot/main.rs"
 name = "streaming"
 path = "src/streaming/main.rs"
 
+[[bin]]
+name = "csv"
+path = "src/csv/main.rs"
+
 [dependencies]
