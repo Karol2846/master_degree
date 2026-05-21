@@ -40,7 +40,7 @@ fn main() -> std::io::Result<()> {
         }
         let t1 = Instant::now();
         let dt = t1.saturating_duration_since(t0).as_nanos();
-        hist.record(dt.min(u64::MAX as u128) as u64);
+        hist.record(u64::try_from(dt).unwrap_or(u64::MAX));
         events += 1;
     }
 

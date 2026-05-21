@@ -9,9 +9,9 @@
 
 ## Scenariusz 4
 
-- planowanie: 53 minuty
-- implementacja Rust: 15 minut
-- implementacja Java: 6 minut
+- planowanie: 56 minuty
+- implementacja Rust: 16 minut
+- implementacja Java: 7 minut
 
 
 

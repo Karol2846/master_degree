@@ -14,7 +14,7 @@ public class PpmWriter {
             Files.createDirectories(p.getParent());
         }
         try (var out = new BufferedOutputStream(Files.newOutputStream(p))) {
-            byte[] header = ("P6\n" + width + " " + height + "\n255\n").getBytes(StandardCharsets.US_ASCII);
+            byte[] header = String.format("P6\n%d %d\n255\n", width, height).getBytes(StandardCharsets.US_ASCII);
             out.write(header);
             out.write(pixels);
         }
