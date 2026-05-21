@@ -5,17 +5,15 @@ Usage:
     python bench/run_benchmarks.py --phases all
     python bench/run_benchmarks.py --phases build timing
     python bench/run_benchmarks.py --phases timing --runs 5 --warmup 1
-    python bench/run_benchmarks.py --phases resources
-    python bench/run_benchmarks.py --phases gc
+    python bench/run_benchmarks.py --phases generate --regen-data
+    python bench/run_benchmarks.py --phases all --scenarios scenario4
 """
 
 import argparse
-import json
 import os
 import shutil
 import subprocess
 import sys
-from glob import glob
 from pathlib import Path
 
 from utils import (
@@ -28,73 +26,111 @@ from utils import (
     get_rust_command,
     get_scenarios,
     load_config,
+    load_json,
     results_path,
     save_json,
-    load_json,
 )
 
 
-def phase_build(config):
+def phase_build(config, scenarios):
     print("=== Phase: BUILD ===")
     root = get_project_root()
-
-    # --- Java: javac + jar ---
-    print("Building Java...")
     javac = get_javac_exe(config)
     jar_exe = get_jar_exe(config)
     java_src = root / "java" / "src" / "main" / "java"
-    classes_dir = root / "java" / "target" / "classes"
-    jar_path = root / config["paths"]["java_jar"]
 
-    classes_dir.mkdir(parents=True, exist_ok=True)
+    binary_sizes_path = results_path(config, "raw", "binary_sizes.json")
+    binary_sizes = load_json(binary_sizes_path) if binary_sizes_path.exists() else {}
 
-    sources = [str(p) for p in java_src.rglob("*.java")]
-    if not sources:
-        print("  ERROR: No Java source files found", file=sys.stderr)
-        return False
+    for scenario_id, scenario in scenarios.items():
+        package = scenario["java_package"]
+        print(f"\n--- {scenario_id}: {scenario['name']} ---")
 
-    result = subprocess.run(
-        [javac, "-d", str(classes_dir)] + sources,
-        capture_output=True, text=True,
-    )
-    if result.returncode != 0:
-        print(f"  javac FAILED:\n{result.stderr}", file=sys.stderr)
-        return False
+        print(f"  Building Java ({package})...")
+        classes_dir = root / "java" / "target" / "classes" / scenario_id
+        jar_path = root / scenario["java_jar"]
 
-    jar_path.parent.mkdir(parents=True, exist_ok=True)
-    result = subprocess.run(
-        [jar_exe, "cfe", str(jar_path), "org.master.Main", "-C", str(classes_dir), "."],
-        capture_output=True, text=True,
-    )
-    if result.returncode != 0:
-        print(f"  jar FAILED:\n{result.stderr}", file=sys.stderr)
-        return False
+        if classes_dir.exists():
+            shutil.rmtree(classes_dir)
+        classes_dir.mkdir(parents=True, exist_ok=True)
 
-    java_size = jar_path.stat().st_size
-    print(f"  Java JAR: {jar_path} ({java_size / 1024:.1f} KB)")
+        package_dir = java_src / "org" / "master" / package
+        sources = [str(p) for p in package_dir.rglob("*.java")]
+        if not sources:
+            print(f"  ERROR: No Java sources for package {package} at {package_dir}", file=sys.stderr)
+            return False
 
-    # --- Rust: cargo build --release ---
-    print("Building Rust...")
-    cargo_toml = root / "rust" / "Cargo.toml"
-    result = subprocess.run(
-        ["cargo", "build", "--release", "--manifest-path", str(cargo_toml)],
-        capture_output=True, text=True,
-    )
-    if result.returncode != 0:
-        print(f"  cargo build FAILED:\n{result.stderr}", file=sys.stderr)
-        return False
+        result = subprocess.run(
+            [javac, "-d", str(classes_dir)] + sources,
+            capture_output=True, text=True,
+        )
+        if result.returncode != 0:
+            print(f"  javac FAILED:\n{result.stderr}", file=sys.stderr)
+            return False
 
-    rust_bin = root / config["paths"]["rust_binary"]
-    rust_size = rust_bin.stat().st_size
-    print(f"  Rust EXE: {rust_bin} ({rust_size / 1024:.1f} KB)")
+        jar_path.parent.mkdir(parents=True, exist_ok=True)
+        result = subprocess.run(
+            [jar_exe, "cfe", str(jar_path), f"org.master.{package}.Main", "-C", str(classes_dir), "."],
+            capture_output=True, text=True,
+        )
+        if result.returncode != 0:
+            print(f"  jar FAILED:\n{result.stderr}", file=sys.stderr)
+            return False
 
-    # --- Save sizes ---
-    save_json({
-        "java_jar_bytes": java_size,
-        "rust_exe_bytes": rust_size,
-    }, results_path(config, "raw", "binary_sizes.json"))
+        java_size = jar_path.stat().st_size
+        print(f"  Java JAR: {jar_path} ({java_size / 1024:.1f} KB)")
 
-    print("Build complete.")
+        print(f"  Building Rust ({package})...")
+        cargo_toml = root / "rust" / "Cargo.toml"
+        result = subprocess.run(
+            ["cargo", "build", "--release", "--bin", package, "--manifest-path", str(cargo_toml)],
+            capture_output=True, text=True,
+        )
+        if result.returncode != 0:
+            print(f"  cargo build FAILED:\n{result.stderr}", file=sys.stderr)
+            return False
+
+        rust_bin = root / scenario["rust_binary"]
+        rust_size = rust_bin.stat().st_size
+        print(f"  Rust EXE: {rust_bin} ({rust_size / 1024:.1f} KB)")
+
+        binary_sizes[scenario_id] = {
+            "java_jar_bytes": java_size,
+            "rust_exe_bytes": rust_size,
+        }
+
+    save_json(binary_sizes, binary_sizes_path)
+    print("\nBuild complete.")
+    return True
+
+
+def phase_generate(config, scenarios, regen=False):
+    print("=== Phase: GENERATE ===")
+    root = get_project_root()
+    any_run = False
+    for scenario_id, scenario in scenarios.items():
+        script_rel = scenario.get("generator_script")
+        if not script_rel:
+            continue
+        any_run = True
+        output_rel = scenario.get("generator_output")
+        output_abs = (root / output_rel) if output_rel else None
+        script_abs = root / script_rel
+
+        if output_abs and output_abs.exists() and not regen:
+            size_mb = output_abs.stat().st_size / (1024 * 1024)
+            print(f"  [{scenario_id}] {output_abs} exists ({size_mb:.1f} MB), skipping. Use --regen-data to force.")
+            continue
+
+        print(f"  [{scenario_id}] Running {script_abs}...")
+        result = subprocess.run([sys.executable, str(script_abs)], cwd=str(root))
+        if result.returncode != 0:
+            print(f"  Generator FAILED for {scenario_id}", file=sys.stderr)
+            return False
+
+    if not any_run:
+        print("  No scenarios declare a generator_script.")
+    print("Generate complete.")
     return True
 
 
@@ -135,6 +171,7 @@ def phase_timing(config, scenarios, runs, warmup):
                 return False
 
     consolidate_timing(config, scenarios)
+    consolidate_latency(config, scenarios)
     print("Timing complete.")
     return True
 
@@ -157,6 +194,18 @@ def consolidate_timing(config, scenarios):
                     "times": r["times"],
                 }
     save_json(timing, results_path(config, "parsed", "timing.json"))
+
+
+def consolidate_latency(config, scenarios):
+    root = get_project_root()
+    for scenario_id in scenarios:
+        latency = {}
+        for lang in ["java", "rust"]:
+            src = root / "output" / f"{scenario_id}_latency_{lang}.json"
+            if src.exists():
+                latency[lang] = load_json(src)
+        if latency:
+            save_json(latency, results_path(config, "parsed", f"latency_{scenario_id}.json"))
 
 
 def phase_resources(config, scenarios, runs):
@@ -279,13 +328,15 @@ def main():
     parser = argparse.ArgumentParser(description="Benchmark runner: Java vs Rust")
     parser.add_argument(
         "--phases", nargs="+",
-        choices=["build", "timing", "resources", "gc", "all"],
+        choices=["build", "generate", "timing", "resources", "gc", "all"],
         default=["all"],
         help="Which phases to run",
     )
     parser.add_argument("--scenarios", nargs="+", default=None, help="Scenario IDs to run (default: all)")
     parser.add_argument("--runs", type=int, default=None, help="Override number of benchmark runs")
     parser.add_argument("--warmup", type=int, default=None, help="Override number of warmup runs")
+    parser.add_argument("--regen-data", action="store_true",
+                        help="Force regeneration of data files in 'generate' phase")
     parser.add_argument("--config", default=None, help="Path to config.toml")
 
     args = parser.parse_args()
@@ -294,7 +345,7 @@ def main():
 
     phases = args.phases
     if "all" in phases:
-        phases = ["build", "timing", "resources", "gc"]
+        phases = ["build", "generate", "timing", "resources", "gc"]
 
     all_scenarios = get_scenarios(config)
     if args.scenarios:
@@ -313,7 +364,9 @@ def main():
 
     success = True
     if "build" in phases:
-        success = phase_build(config) and success
+        success = phase_build(config, scenarios) and success
+    if "generate" in phases:
+        success = phase_generate(config, scenarios, regen=args.regen_data) and success
     if "timing" in phases:
         success = phase_timing(config, scenarios, runs, warmup) and success
     if "resources" in phases:

@@ -7,7 +7,11 @@
 - implementacja Java: 5 minut
 
 
+## Scenariusz 4
 
+- planowanie: 53 minuty
+- implementacja Rust: 15 minut
+- implementacja Java: 6 minut
 
 
 

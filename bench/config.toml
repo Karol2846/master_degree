@@ -5,8 +5,6 @@ resource_monitor_runs = 5
 resource_sample_interval_ms = 10
 
 [paths]
-java_jar = "java/target/degree.jar"
-rust_binary = "rust/target/release/rust.exe"
 results_dir = "results"
 
 [java]
@@ -15,4 +13,16 @@ jvm_args = ["-Xms512m", "-Xmx8g"]
 
 [scenarios.scenario1]
 name = "CPU - Mandelbrot"
-description = "Mandelbrot set 4096x4096 -> PPM"
+description = "Mandelbrot 4096x4096 -> PPM"
+java_package = "mandelbrot"
+java_jar = "java/target/mandelbrot.jar"
+rust_binary = "rust/target/release/mandelbrot.exe"
+
+[scenarios.scenario4]
+name = "Memory - IoT Streaming"
+description = "Z-score anomaly detection + per-sensor rolling avg over 100M events"
+java_package = "streaming"
+java_jar = "java/target/streaming.jar"
+rust_binary = "rust/target/release/streaming.exe"
+generator_script = "bench/gen_scenario4.py"
+generator_output = "output/scenario4_events.bin"

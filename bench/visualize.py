@@ -277,19 +277,30 @@ def chart_binary_size(config, formats):
         return
 
     sizes = load_json(path)
-    java_kb = sizes["java_jar_bytes"] / 1024
-    rust_kb = sizes["rust_exe_bytes"] / 1024
+    scenarios = list(sizes.keys())
+    if not scenarios:
+        print("  Skipping binary size chart (empty file)")
+        return
 
-    fig, ax = plt.subplots(figsize=(5, 4))
+    x = np.arange(len(scenarios))
+    width = 0.35
+    java_kb = [sizes[s].get("java_jar_bytes", 0) / 1024 for s in scenarios]
+    rust_kb = [sizes[s].get("rust_exe_bytes", 0) / 1024 for s in scenarios]
 
-    bars = ax.bar(["Java JAR", "Rust EXE"], [java_kb, rust_kb],
-                  color=[JAVA_COLOR, RUST_COLOR],
-                  edgecolor="black", linewidth=0.5)
+    fig, ax = plt.subplots(figsize=(max(5, len(scenarios) * 2.5), 4.5))
+
+    bars_j = ax.bar(x - width / 2, java_kb, width, label="Java JAR",
+                    color=JAVA_COLOR, edgecolor="black", linewidth=0.5)
+    bars_r = ax.bar(x + width / 2, rust_kb, width, label="Rust EXE",
+                    color=RUST_COLOR, edgecolor="black", linewidth=0.5)
 
     ax.set_ylabel("Size (KB)")
-    ax.set_title("Binary Size Comparison")
+    ax.set_title("Binary Size per Scenario")
+    ax.set_xticks(x)
+    ax.set_xticklabels([SCENARIO_LABELS.get(s, s) for s in scenarios])
+    ax.legend()
 
-    for bar in bars:
+    for bar in list(bars_j) + list(bars_r):
         h = bar.get_height()
         unit = "KB" if h < 1024 else "MB"
         val = h if h < 1024 else h / 1024
@@ -301,6 +312,74 @@ def chart_binary_size(config, formats):
     save_chart(fig, results_path(config, "charts", "binary_size.pdf"), formats)
 
 
+def chart_latency_distribution(config, formats):
+    parsed_dir = results_path(config, "parsed")
+    latency_files = list(parsed_dir.glob("latency_*.json"))
+
+    if not latency_files:
+        print("  Skipping latency chart (no latency data)")
+        return
+
+    for path in latency_files:
+        data = load_json(path)
+        scenario_id = path.stem.replace("latency_", "")
+        java = data.get("java")
+        rust = data.get("rust")
+        if not (java or rust):
+            continue
+
+        label = SCENARIO_LABELS.get(scenario_id, scenario_id).replace("\n", " - ")
+
+        # --- (1) percentile comparison ---
+        percentiles = ["p50_ns", "p95_ns", "p99_ns", "p999_ns", "max_ns"]
+        percentile_labels = ["p50", "p95", "p99", "p99.9", "max"]
+        x = np.arange(len(percentiles))
+        width = 0.35
+
+        java_vals = [(java or {}).get(p, 0) / 1000.0 for p in percentiles]
+        rust_vals = [(rust or {}).get(p, 0) / 1000.0 for p in percentiles]
+
+        fig, ax = plt.subplots(figsize=(7, 4.5))
+        ax.bar(x - width / 2, java_vals, width, label="Java 25",
+               color=JAVA_COLOR, edgecolor="black", linewidth=0.5)
+        ax.bar(x + width / 2, rust_vals, width, label="Rust",
+               color=RUST_COLOR, edgecolor="black", linewidth=0.5)
+        ax.set_yscale("log")
+        ax.set_ylabel("Per-event latency (µs, log scale)")
+        ax.set_xlabel("Percentile")
+        ax.set_xticks(x)
+        ax.set_xticklabels(percentile_labels)
+        ax.set_title(f"Per-event Latency Percentiles: {label}")
+        ax.legend()
+        save_chart(fig, results_path(config, "charts", f"latency_percentiles_{scenario_id}.pdf"), formats)
+
+        # --- (2) bucket histogram overlay ---
+        fig, ax = plt.subplots(figsize=(8, 4.5))
+        plotted_any = False
+        for side, color, label_lang in [(java, JAVA_COLOR, "Java 25"), (rust, RUST_COLOR, "Rust")]:
+            if not side:
+                continue
+            buckets = side.get("buckets") or []
+            lowers_ns = side.get("bucket_lower_ns") or []
+            if not buckets or not lowers_ns:
+                continue
+            lowers_us = [max(b, 1) / 1000.0 for b in lowers_ns]
+            ax.step(lowers_us, buckets, where="post",
+                    color=color, label=label_lang, linewidth=1.5, alpha=0.85)
+            plotted_any = True
+
+        if plotted_any:
+            ax.set_xscale("log")
+            ax.set_yscale("symlog", linthresh=1)
+            ax.set_xlabel("Per-event latency bucket lower bound (µs, log scale)")
+            ax.set_ylabel("Events in bucket")
+            ax.set_title(f"Per-event Latency Distribution: {label}")
+            ax.legend()
+            save_chart(fig, results_path(config, "charts", f"latency_distribution_{scenario_id}.pdf"), formats)
+        else:
+            plt.close(fig)
+
+
 CHART_FUNCTIONS = {
     "timing": chart_execution_time,
     "ram": chart_peak_ram,
@@ -308,6 +387,7 @@ CHART_FUNCTIONS = {
     "gc_hist": chart_gc_histogram,
     "gc_timeline": chart_gc_timeline,
     "binary": chart_binary_size,
+    "latency": chart_latency_distribution,
 }
 
 

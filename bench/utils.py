@@ -36,21 +36,21 @@ def get_java_home(config):
 
 def get_java_command(config, scenario_id):
     java_exe = get_java_home(config) / "bin" / "java.exe"
-    jar_path = get_project_root() / config["paths"]["java_jar"]
+    jar_path = get_project_root() / config["scenarios"][scenario_id]["java_jar"]
     jvm_args = config["java"]["jvm_args"]
     return [str(java_exe)] + jvm_args + ["-jar", str(jar_path)]
 
 
 def get_java_command_with_gc(config, scenario_id, gc_log_path):
     java_exe = get_java_home(config) / "bin" / "java.exe"
-    jar_path = get_project_root() / config["paths"]["java_jar"]
+    jar_path = get_project_root() / config["scenarios"][scenario_id]["java_jar"]
     jvm_args = config["java"]["jvm_args"]
     gc_flag = f"-Xlog:gc*:file={gc_log_path}:time,uptime,level,tags"
     return [str(java_exe)] + jvm_args + [gc_flag, "-jar", str(jar_path)]
 
 
 def get_rust_command(config, scenario_id):
-    rust_bin = get_project_root() / config["paths"]["rust_binary"]
+    rust_bin = get_project_root() / config["scenarios"][scenario_id]["rust_binary"]
     return [str(rust_bin)]
 
 
