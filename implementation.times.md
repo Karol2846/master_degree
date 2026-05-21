@@ -6,6 +6,11 @@
 - implementacja Rust: 9 minut (sprawdzanie kompilacji)
 - implementacja Java: 7 minut
 
+## Scenariusz 2
+
+- planowanie: 31 minuty
+- implementacja Rust: 3 minuty
+- implementacja Java: 1 minuty
 
 ## Scenariusz 4
 

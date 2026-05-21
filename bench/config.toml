@@ -18,6 +18,15 @@ java_package = "mandelbrot"
 java_jar = "java/target/mandelbrot.jar"
 rust_binary = "rust/target/release/mandelbrot.exe"
 
+[scenarios.scenario2]
+name = "I/O - CSV Filter"
+description = "Two-pass top-1% amount filter over 50M transaction rows (~5 GB)"
+java_package = "csv"
+java_jar = "java/target/csv.jar"
+rust_binary = "rust/target/release/csv.exe"
+generator_script = "bench/gen_scenario2.py"
+generator_output = "output/scenario2_transactions.csv"
+
 [scenarios.scenario4]
 name = "Memory - IoT Streaming"
 description = "Z-score anomaly detection + per-sensor rolling avg over 100M events"
