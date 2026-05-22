@@ -52,9 +52,16 @@ def setup_style():
     })
 
 
+def chart_dir(config, scenario_id):
+    d = results_path(config, "charts", scenario_id)
+    d.mkdir(parents=True, exist_ok=True)
+    return d
+
+
 def save_chart(fig, path, formats):
     for fmt in formats:
         out = Path(str(path).rsplit(".", 1)[0] + f".{fmt}")
+        out.parent.mkdir(parents=True, exist_ok=True)
         fig.savefig(out)
         print(f"  Saved: {out}")
     plt.close(fig)
@@ -67,38 +74,39 @@ def chart_execution_time(config, formats):
         return
 
     timing = load_json(path)
-    scenarios = list(timing.keys())
-    x = np.arange(len(scenarios))
     width = 0.35
 
-    java_means = [timing[s]["java"]["mean"] for s in scenarios]
-    java_stds = [timing[s]["java"]["stddev"] for s in scenarios]
-    rust_means = [timing[s]["rust"]["mean"] for s in scenarios]
-    rust_stds = [timing[s]["rust"]["stddev"] for s in scenarios]
+    for scenario_id in timing.keys():
+        x = np.arange(1)
+        java_mean = timing[scenario_id]["java"]["mean"]
+        java_std = timing[scenario_id]["java"]["stddev"]
+        rust_mean = timing[scenario_id]["rust"]["mean"]
+        rust_std = timing[scenario_id]["rust"]["stddev"]
 
-    fig, ax = plt.subplots(figsize=(max(6.5, len(scenarios) * 2.5), 4.5))
+        fig, ax = plt.subplots(figsize=(4.0, 4.5))
 
-    bars_j = ax.bar(x - width / 2, java_means, width, yerr=java_stds,
-                    label="Java 25", color=JAVA_COLOR, capsize=4,
-                    edgecolor="black", linewidth=0.5)
-    bars_r = ax.bar(x + width / 2, rust_means, width, yerr=rust_stds,
-                    label="Rust", color=RUST_COLOR, capsize=4,
-                    edgecolor="black", linewidth=0.5)
+        bars_j = ax.bar(x - width / 2, [java_mean], width, yerr=[java_std],
+                        label="Java 25", color=JAVA_COLOR, capsize=4,
+                        edgecolor="black", linewidth=0.5)
+        bars_r = ax.bar(x + width / 2, [rust_mean], width, yerr=[rust_std],
+                        label="Rust", color=RUST_COLOR, capsize=4,
+                        edgecolor="black", linewidth=0.5)
 
-    ax.set_ylabel("Execution Time (s)")
-    ax.set_title("Execution Time Comparison: Java vs Rust")
-    ax.set_xticks(x)
-    ax.set_xticklabels([SCENARIO_LABELS.get(s, s) for s in scenarios])
-    ax.legend()
+        label = SCENARIO_LABELS.get(scenario_id, scenario_id).replace("\n", " - ")
+        ax.set_ylabel("Execution Time (s)")
+        ax.set_title(f"Execution Time: {label}")
+        ax.set_xticks(x)
+        ax.set_xticklabels([label])
+        ax.legend()
 
-    for bar in list(bars_j) + list(bars_r):
-        h = bar.get_height()
-        ax.annotate(f"{h:.2f}s",
-                    xy=(bar.get_x() + bar.get_width() / 2, h),
-                    xytext=(0, 4), textcoords="offset points",
-                    ha="center", fontsize=8)
+        for bar in list(bars_j) + list(bars_r):
+            h = bar.get_height()
+            ax.annotate(f"{h:.2f}s",
+                        xy=(bar.get_x() + bar.get_width() / 2, h),
+                        xytext=(0, 4), textcoords="offset points",
+                        ha="center", fontsize=8)
 
-    save_chart(fig, results_path(config, "charts", "execution_time.pdf"), formats)
+        save_chart(fig, chart_dir(config, scenario_id) / "execution_time.pdf", formats)
 
 
 def chart_peak_ram(config, formats):
@@ -108,41 +116,39 @@ def chart_peak_ram(config, formats):
         return
 
     resources = load_json(path)
-    scenarios = list(resources.keys())
-    x = np.arange(len(scenarios))
     width = 0.35
 
-    java_peaks = []
-    rust_peaks = []
-    for s in scenarios:
-        j = resources[s].get("java", {}).get("memory", {})
-        r = resources[s].get("rust", {}).get("memory", {})
-        java_peaks.append(j.get("peak_rss_bytes_mean", 0) / (1024 ** 2))
-        rust_peaks.append(r.get("peak_rss_bytes_mean", 0) / (1024 ** 2))
+    for scenario_id, data in resources.items():
+        x = np.arange(1)
+        j = data.get("java", {}).get("memory", {})
+        r = data.get("rust", {}).get("memory", {})
+        java_peak = j.get("peak_rss_bytes_mean", 0) / (1024 ** 2)
+        rust_peak = r.get("peak_rss_bytes_mean", 0) / (1024 ** 2)
 
-    fig, ax = plt.subplots(figsize=(max(6.5, len(scenarios) * 2.5), 4.5))
+        fig, ax = plt.subplots(figsize=(4.0, 4.5))
 
-    bars_j = ax.bar(x - width / 2, java_peaks, width,
-                    label="Java 25", color=JAVA_COLOR,
-                    edgecolor="black", linewidth=0.5)
-    bars_r = ax.bar(x + width / 2, rust_peaks, width,
-                    label="Rust", color=RUST_COLOR,
-                    edgecolor="black", linewidth=0.5)
+        bars_j = ax.bar(x - width / 2, [java_peak], width,
+                        label="Java 25", color=JAVA_COLOR,
+                        edgecolor="black", linewidth=0.5)
+        bars_r = ax.bar(x + width / 2, [rust_peak], width,
+                        label="Rust", color=RUST_COLOR,
+                        edgecolor="black", linewidth=0.5)
 
-    ax.set_ylabel("Peak RSS (MB)")
-    ax.set_title("Peak Memory Usage Comparison: Java vs Rust")
-    ax.set_xticks(x)
-    ax.set_xticklabels([SCENARIO_LABELS.get(s, s) for s in scenarios])
-    ax.legend()
+        label = SCENARIO_LABELS.get(scenario_id, scenario_id).replace("\n", " - ")
+        ax.set_ylabel("Peak RSS (MB)")
+        ax.set_title(f"Peak Memory Usage: {label}")
+        ax.set_xticks(x)
+        ax.set_xticklabels([label])
+        ax.legend()
 
-    for bar in list(bars_j) + list(bars_r):
-        h = bar.get_height()
-        ax.annotate(f"{h:.0f} MB",
-                    xy=(bar.get_x() + bar.get_width() / 2, h),
-                    xytext=(0, 4), textcoords="offset points",
-                    ha="center", fontsize=8)
+        for bar in list(bars_j) + list(bars_r):
+            h = bar.get_height()
+            ax.annotate(f"{h:.0f} MB",
+                        xy=(bar.get_x() + bar.get_width() / 2, h),
+                        xytext=(0, 4), textcoords="offset points",
+                        ha="center", fontsize=8)
 
-    save_chart(fig, results_path(config, "charts", "peak_ram.pdf"), formats)
+        save_chart(fig, chart_dir(config, scenario_id) / "peak_ram.pdf", formats)
 
 
 def chart_ram_over_time(config, formats):
@@ -178,7 +184,7 @@ def chart_ram_over_time(config, formats):
         ax.set_title(f"Memory Usage Over Time: {label}")
         ax.legend()
 
-        save_chart(fig, results_path(config, "charts", f"ram_over_time_{scenario_id}.pdf"), formats)
+        save_chart(fig, chart_dir(config, scenario_id) / "ram_over_time.pdf", formats)
 
 
 def chart_gc_histogram(config, formats):
@@ -227,7 +233,7 @@ def chart_gc_histogram(config, formats):
         ax.set_title(f"GC Pause Duration Distribution: {label}")
         ax.legend()
 
-        save_chart(fig, results_path(config, "charts", f"gc_pause_histogram_{scenario_id}.pdf"), formats)
+        save_chart(fig, chart_dir(config, scenario_id) / "gc_pause_histogram.pdf", formats)
 
 
 def chart_gc_timeline(config, formats):
@@ -267,7 +273,7 @@ def chart_gc_timeline(config, formats):
         ax.set_title(f"GC Pause Events Over Time: {label}")
         ax.legend()
 
-        save_chart(fig, results_path(config, "charts", f"gc_pause_timeline_{scenario_id}.pdf"), formats)
+        save_chart(fig, chart_dir(config, scenario_id) / "gc_pause_timeline.pdf", formats)
 
 
 def chart_binary_size(config, formats):
@@ -277,39 +283,43 @@ def chart_binary_size(config, formats):
         return
 
     sizes = load_json(path)
-    scenarios = list(sizes.keys())
-    if not scenarios:
+    if not sizes:
         print("  Skipping binary size chart (empty file)")
         return
 
-    x = np.arange(len(scenarios))
     width = 0.35
-    java_kb = [sizes[s].get("java_jar_bytes", 0) / 1024 for s in scenarios]
-    rust_kb = [sizes[s].get("rust_exe_bytes", 0) / 1024 for s in scenarios]
 
-    fig, ax = plt.subplots(figsize=(max(5, len(scenarios) * 2.5), 4.5))
+    for scenario_id, scenario_sizes in sizes.items():
+        if not isinstance(scenario_sizes, dict):
+            continue
+        x = np.arange(1)
+        java_kb = scenario_sizes.get("java_jar_bytes", 0) / 1024
+        rust_kb = scenario_sizes.get("rust_exe_bytes", 0) / 1024
 
-    bars_j = ax.bar(x - width / 2, java_kb, width, label="Java JAR",
-                    color=JAVA_COLOR, edgecolor="black", linewidth=0.5)
-    bars_r = ax.bar(x + width / 2, rust_kb, width, label="Rust EXE",
-                    color=RUST_COLOR, edgecolor="black", linewidth=0.5)
+        fig, ax = plt.subplots(figsize=(4.0, 4.5))
 
-    ax.set_ylabel("Size (KB)")
-    ax.set_title("Binary Size per Scenario")
-    ax.set_xticks(x)
-    ax.set_xticklabels([SCENARIO_LABELS.get(s, s) for s in scenarios])
-    ax.legend()
+        bars_j = ax.bar(x - width / 2, [java_kb], width, label="Java JAR",
+                        color=JAVA_COLOR, edgecolor="black", linewidth=0.5)
+        bars_r = ax.bar(x + width / 2, [rust_kb], width, label="Rust EXE",
+                        color=RUST_COLOR, edgecolor="black", linewidth=0.5)
 
-    for bar in list(bars_j) + list(bars_r):
-        h = bar.get_height()
-        unit = "KB" if h < 1024 else "MB"
-        val = h if h < 1024 else h / 1024
-        ax.annotate(f"{val:.1f} {unit}",
-                    xy=(bar.get_x() + bar.get_width() / 2, h),
-                    xytext=(0, 4), textcoords="offset points",
-                    ha="center", fontsize=9)
+        label = SCENARIO_LABELS.get(scenario_id, scenario_id).replace("\n", " - ")
+        ax.set_ylabel("Size (KB)")
+        ax.set_title(f"Binary Size: {label}")
+        ax.set_xticks(x)
+        ax.set_xticklabels([label])
+        ax.legend()
 
-    save_chart(fig, results_path(config, "charts", "binary_size.pdf"), formats)
+        for bar in list(bars_j) + list(bars_r):
+            h = bar.get_height()
+            unit = "KB" if h < 1024 else "MB"
+            val = h if h < 1024 else h / 1024
+            ax.annotate(f"{val:.1f} {unit}",
+                        xy=(bar.get_x() + bar.get_width() / 2, h),
+                        xytext=(0, 4), textcoords="offset points",
+                        ha="center", fontsize=9)
+
+        save_chart(fig, chart_dir(config, scenario_id) / "binary_size.pdf", formats)
 
 
 def chart_latency_distribution(config, formats):
@@ -351,7 +361,7 @@ def chart_latency_distribution(config, formats):
         ax.set_xticklabels(percentile_labels)
         ax.set_title(f"Per-event Latency Percentiles: {label}")
         ax.legend()
-        save_chart(fig, results_path(config, "charts", f"latency_percentiles_{scenario_id}.pdf"), formats)
+        save_chart(fig, chart_dir(config, scenario_id) / "latency_percentiles.pdf", formats)
 
         # --- (2) bucket histogram overlay ---
         fig, ax = plt.subplots(figsize=(8, 4.5))
@@ -375,7 +385,7 @@ def chart_latency_distribution(config, formats):
             ax.set_ylabel("Events in bucket")
             ax.set_title(f"Per-event Latency Distribution: {label}")
             ax.legend()
-            save_chart(fig, results_path(config, "charts", f"latency_distribution_{scenario_id}.pdf"), formats)
+            save_chart(fig, chart_dir(config, scenario_id) / "latency_distribution.pdf", formats)
         else:
             plt.close(fig)
 
