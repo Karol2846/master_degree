@@ -279,6 +279,7 @@ def aggregate_resource_runs(run_results):
             "peak_rss_bytes_min": min(peak_rss_values),
         },
         "median_run_timeseries": median_run["timeseries"],
+        "all_run_timeseries": [r["timeseries"] for r in run_results],
     }
 
 

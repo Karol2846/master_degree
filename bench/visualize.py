@@ -160,23 +160,48 @@ def chart_ram_over_time(config, formats):
     resources = load_json(path)
 
     for scenario_id, data in resources.items():
-        java_ts = data.get("java", {}).get("median_run_timeseries", [])
-        rust_ts = data.get("rust", {}).get("median_run_timeseries", [])
+        java_data = data.get("java", {})
+        rust_data = data.get("rust", {})
 
-        if not java_ts and not rust_ts:
+        java_all = java_data.get("all_run_timeseries") or (
+            [java_data["median_run_timeseries"]] if java_data.get("median_run_timeseries") else []
+        )
+        rust_all = rust_data.get("all_run_timeseries") or (
+            [rust_data["median_run_timeseries"]] if rust_data.get("median_run_timeseries") else []
+        )
+        java_median = java_data.get("median_run_timeseries", [])
+        rust_median = rust_data.get("median_run_timeseries", [])
+
+        if not java_all and not rust_all:
             continue
 
         fig, ax = plt.subplots(figsize=(8, 4))
 
-        if java_ts:
-            jt = [s["timestamp_ms"] / 1000 for s in java_ts]
-            jr = [s["rss_bytes"] / (1024 ** 2) for s in java_ts]
-            ax.plot(jt, jr, color=JAVA_COLOR, label="Java 25", alpha=0.8, linewidth=1)
+        for ts in java_all:
+            ax.plot(
+                [s["timestamp_ms"] / 1000 for s in ts],
+                [s["rss_bytes"] / (1024 ** 2) for s in ts],
+                color=JAVA_COLOR, alpha=0.4, linewidth=0.8,
+            )
+        if java_median:
+            ax.plot(
+                [s["timestamp_ms"] / 1000 for s in java_median],
+                [s["rss_bytes"] / (1024 ** 2) for s in java_median],
+                color=JAVA_COLOR, alpha=1.0, linewidth=2, label="Java 25",
+            )
 
-        if rust_ts:
-            rt = [s["timestamp_ms"] / 1000 for s in rust_ts]
-            rr = [s["rss_bytes"] / (1024 ** 2) for s in rust_ts]
-            ax.plot(rt, rr, color=RUST_COLOR, label="Rust", alpha=0.8, linewidth=1)
+        for ts in rust_all:
+            ax.plot(
+                [s["timestamp_ms"] / 1000 for s in ts],
+                [s["rss_bytes"] / (1024 ** 2) for s in ts],
+                color=RUST_COLOR, alpha=0.4, linewidth=0.8,
+            )
+        if rust_median:
+            ax.plot(
+                [s["timestamp_ms"] / 1000 for s in rust_median],
+                [s["rss_bytes"] / (1024 ** 2) for s in rust_median],
+                color=RUST_COLOR, alpha=1.0, linewidth=2, label="Rust",
+            )
 
         label = SCENARIO_LABELS.get(scenario_id, scenario_id).replace("\n", " - ")
         ax.set_xlabel("Time (s)")
