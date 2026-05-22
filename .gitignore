@@ -3,3 +3,4 @@ output/
 testdata/
 __pycache__/
 *.pyc
+.idea
