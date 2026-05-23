@@ -1,4 +1,6 @@
-results/
+results/parsed
+results/raw
+
 output/
 testdata/
 __pycache__/
