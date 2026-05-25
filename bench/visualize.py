@@ -167,8 +167,23 @@ def chart_ram_over_time(config, formats):
         return
 
     resources = load_json(path)
+    scenarios = [s for s in POSTER_EXEC_ORDER if s in resources]
+    if not scenarios:
+        print("  Skipping RAM-over-time chart (no poster scenarios in resource data)")
+        return
 
-    for scenario_id, data in resources.items():
+    fig, axes = plt.subplots(
+        nrows=len(scenarios), ncols=1,
+        figsize=(10, 2.6 * len(scenarios)),
+    )
+    if len(scenarios) == 1:
+        axes = [axes]
+
+    java_handle = None
+    rust_handle = None
+
+    for ax, scenario_id in zip(axes, scenarios):
+        data = resources[scenario_id]
         java_data = data.get("java", {})
         rust_data = data.get("rust", {})
 
@@ -181,11 +196,6 @@ def chart_ram_over_time(config, formats):
         java_median = java_data.get("median_run_timeseries", [])
         rust_median = rust_data.get("median_run_timeseries", [])
 
-        if not java_all and not rust_all:
-            continue
-
-        fig, ax = plt.subplots(figsize=(10, 2.8))
-
         for ts in java_all:
             ax.plot(
                 [s["timestamp_ms"] / 1000 for s in ts],
@@ -193,11 +203,13 @@ def chart_ram_over_time(config, formats):
                 color=JAVA_COLOR, alpha=0.4, linewidth=0.8,
             )
         if java_median:
-            ax.plot(
+            line, = ax.plot(
                 [s["timestamp_ms"] / 1000 for s in java_median],
                 [s["rss_bytes"] / (1024 ** 2) for s in java_median],
                 color=JAVA_COLOR, alpha=1.0, linewidth=2, label="Java 25",
             )
+            if java_handle is None:
+                java_handle = line
 
         for ts in rust_all:
             ax.plot(
@@ -206,18 +218,29 @@ def chart_ram_over_time(config, formats):
                 color=RUST_COLOR, alpha=0.4, linewidth=0.8,
             )
         if rust_median:
-            ax.plot(
+            line, = ax.plot(
                 [s["timestamp_ms"] / 1000 for s in rust_median],
                 [s["rss_bytes"] / (1024 ** 2) for s in rust_median],
                 color=RUST_COLOR, alpha=1.0, linewidth=2, label="Rust",
             )
+            if rust_handle is None:
+                rust_handle = line
 
-        label = SCENARIO_LABELS.get(scenario_id, scenario_id).replace("\n", " - ")
+        ax.set_title(POSTER_EXEC_LABELS.get(scenario_id, scenario_id), loc="left", fontsize=11)
         ax.set_xlabel("Time (s)")
         ax.set_ylabel("RSS Memory (MB)")
-        ax.legend()
 
-        save_chart(fig, chart_dir(config, scenario_id) / "ram_over_time.pdf", formats)
+    handles = [h for h in [java_handle, rust_handle] if h is not None]
+    if handles:
+        fig.legend(
+            handles=handles,
+            loc="upper right",
+            bbox_to_anchor=(1.0, 1.0),
+            ncol=len(handles),
+        )
+
+    fig.tight_layout(rect=[0, 0, 1, 0.97])
+    save_chart(fig, results_path(config, "charts", "ram_over_time.pdf"), formats)
 
 
 def chart_gc_histogram(config, formats):
