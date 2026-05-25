@@ -177,7 +177,8 @@ def phase_timing(config, scenarios, runs, warmup):
 
 
 def consolidate_timing(config, scenarios):
-    timing = {}
+    timing_file = results_path(config, "parsed", "timing.json")
+    timing = load_json(timing_file) if timing_file.exists() else {}
     for scenario_id in scenarios:
         timing[scenario_id] = {}
         for lang in ["java", "rust"]:
@@ -193,7 +194,7 @@ def consolidate_timing(config, scenarios):
                     "max": r["max"],
                     "times": r["times"],
                 }
-    save_json(timing, results_path(config, "parsed", "timing.json"))
+    save_json(timing, timing_file)
 
 
 def consolidate_latency(config, scenarios):
@@ -284,14 +285,15 @@ def aggregate_resource_runs(run_results):
 
 
 def consolidate_resources(config, scenarios):
-    resources = {}
+    resources_file = results_path(config, "parsed", "resources.json")
+    resources = load_json(resources_file) if resources_file.exists() else {}
     for scenario_id in scenarios:
         resources[scenario_id] = {}
         for lang in ["java", "rust"]:
             path = results_path(config, "raw", "resource_monitor", f"{scenario_id}_{lang}_aggregated.json")
             if path.exists():
                 resources[scenario_id][lang] = load_json(path)
-    save_json(resources, results_path(config, "parsed", "resources.json"))
+    save_json(resources, resources_file)
 
 
 def phase_gc(config, scenarios, runs):

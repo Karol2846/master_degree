@@ -67,6 +67,14 @@ def save_chart(fig, path, formats):
     plt.close(fig)
 
 
+POSTER_EXEC_ORDER = ["scenario1", "scenario2", "scenario4"]
+POSTER_EXEC_LABELS = {
+    "scenario1": "a) CPU",
+    "scenario2": "b) I/O operations",
+    "scenario4": "c) IoT Streaming",
+}
+
+
 def chart_execution_time(config, formats):
     path = results_path(config, "parsed", "timing.json")
     if not path.exists():
@@ -74,39 +82,40 @@ def chart_execution_time(config, formats):
         return
 
     timing = load_json(path)
+    scenarios = [s for s in POSTER_EXEC_ORDER if s in timing]
+    if not scenarios:
+        print("  Skipping execution time chart (no poster scenarios in timing data)")
+        return
+
     width = 0.35
+    x = np.arange(len(scenarios))
+    java_means = [timing[s]["java"]["mean"] for s in scenarios]
+    java_stds = [timing[s]["java"]["stddev"] for s in scenarios]
+    rust_means = [timing[s]["rust"]["mean"] for s in scenarios]
+    rust_stds = [timing[s]["rust"]["stddev"] for s in scenarios]
 
-    for scenario_id in timing.keys():
-        x = np.arange(1)
-        java_mean = timing[scenario_id]["java"]["mean"]
-        java_std = timing[scenario_id]["java"]["stddev"]
-        rust_mean = timing[scenario_id]["rust"]["mean"]
-        rust_std = timing[scenario_id]["rust"]["stddev"]
+    fig, ax = plt.subplots(figsize=(5.0, 4.5))
 
-        fig, ax = plt.subplots(figsize=(4.0, 4.5))
+    bars_j = ax.bar(x - width / 2, java_means, width, yerr=java_stds,
+                    label="Java 25", color=JAVA_COLOR, capsize=4,
+                    edgecolor="black", linewidth=0.5)
+    bars_r = ax.bar(x + width / 2, rust_means, width, yerr=rust_stds,
+                    label="Rust", color=RUST_COLOR, capsize=4,
+                    edgecolor="black", linewidth=0.5)
 
-        bars_j = ax.bar(x - width / 2, [java_mean], width, yerr=[java_std],
-                        label="Java 25", color=JAVA_COLOR, capsize=4,
-                        edgecolor="black", linewidth=0.5)
-        bars_r = ax.bar(x + width / 2, [rust_mean], width, yerr=[rust_std],
-                        label="Rust", color=RUST_COLOR, capsize=4,
-                        edgecolor="black", linewidth=0.5)
+    ax.set_ylabel("Execution Time (s)")
+    ax.set_xticks(x)
+    ax.set_xticklabels([POSTER_EXEC_LABELS[s] for s in scenarios])
+    ax.legend()
 
-        label = SCENARIO_LABELS.get(scenario_id, scenario_id).replace("\n", " - ")
-        ax.set_ylabel("Execution Time (s)")
-        ax.set_title(f"Execution Time: {label}")
-        ax.set_xticks(x)
-        ax.set_xticklabels([label])
-        ax.legend()
+    for bar in list(bars_j) + list(bars_r):
+        h = bar.get_height()
+        ax.annotate(f"{h:.2f}s",
+                    xy=(bar.get_x() + bar.get_width() / 2, h),
+                    xytext=(0, 4), textcoords="offset points",
+                    ha="center", fontsize=8)
 
-        for bar in list(bars_j) + list(bars_r):
-            h = bar.get_height()
-            ax.annotate(f"{h:.2f}s",
-                        xy=(bar.get_x() + bar.get_width() / 2, h),
-                        xytext=(0, 4), textcoords="offset points",
-                        ha="center", fontsize=8)
-
-        save_chart(fig, chart_dir(config, scenario_id) / "execution_time.pdf", formats)
+    save_chart(fig, results_path(config, "charts", "execution_time.pdf"), formats)
 
 
 def chart_peak_ram(config, formats):
@@ -175,7 +184,7 @@ def chart_ram_over_time(config, formats):
         if not java_all and not rust_all:
             continue
 
-        fig, ax = plt.subplots(figsize=(8, 4))
+        fig, ax = plt.subplots(figsize=(10, 2.8))
 
         for ts in java_all:
             ax.plot(
@@ -206,7 +215,6 @@ def chart_ram_over_time(config, formats):
         label = SCENARIO_LABELS.get(scenario_id, scenario_id).replace("\n", " - ")
         ax.set_xlabel("Time (s)")
         ax.set_ylabel("RSS Memory (MB)")
-        ax.set_title(f"Memory Usage Over Time: {label}")
         ax.legend()
 
         save_chart(fig, chart_dir(config, scenario_id) / "ram_over_time.pdf", formats)
@@ -227,7 +235,7 @@ def chart_gc_histogram(config, formats):
         if not gc_data["pauses"]:
             continue
 
-        fig, ax = plt.subplots(figsize=(7, 4))
+        fig, ax = plt.subplots(figsize=(10, 2.6))
 
         type_colors = {
             "Young": "#4CAF50",
@@ -254,8 +262,6 @@ def chart_gc_histogram(config, formats):
 
         ax.set_xlabel("Pause Duration (ms)")
         ax.set_ylabel("Count")
-        label = SCENARIO_LABELS.get(scenario_id, scenario_id).replace("\n", " - ")
-        ax.set_title(f"GC Pause Duration Distribution: {label}")
         ax.legend()
 
         save_chart(fig, chart_dir(config, scenario_id) / "gc_pause_histogram.pdf", formats)

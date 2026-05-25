@@ -14,7 +14,7 @@ from pathlib import Path
 
 # --- Configuration ---
 OUTPUT_PATH = "output/scenario4_events.bin"
-EVENT_COUNT = 100_000_000
+EVENT_COUNT = 1_000_000_000
 SENSOR_COUNT = 1000
 SEED = 42
 ANOMALY_RATE = 0.02
