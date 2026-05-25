@@ -1,5 +1,4 @@
-results/parsed
-results/raw
+results
 
 output/
 testdata/
