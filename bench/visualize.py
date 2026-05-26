@@ -94,7 +94,7 @@ def chart_execution_time(config, formats):
     rust_means = [timing[s]["rust"]["mean"] for s in scenarios]
     rust_stds = [timing[s]["rust"]["stddev"] for s in scenarios]
 
-    fig, ax = plt.subplots(figsize=(5.0, 4.5))
+    fig, ax = plt.subplots(figsize=(11, 5.0))
 
     bars_j = ax.bar(x - width / 2, java_means, width, yerr=java_stds,
                     label="Java 25", color=JAVA_COLOR, capsize=4,
@@ -174,7 +174,7 @@ def chart_ram_over_time(config, formats):
 
     fig, axes = plt.subplots(
         nrows=len(scenarios), ncols=1,
-        figsize=(10, 2.6 * len(scenarios)),
+        figsize=(17.5, 2.7 * len(scenarios)),
     )
     if len(scenarios) == 1:
         axes = [axes]
@@ -258,7 +258,7 @@ def chart_gc_histogram(config, formats):
         if not gc_data["pauses"]:
             continue
 
-        fig, ax = plt.subplots(figsize=(10, 2.6))
+        fig, ax = plt.subplots(figsize=(14.3, 2.7))
 
         type_colors = {
             "Young": "#4CAF50",
@@ -286,6 +286,11 @@ def chart_gc_histogram(config, formats):
         ax.set_xlabel("Pause Duration (ms)")
         ax.set_ylabel("Count")
         ax.legend()
+
+        poster_label = POSTER_EXEC_LABELS.get(scenario_id)
+        if poster_label:
+            ax.text(0.0, -0.1, poster_label, transform=ax.transAxes,
+                    fontsize=10, va="top", ha="left", style="italic", clip_on=False)
 
         save_chart(fig, chart_dir(config, scenario_id) / "gc_pause_histogram.pdf", formats)
 
