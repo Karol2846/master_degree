@@ -69,9 +69,9 @@ def save_chart(fig, path, formats):
 
 POSTER_EXEC_ORDER = ["scenario1", "scenario2", "scenario4"]
 POSTER_EXEC_LABELS = {
-    "scenario1": "a) CPU",
-    "scenario2": "b) I/O operations",
-    "scenario4": "c) IoT Streaming",
+    "scenario1": "CPU",
+    "scenario2": "I/O operations",
+    "scenario4": "IoT Streaming",
 }
 
 
@@ -103,7 +103,7 @@ def chart_execution_time(config, formats):
                     label="Rust", color=RUST_COLOR, capsize=4,
                     edgecolor="black", linewidth=0.5)
 
-    ax.set_ylabel("Execution Time (s)")
+    ax.set_ylabel("Execution Time [s]")
     ax.set_xticks(x)
     ax.set_xticklabels([POSTER_EXEC_LABELS[s] for s in scenarios])
     ax.legend()
@@ -227,8 +227,8 @@ def chart_ram_over_time(config, formats):
                 rust_handle = line
 
         ax.set_title(POSTER_EXEC_LABELS.get(scenario_id, scenario_id), loc="left", fontsize=11)
-        ax.set_xlabel("Time (s)")
-        ax.set_ylabel("RSS Memory (MB)")
+        ax.set_xlabel("Time [s]")
+        ax.set_ylabel("RSS Memory [MB]")
 
     handles = [h for h in [java_handle, rust_handle] if h is not None]
     if handles:
@@ -283,7 +283,7 @@ def chart_gc_histogram(config, formats):
         ax.axvline(summary["p99_pause_ms"], color="red", linestyle=":",
                    label=f"P99 ({summary['p99_pause_ms']:.2f} ms)")
 
-        ax.set_xlabel("Pause Duration (ms)")
+        ax.set_xlabel("Pause Duration [ms[")
         ax.set_ylabel("Count")
         ax.legend()
 
