@@ -87,14 +87,14 @@ def chart_execution_time(config, formats):
         print("  Skipping execution time chart (no poster scenarios in timing data)")
         return
 
-    width = 0.35
+    width = 0.28
     x = np.arange(len(scenarios))
     java_means = [timing[s]["java"]["mean"] for s in scenarios]
     java_stds = [timing[s]["java"]["stddev"] for s in scenarios]
     rust_means = [timing[s]["rust"]["mean"] for s in scenarios]
     rust_stds = [timing[s]["rust"]["stddev"] for s in scenarios]
 
-    fig, ax = plt.subplots(figsize=(11, 5.0))
+    fig, ax = plt.subplots(figsize=(14, 7.5))
 
     bars_j = ax.bar(x - width / 2, java_means, width, yerr=java_stds,
                     label="Java 25", color=JAVA_COLOR, capsize=4,
@@ -113,7 +113,7 @@ def chart_execution_time(config, formats):
         ax.annotate(f"{h:.2f}s",
                     xy=(bar.get_x() + bar.get_width() / 2, h),
                     xytext=(0, 4), textcoords="offset points",
-                    ha="center", fontsize=8)
+                    ha="center", fontsize=7)
 
     save_chart(fig, results_path(config, "charts", "execution_time.pdf"), formats)
 
@@ -174,7 +174,7 @@ def chart_ram_over_time(config, formats):
 
     fig, axes = plt.subplots(
         nrows=len(scenarios), ncols=1,
-        figsize=(17.5, 2.7 * len(scenarios)),
+        figsize=(14, 2.8 * len(scenarios)),
     )
     if len(scenarios) == 1:
         axes = [axes]
@@ -239,7 +239,7 @@ def chart_ram_over_time(config, formats):
             ncol=len(handles),
         )
 
-    fig.tight_layout(rect=[0, 0, 1, 0.97])
+    fig.tight_layout(rect=[0, 0, 1, 0.97], h_pad=0.6)
     save_chart(fig, results_path(config, "charts", "ram_over_time.pdf"), formats)
 
 
@@ -258,7 +258,7 @@ def chart_gc_histogram(config, formats):
         if not gc_data["pauses"]:
             continue
 
-        fig, ax = plt.subplots(figsize=(14.3, 2.7))
+        fig, ax = plt.subplots(figsize=(12, 2.7))
 
         type_colors = {
             "Young": "#4CAF50",
@@ -283,7 +283,7 @@ def chart_gc_histogram(config, formats):
         ax.axvline(summary["p99_pause_ms"], color="red", linestyle=":",
                    label=f"P99 ({summary['p99_pause_ms']:.2f} ms)")
 
-        ax.set_xlabel("Pause Duration [ms[")
+        ax.set_xlabel("Pause Duration [ms]")
         ax.set_ylabel("Count")
         ax.legend()
 
