@@ -1,5 +1,6 @@
 results/parsed
 results/raw
+/out
 
 output/
 testdata/

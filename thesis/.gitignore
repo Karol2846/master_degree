@@ -1,0 +1,17 @@
+# wyniki kompilacji
+build/
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.lof
+*.log
+*.lol
+*.lot
+*.low
+*.out
+*.run.xml
+*.synctex.gz
+*.toc

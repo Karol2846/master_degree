@@ -1,0 +1,35 @@
+% !TeX program = pdflatex
+% !BIB program = biber
+%
+% Plik główny — „skleja” całą pracę. Kompilacja: make (albo latexmk), wynik: build/main.pdf
+%
+\documentclass{pollubthesis}   % [oneside] — wydruk jednostronny (bez marginesów lustrzanych)
+
+\input{metadane}
+\addbibresource{bibliografia.bib}
+
+\begin{document}
+
+\input{strony-wstepne/strona-tytulowa}
+\spistresci
+\input{strony-wstepne/streszczenie}
+\input{strony-wstepne/abstract}
+
+\input{rozdzialy/01-wstep}
+\input{rozdzialy/02-cel-i-zakres-pracy}
+\input{rozdzialy/03-podstawy-teoretyczne}
+\input{rozdzialy/04-metodologia-badan}
+\input{rozdzialy/05-wyniki}
+\input{rozdzialy/06-wnioski}
+
+\input{rozdzialy/99-przyklady}    % ŚCIĄGA z przykładami (rysunek, tabela, listing, cytowanie) — usuń przed oddaniem
+
+\printbibliography[heading=bibintoc]
+
+% Spisy — w oryginale ich nie było; odkomentuj, jeśli promotor ich wymaga:
+% \listoffigures
+% \listoftables
+% \listof{wykres}{Spis wykresów}
+% \lstlistoflistings
+
+\end{document}

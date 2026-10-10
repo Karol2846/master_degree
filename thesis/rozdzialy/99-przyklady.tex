@@ -1,0 +1,105 @@
+% ŚCIĄGA — przykłady użycia szablonu. Usuń \include{rozdzialy/99-przyklady} z main.tex przed oddaniem.
+\chapter{Przykłady użycia szablonu (do usunięcia)}
+\label{chap:przyklady}
+
+\section{Tekst, cytowania i odwołania}
+
+Zwykły akapit jest wyjustowany, ma wcięcie 1,27~cm i~interlinię 1,5. Cytowanie pojedynczej
+pozycji wygląda tak~\cite{przyklad-ksiazka}, kilku naraz tak~\cite{przyklad-artykul,
+przyklad-konferencja,przyklad-www}. Kolejność w~bibliografii wynika z~kolejności pierwszego
+cytowania. Odwołania do innych miejsc: rozdział~\ref{chap:wstep}, rysunek~\ref{fig:przyklad},
+tabela~\ref{tab:przyklad}, wzór~\eqref{eq:przyklad}, listing~\ref{lst:java}\footnote{Przypis
+dolny wstawia się poleceniem \texttt{\textbackslash footnote}.}.
+
+Jednoliterowe spójniki i~przyimki (a, i, o, u, w, z) wiąże się z~następnym słowem tyldą:
+\texttt{w\textasciitilde{}pracy}, aby nie zostawały na końcu wiersza. Liczby z~przecinkiem
+dziesiętnym: \num{1234.5} albo z~jednostką: \SI{12.5}{\milli\second}.
+
+\section{Listy}
+
+\begin{itemize}
+  \item pierwszy element listy punktowanej,
+  \item drugi element:
+  \begin{itemize}
+    \item element drugiego poziomu,
+    \item kolejny element drugiego poziomu,
+  \end{itemize}
+  \item trzeci element.
+\end{itemize}
+
+\begin{enumerate}
+  \item pierwszy krok,
+  \item drugi krok.
+\end{enumerate}
+
+\section{Rysunek, wykres i tabela}
+
+Rysunek wstawiany jest z~katalogu \texttt{grafika/} (najlepiej w~PDF lub PNG). Podpis jest pod
+rysunkiem, numeracja jest ciągła w~całej pracy.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.5\textwidth]{example-image}
+  \caption{Przykładowy rysunek}
+  \label{fig:przyklad}
+\end{figure}
+
+Wykresy mają osobną numerację (w~oryginale „Wykres 1”, „Wykres 2”, …). Jeśli wolisz traktować
+je jak rysunki, użyj zwykłego \texttt{figure}.
+
+\begin{wykres}[htbp]
+  \centering
+  \includegraphics[width=0.5\textwidth]{example-image-a}
+  \caption{Przykładowy wykres}
+  \label{wyk:przyklad}
+\end{wykres}
+
+Tabela w~stylu oryginału: pełna siatka, szary wiersz nagłówka, wyśrodkowane komórki, podpis pod
+tabelą (aby przenieść podpis nad tabelę, przesuń \texttt{\textbackslash caption} przed
+\texttt{tabular}).
+
+\begin{table}[htbp]
+  \centering
+  \begin{tabular}{|c|c|c|}
+    \hline
+    \rowcolor{tabnaglowek}
+    \textbf{Kolumna 1} & \textbf{Kolumna 2} & \textbf{Kolumna 3} \\
+    \hline
+    A & \num{0.95} & \num{120} \\
+    \hline
+    B & \num{0.87} & \num{340} \\
+    \hline
+  \end{tabular}
+  \caption{Przykładowa tabela}
+  \label{tab:przyklad}
+\end{table}
+
+\section{Wzory i listingi}
+
+\begin{equation}
+  F_1 = 2 \cdot \frac{\mathit{precision} \cdot \mathit{recall}}{\mathit{precision} + \mathit{recall}}
+  \label{eq:przyklad}
+\end{equation}
+
+\begin{lstlisting}[language=Java, caption={Przykładowy kod w~języku Java}, label={lst:java}]
+public class Main {
+    public static void main(String[] args) {
+        // komentarz z polskimi znakami: zażółć gęślą jaźń
+        System.out.println("Witaj!");
+    }
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=Rust, caption={Przykładowy kod w~języku Rust}, label={lst:rust}]
+fn main() {
+    let liczby: Vec<u64> = (1..=10).collect();
+    let suma: u64 = liczby.iter().sum();
+    println!("Suma: {}", suma);
+}
+\end{lstlisting}
+
+Kod można też wczytać wprost z~pliku źródłowego:
+
+\begin{verbatim}
+\lstinputlisting[language=Rust, caption={Opis}]{../rust/src/main.rs}
+\end{verbatim}
