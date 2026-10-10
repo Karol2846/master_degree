@@ -5,4 +5,11 @@ output/
 testdata/
 __pycache__/
 *.pyc
-.idea
+.idea/workspace.xml
+.idea/usage.statistics.xml
+.idea/shelf/
+.idea/tasks.xml
+.idea/dictionaries/
+.idea/dataSources.local.xml
+.idea/httpRequests/
+.venv/

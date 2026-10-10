@@ -6,3 +6,4 @@ output/
 !**/src/main/**/target/
 !**/src/test/**/target/
 .kotlin
+/build
