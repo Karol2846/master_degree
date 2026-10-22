@@ -1,0 +1,98 @@
+{
+  "source": "bench/gen_scenario4.py",
+  "record_format": "<QId",
+  "record_size_bytes": 20,
+  "byte_order": "little-endian, packed (no padding)",
+  "fields": [
+    {
+      "name": "timestamp_ns",
+      "type": "u64",
+      "struct": "Q",
+      "offset": 0,
+      "bytes": 8,
+      "meaning": "synthetic monotonic event time in ns; each event adds randint(50, 200); read but not used by the processing (Rust: #[allow(dead_code)])"
+    },
+    {
+      "name": "sensor_id",
+      "type": "u32",
+      "struct": "I",
+      "offset": 8,
+      "bytes": 4,
+      "meaning": "sensor index 0..999, uniform randrange(1000); key of the per-sensor state hash map"
+    },
+    {
+      "name": "value",
+      "type": "f64",
+      "struct": "d",
+      "offset": 12,
+      "bytes": 8,
+      "meaning": "measurement: baseline[sensor] + N(0,1) noise, or baseline +/- U(5,10) for an injected anomaly"
+    }
+  ],
+  "sensor_count": 1000,
+  "event_count": 1000000000,
+  "file_size_bytes": 20000000000,
+  "file_size_gb": 20.0,
+  "file_size_gib": 18.63,
+  "anomaly_rate": 0.02,
+  "seed": 42,
+  "generation": {
+    "rng": "Python random.Random(42), single stream",
+    "baselines": "per sensor 10 + U(0,1)*80, i.e. U(10, 90), drawn first for all 1000 sensors",
+    "per_event": "ts += randint(50,200); sid = randrange(1000); with prob 0.02: value = baseline[sid] + sign*U(5,10), sign = +/-1 with p=0.5; else value = baseline[sid] + gauss(0,1)",
+    "anomaly_magnitude": "5-10 sigma of the normal noise (sigma = 1)"
+  },
+  "detection": {
+    "window": 128,
+    "window_kind": "per-sensor ring buffer of the last 128 values with running sum and sum of squares (rolling mean / variance, O(1) per event)",
+    "warmup": 32,
+    "warmup_meaning": "no z-score test until the sensor has >= 32 values in its window",
+    "z_threshold_k": 3.0,
+    "rule": "anomaly if |value - mean| > 3 * std, mean and population std over the window that already includes the current value; std = sqrt(max(0, (sum_sq - sum^2/n)/n))",
+    "state": "HashMap<u32, SensorState> (Rust) / HashMap<Integer, SensorState> (Java), entry created lazily on first event of a sensor"
+  },
+  "latency_measurement": {
+    "clock": "Rust std::time::Instant / Java System.nanoTime()",
+    "t0": "before reader.read() of the event",
+    "t1": "after the z-score test",
+    "includes": [
+      "reading and decoding one 20-byte record from a 64 KiB buffered reader (incl. the occasional refill syscall, ~every 3277 events)",
+      "Java: creation of the Event record object (possibly removed by JIT escape analysis)",
+      "hash-map lookup / insert of the sensor state",
+      "ring-buffer update (rolling sum, sum_sq)",
+      "mean / std / z-score test"
+    ],
+    "excludes": [
+      "histogram.record() itself",
+      "output / printing"
+    ],
+    "histogram": "64 log2 buckets, bucket i = [100*2^i, 100*2^(i+1)) ns; percentiles reported as the bucket upper bound; exact min / max / mean kept separately",
+    "reported": "p50, p95, p99, p99.9, max, mean -> output/scenario4_latency_{lang}.json"
+  },
+  "sample_records": [
+    {
+      "timestamp_ns": 75,
+      "sensor_id": 702,
+      "value": 77.303497,
+      "injected_anomaly": false,
+      "hex_le": "4b 00 00 00 00 00 00 00 be 02 00 00 d8 0a a9 7e 6c 53 53 40"
+    },
+    {
+      "timestamp_ns": 140,
+      "sensor_id": 407,
+      "value": 50.402878,
+      "injected_anomaly": false,
+      "hex_le": "8c 00 00 00 00 00 00 00 97 01 00 00 79 ff b7 7f 91 33 49 40"
+    },
+    {
+      "timestamp_ns": 221,
+      "sensor_id": 971,
+      "value": 13.642201,
+      "injected_anomaly": false,
+      "hex_le": "dd 00 00 00 00 00 00 00 cb 03 00 00 70 bb 19 8b ce 48 2b 40"
+    }
+  ],
+  "notes": [
+    "bench/config.toml describes scenario4 as '100M events', but the generator (EVENT_COUNT) and results (total_events = 1000000000) use 1e9"
+  ]
+}

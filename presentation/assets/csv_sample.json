@@ -1,0 +1,14 @@
+{
+  "header": "transaction_id,timestamp_ms,amount,sender_id,receiver_id,category,description",
+  "rows": [
+    "1,1700000000664,11133.99,ACC303832645883,ACC245864938384,TRANSFER,Payment ref #98847493",
+    "2,1700000000778,67670.27,ACC600832336208,ACC648913461122,INVESTMENT,Payment ref #04265799",
+    "3,1700000000818,9370.43,ACC555050052120,ACC028355454532,UTILITY,Payment ref #26687537"
+  ],
+  "seed": 42,
+  "total_rows": 50000000,
+  "approx_size_gb": 4.38,
+  "approx_size_gb_decimal": 4.7,
+  "filter_column": "amount",
+  "filter": "top 1% by amount: threshold = sorted(amounts)[int(N * 0.99)], rows with amount >= threshold are written"
+}
