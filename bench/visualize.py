@@ -45,6 +45,8 @@ PHASE_STYLES = [
     ("forces", "C: forces", "#6250d6", None),
     ("velocities", "D: velocities", "#e87ba4", None),
 ]
+# Distinct markers per phase: A and D take near-identical times, so their lines overlap
+PHASE_MARKERS = {"positions": "o", "cells": "s", "forces": "D", "velocities": "^"}
 # Log axes spanning less than a decade: label ticks as plain numbers (60, not 6x10^1)
 PLAIN_TICKS = FuncFormatter(lambda v, _: f"{v:g}")
 PERCENTILES = [("p50", "p50"), ("p95", "p95"), ("p99", "p99"), ("max", "max")]
@@ -53,7 +55,7 @@ PERCENTILES = [("p50", "p50"), ("p95", "p95"), ("p99", "p99"), ("max", "max")]
 def setup_style():
     plt.rcParams.update({
         "font.family": "serif",
-        "font.serif": ["Times New Roman", "DejaVu Serif"],
+        "font.serif": ["Times New Roman", "Liberation Serif", "DejaVu Serif"],
         "font.size": 11,
         "axes.labelsize": 12,
         "axes.titlesize": 13,
@@ -692,14 +694,18 @@ def chart_efficiency(config, formats):
         save_chart(fig, chart_dir(config, scenario_id) / "efficiency.pdf", formats)
 
 
+def phase_timing_runs(steps):
+    """{lang: {P: timing_run summary}} from the consolidated per-step data."""
+    return {
+        lang: {int(p): v["timing_run"] for p, v in (steps or {}).get(lang, {}).items() if "timing_run" in v}
+        for lang, _, _ in LANGS
+    }
+
+
 def chart_phase_breakdown(config, formats):
     found = False
     for scenario_id in threaded_scenarios(config):
-        steps = load_steps(config, scenario_id) or {}
-        timing_runs = {
-            lang: {int(p): v["timing_run"] for p, v in steps.get(lang, {}).items() if "timing_run" in v}
-            for lang, _, _ in LANGS
-        }
+        timing_runs = phase_timing_runs(load_steps(config, scenario_id))
         if not any(timing_runs.values()):
             continue
         found = True
@@ -733,6 +739,87 @@ def chart_phase_breakdown(config, formats):
 
     if not found:
         print("  Skipping phase breakdown (no per-step data)")
+
+
+def chart_phase_breakdown_log(config, formats):
+    """Phase medians as lines on a log axis: A, B and D are <1% of the step, invisible when stacked.
+    Lines, not bars: bar length on a log axis depends on the arbitrary baseline."""
+    found = False
+    for scenario_id in threaded_scenarios(config):
+        timing_runs = phase_timing_runs(load_steps(config, scenario_id))
+        if not any(timing_runs.values()):
+            continue
+        found = True
+
+        fig, axes = plt.subplots(1, len(LANGS), figsize=(11, 4.5), sharey=True)
+        for ax, (lang, _, name) in zip(axes, LANGS):
+            runs = timing_runs[lang]
+            ps = sorted(runs)
+            for key, phase_label, color, _ in PHASE_STYLES:
+                vals = [runs[p]["phase_median_ns"][key] / 1e6 for p in ps]
+                ax.plot(ps, vals, color=color, linewidth=2, marker=PHASE_MARKERS[key], markersize=6,
+                        markeredgecolor="white", markeredgewidth=1.2, label=phase_label)
+            mark_physical_cores(ax)
+            ax.set_yscale("log")
+            ax.yaxis.set_major_formatter(PLAIN_TICKS)
+            ax.set_xticks(ps)
+            ax.set_xlabel("Worker threads P")
+            ax.set_title(name, loc="left", fontsize=11)
+        axes[0].set_ylabel("Median phase time per step [ms, log scale]")
+
+        handles, labels = axes[0].get_legend_handles_labels()
+        fig.legend(handles, labels, loc="upper right", ncol=len(PHASE_STYLES), fontsize=9)
+        fig.suptitle(f"Step Phase Times (incl. barrier wait): {scenario_label(scenario_id)}",
+                     x=0.01, ha="left")
+        fig.tight_layout(rect=[0, 0, 1, 0.94])
+        save_chart(fig, chart_dir(config, scenario_id) / "phase_breakdown_log.pdf", formats)
+
+    if not found:
+        print("  Skipping phase breakdown, log scale (no per-step data)")
+
+
+def chart_phase_breakdown_log_bars(config, formats):
+    """Phase medians as grouped (not stacked) bars on a log axis: stacking on a log axis distorts segments."""
+    found = False
+    for scenario_id in threaded_scenarios(config):
+        timing_runs = phase_timing_runs(load_steps(config, scenario_id))
+        if not any(timing_runs.values()):
+            continue
+        found = True
+
+        width = 0.2
+        offsets = (np.arange(len(PHASE_STYLES)) - (len(PHASE_STYLES) - 1) / 2) * width
+        lowest = min(run["phase_median_ns"][key] / 1e6
+                     for runs in timing_runs.values() for run in runs.values() for key, *_ in PHASE_STYLES)
+
+        fig, axes = plt.subplots(1, len(LANGS), figsize=(11, 4.5), sharey=True)
+        for ax, (lang, _, name) in zip(axes, LANGS):
+            runs = timing_runs[lang]
+            ps = sorted(runs)
+            x = np.arange(len(ps))
+            for offset, (key, phase_label, color, hatch) in zip(offsets, PHASE_STYLES):
+                vals = [runs[p]["phase_median_ns"][key] / 1e6 for p in ps]
+                ax.bar(x + offset, vals, width, label=phase_label, color=color, hatch=hatch,
+                       edgecolor="black", linewidth=0.5)
+            ax.set_yscale("log")
+            # Bars grow from the axis floor: one decade below the smallest phase
+            ax.set_ylim(bottom=10 ** np.floor(np.log10(lowest)))
+            ax.yaxis.set_major_formatter(PLAIN_TICKS)
+            ax.set_xticks(x)
+            ax.set_xticklabels([str(p) for p in ps])
+            ax.set_xlabel("Worker threads P")
+            ax.set_title(name, loc="left", fontsize=11)
+        axes[0].set_ylabel("Median phase time per step [ms, log scale]")
+
+        handles, labels = axes[0].get_legend_handles_labels()
+        fig.legend(handles, labels, loc="upper right", ncol=len(PHASE_STYLES), fontsize=9)
+        fig.suptitle(f"Step Phase Times (incl. barrier wait): {scenario_label(scenario_id)}",
+                     x=0.01, ha="left")
+        fig.tight_layout(rect=[0, 0, 1, 0.94])
+        save_chart(fig, chart_dir(config, scenario_id) / "phase_breakdown_log_bars.pdf", formats)
+
+    if not found:
+        print("  Skipping phase breakdown, log-scale bars (no per-step data)")
 
 
 def chart_step_time_percentiles(config, formats):
@@ -858,6 +945,8 @@ CHART_FUNCTIONS = {
     "speedup": chart_speedup,
     "efficiency": chart_efficiency,
     "phases": chart_phase_breakdown,
+    "phases_log": chart_phase_breakdown_log,
+    "phases_log_bars": chart_phase_breakdown_log_bars,
     "step_pct": chart_step_time_percentiles,
     "step_timeline": chart_step_time_timeline,
 }
