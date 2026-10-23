@@ -18,13 +18,11 @@
 - implementacja Rust: 16 minut
 - implementacja Java: 7 minut
 
+## Scenariusz 3
 
-
-
-
-
-
-
+- planowanie: 2h 43min
+- implementacja Rust: 7 min
+- implementacja Java: 7min
 
 
 ---

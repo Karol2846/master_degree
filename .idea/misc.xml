@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="Black">
+    <option name="sdkName" value="Python 3.14 (master_degree)" />
+  </component>
   <component name="ExternalStorageConfigurationManager" enabled="true" />
   <component name="FrameworkDetectionExcludesConfiguration">
     <file type="web" url="file://$PROJECT_DIR$/java" />
   </component>
-  <component name="ProjectRootManager" version="2">
+  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.14 (master_degree)" project-jdk-type="Python SDK">
     <output url="file://$PROJECT_DIR$/out" />
   </component>
 </project>
