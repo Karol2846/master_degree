@@ -1,8 +1,12 @@
-results/parsed
-results/raw
+#results/parsed
+#results/raw
 /out
 
-output/
+#output/
+output/scenario4_events.bin
+output/scenario2_transactions.csv
+output/scenario2_filtered.csv
+output/mandelbrot.ppm
 testdata/
 __pycache__/
 *.pyc

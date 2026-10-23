@@ -1,0 +1,14 @@
+{
+  "total_pauses": 0,
+  "summary": {
+    "total_pause_time_ms": 0,
+    "mean_pause_ms": 0,
+    "median_pause_ms": 0,
+    "p95_pause_ms": 0,
+    "p99_pause_ms": 0,
+    "max_pause_ms": 0,
+    "min_pause_ms": 0
+  },
+  "by_type": {},
+  "pauses": []
+}

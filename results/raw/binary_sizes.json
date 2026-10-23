@@ -1,0 +1,16 @@
+{
+  "java_jar_bytes": 3684,
+  "rust_exe_bytes": 142848,
+  "scenario1": {
+    "java_jar_bytes": 3679,
+    "rust_exe_bytes": 142848
+  },
+  "scenario4": {
+    "java_jar_bytes": 8152,
+    "rust_exe_bytes": 182272
+  },
+  "scenario2": {
+    "java_jar_bytes": 3315,
+    "rust_exe_bytes": 205312
+  }
+}
