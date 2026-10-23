@@ -1,0 +1,347 @@
+{
+  "results": [
+    {
+      "command": "C:\\Users\\karol\\.jdks\\openjdk-25.0.2\\bin\\java.exe -Xms512m -Xmx8g -jar C:\\Users\\karol\\IdeaProjects\\master_degree\\java\\target\\particles.jar --input output/scenario3_n108000.bin --steps 200 --threads 1",
+      "mean": 39.078629490000004,
+      "stddev": 0.21974647539982026,
+      "median": 39.07208016,
+      "user": 39.03906249999999,
+      "system": 0.16406249999999997,
+      "min": 38.79857981,
+      "max": 39.40540521,
+      "times": [
+        39.40540521,
+        38.82591311,
+        38.93514711,
+        38.86324251,
+        39.25121311,
+        39.32558101,
+        39.10805411,
+        39.03610621,
+        39.23705271,
+        38.79857981
+      ],
+      "memory_usage_byte": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "exit_codes": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "parameters": {
+        "threads": "1"
+      }
+    },
+    {
+      "command": "C:\\Users\\karol\\.jdks\\openjdk-25.0.2\\bin\\java.exe -Xms512m -Xmx8g -jar C:\\Users\\karol\\IdeaProjects\\master_degree\\java\\target\\particles.jar --input output/scenario3_n108000.bin --steps 200 --threads 2",
+      "mean": 20.172983440000003,
+      "stddev": 0.1565831589289433,
+      "median": 20.19226316,
+      "user": 39.846875,
+      "system": 0.16406249999999997,
+      "min": 19.91693311,
+      "max": 20.389248209999998,
+      "times": [
+        19.91693311,
+        20.34620851,
+        20.21339441,
+        20.284110209999998,
+        19.98944741,
+        20.27293661,
+        20.17113191,
+        20.09264141,
+        20.05378261,
+        20.389248209999998
+      ],
+      "memory_usage_byte": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "exit_codes": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "parameters": {
+        "threads": "2"
+      }
+    },
+    {
+      "command": "C:\\Users\\karol\\.jdks\\openjdk-25.0.2\\bin\\java.exe -Xms512m -Xmx8g -jar C:\\Users\\karol\\IdeaProjects\\master_degree\\java\\target\\particles.jar --input output/scenario3_n108000.bin --steps 200 --threads 3",
+      "mean": 14.02540932,
+      "stddev": 0.09229658142959492,
+      "median": 14.01869776,
+      "user": 41.06249999999999,
+      "system": 0.17656249999999998,
+      "min": 13.91974461,
+      "max": 14.203223209999999,
+      "times": [
+        14.02168101,
+        13.93144641,
+        14.10106491,
+        13.92071501,
+        14.11396811,
+        14.01763221,
+        14.203223209999999,
+        14.01976331,
+        13.91974461,
+        14.00485441
+      ],
+      "memory_usage_byte": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "exit_codes": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "parameters": {
+        "threads": "3"
+      }
+    },
+    {
+      "command": "C:\\Users\\karol\\.jdks\\openjdk-25.0.2\\bin\\java.exe -Xms512m -Xmx8g -jar C:\\Users\\karol\\IdeaProjects\\master_degree\\java\\target\\particles.jar --input output/scenario3_n108000.bin --steps 200 --threads 4",
+      "mean": 10.822173709999998,
+      "stddev": 0.10990239279668913,
+      "median": 10.78097556,
+      "user": 41.670312499999994,
+      "system": 0.2125,
+      "min": 10.70174501,
+      "max": 11.00799071,
+      "times": [
+        10.75756431,
+        10.91757101,
+        10.822591509999999,
+        10.73781481,
+        10.74230251,
+        10.80438681,
+        11.00799071,
+        10.985176209999999,
+        10.70174501,
+        10.744594209999999
+      ],
+      "memory_usage_byte": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "exit_codes": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "parameters": {
+        "threads": "4"
+      }
+    },
+    {
+      "command": "C:\\Users\\karol\\.jdks\\openjdk-25.0.2\\bin\\java.exe -Xms512m -Xmx8g -jar C:\\Users\\karol\\IdeaProjects\\master_degree\\java\\target\\particles.jar --input output/scenario3_n108000.bin --steps 200 --threads 6",
+      "mean": 7.755990340000001,
+      "stddev": 0.10934455708081747,
+      "median": 7.723940259999999,
+      "user": 42.810937499999994,
+      "system": 0.26250000000000007,
+      "min": 7.593834709999999,
+      "max": 7.94902321,
+      "times": [
+        7.71747771,
+        7.593834709999999,
+        7.688988009999999,
+        7.78012061,
+        7.87108031,
+        7.94902321,
+        7.65834751,
+        7.730402809999999,
+        7.863866209999999,
+        7.706762309999999
+      ],
+      "memory_usage_byte": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "exit_codes": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "parameters": {
+        "threads": "6"
+      }
+    },
+    {
+      "command": "C:\\Users\\karol\\.jdks\\openjdk-25.0.2\\bin\\java.exe -Xms512m -Xmx8g -jar C:\\Users\\karol\\IdeaProjects\\master_degree\\java\\target\\particles.jar --input output/scenario3_n108000.bin --steps 200 --threads 8",
+      "mean": 7.78560008,
+      "stddev": 0.06873846780846708,
+      "median": 7.775543409999999,
+      "user": 50.912499999999994,
+      "system": 0.26562500000000006,
+      "min": 7.649083109999999,
+      "max": 7.8933616099999995,
+      "times": [
+        7.72870181,
+        7.844095009999999,
+        7.81870171,
+        7.77331481,
+        7.77226821,
+        7.8933616099999995,
+        7.77777201,
+        7.75603591,
+        7.842666609999999,
+        7.649083109999999
+      ],
+      "memory_usage_byte": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "exit_codes": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "parameters": {
+        "threads": "8"
+      }
+    },
+    {
+      "command": "C:\\Users\\karol\\.jdks\\openjdk-25.0.2\\bin\\java.exe -Xms512m -Xmx8g -jar C:\\Users\\karol\\IdeaProjects\\master_degree\\java\\target\\particles.jar --input output/scenario3_n108000.bin --steps 200 --threads 12",
+      "mean": 5.76954338,
+      "stddev": 0.07284000654141536,
+      "median": 5.75664426,
+      "user": 61.571875,
+      "system": 0.37031250000000004,
+      "min": 5.65342491,
+      "max": 5.87375771,
+      "times": [
+        5.73283501,
+        5.8730704099999995,
+        5.70187651,
+        5.74178271,
+        5.77150581,
+        5.83153611,
+        5.7272417099999995,
+        5.87375771,
+        5.65342491,
+        5.788402909999999
+      ],
+      "memory_usage_byte": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "exit_codes": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "parameters": {
+        "threads": "12"
+      }
+    }
+  ]
+}

@@ -12,5 +12,13 @@
   "scenario2": {
     "java_jar_bytes": 3315,
     "rust_exe_bytes": 205312
+  },
+  "scenario3": {
+    "java_jar_bytes": 17400,
+    "rust_exe_bytes": 264704
+  },
+  "scenario3_small": {
+    "java_jar_bytes": 17400,
+    "rust_exe_bytes": 264704
   }
 }

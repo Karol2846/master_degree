@@ -1,0 +1,51 @@
+{
+  "total_pauses": 3,
+  "summary": {
+    "total_pause_time_ms": 5.692,
+    "mean_pause_ms": 1.897,
+    "median_pause_ms": 1.537,
+    "p95_pause_ms": 2.838,
+    "p99_pause_ms": 2.838,
+    "max_pause_ms": 2.838,
+    "min_pause_ms": 1.317
+  },
+  "by_type": {
+    "Young": {
+      "count": 3,
+      "total_ms": 5.692,
+      "mean_ms": 1.897
+    }
+  },
+  "pauses": [
+    {
+      "gc_id": 0,
+      "timestamp_s": 0.147,
+      "pause_type": "Young",
+      "cause": "Normal",
+      "heap_before_mb": 57,
+      "heap_after_mb": 14,
+      "heap_capacity_mb": 516,
+      "pause_duration_ms": 2.838
+    },
+    {
+      "gc_id": 1,
+      "timestamp_s": 1.02,
+      "pause_type": "Young",
+      "cause": "Normal",
+      "heap_before_mb": 206,
+      "heap_after_mb": 14,
+      "heap_capacity_mb": 516,
+      "pause_duration_ms": 1.537
+    },
+    {
+      "gc_id": 2,
+      "timestamp_s": 4.426,
+      "pause_type": "Young",
+      "cause": "Normal",
+      "heap_before_mb": 234,
+      "heap_after_mb": 13,
+      "heap_capacity_mb": 516,
+      "pause_duration_ms": 1.317
+    }
+  ]
+}
