@@ -27,6 +27,37 @@ rust_binary = "rust/target/release/csv.exe"
 generator_script = "bench/gen_scenario2.py"
 generator_output = "output/scenario2_transactions.csv"
 
+[scenarios.scenario3]
+name = "Concurrency - LJ particles (E1)"
+description = "3D Lennard-Jones MD, 108k particles, 200 steps, cell list, P worker threads + barrier"
+java_package = "particles"
+java_jar = "java/target/particles.jar"
+rust_binary = "rust/target/release/particles.exe"
+generator_script = "bench/gen_scenario3.py"
+generator_args = ["--cells", "30", "--output", "output/scenario3_n108000.bin"]
+generator_output = "output/scenario3_n108000.bin"
+args = ["--input", "{input}", "--steps", "200", "--threads", "{threads}"]
+threads = [1, 2, 3, 4, 6, 8, 12]
+resource_threads = [6, 12]
+# Per-step JSON written by the program itself ({lang}, {threads} filled in by the pipeline)
+steps_output = "output/scenario3_steps_{lang}_n108000_p{threads}.json"
+validate_script = "bench/validate_scenario3.py"
+validate_threads = [1, 12]
+
+[scenarios.scenario3_small]
+name = "Concurrency - LJ particles (E2)"
+description = "3D Lennard-Jones MD, 4k particles, 2000 steps"
+java_package = "particles"
+java_jar = "java/target/particles.jar"
+rust_binary = "rust/target/release/particles.exe"
+generator_script = "bench/gen_scenario3.py"
+generator_args = ["--cells", "10", "--output", "output/scenario3_n4000.bin"]
+generator_output = "output/scenario3_n4000.bin"
+args = ["--input", "{input}", "--steps", "2000", "--threads", "{threads}"]
+threads = [1, 2, 3, 4, 6, 8, 12]
+resource_threads = []
+steps_output = "output/scenario3_steps_{lang}_n4000_p{threads}.json"
+
 [scenarios.scenario4]
 name = "Memory - IoT Streaming"
 description = "Z-score anomaly detection + per-sensor rolling avg over 100M events"

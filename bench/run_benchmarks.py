@@ -6,6 +6,7 @@ Usage:
     python bench/run_benchmarks.py --phases build timing
     python bench/run_benchmarks.py --phases timing --runs 5 --warmup 1
     python bench/run_benchmarks.py --phases generate --regen-data
+    python bench/run_benchmarks.py --phases validate --scenarios scenario3
     python bench/run_benchmarks.py --phases all --scenarios scenario4
 """
 
@@ -16,15 +17,17 @@ import subprocess
 import sys
 from pathlib import Path
 
+from steps_parser import consolidate_steps
 from utils import (
     ensure_dirs,
+    get_command,
     get_jar_exe,
-    get_java_command,
     get_java_command_with_gc,
     get_javac_exe,
     get_project_root,
-    get_rust_command,
     get_scenarios,
+    get_steps_output,
+    get_thread_variants,
     load_config,
     load_json,
     results_path,
@@ -123,7 +126,8 @@ def phase_generate(config, scenarios, regen=False):
             continue
 
         print(f"  [{scenario_id}] Running {script_abs}...")
-        result = subprocess.run([sys.executable, str(script_abs)], cwd=str(root))
+        cmd = [sys.executable, str(script_abs)] + scenario.get("generator_args", [])
+        result = subprocess.run(cmd, cwd=str(root))
         if result.returncode != 0:
             print(f"  Generator FAILED for {scenario_id}", file=sys.stderr)
             return False
@@ -132,6 +136,68 @@ def phase_generate(config, scenarios, regen=False):
         print("  No scenarios declare a generator_script.")
     print("Generate complete.")
     return True
+
+
+def phase_validate(config, scenarios):
+    print("=== Phase: VALIDATE ===")
+    root = get_project_root()
+    any_run = False
+    for scenario_id, scenario in scenarios.items():
+        script_rel = scenario.get("validate_script")
+        if not script_rel:
+            continue
+        any_run = True
+        print(f"\n--- {scenario['name']} ---")
+        thread_counts = scenario["validate_threads"]
+        final_template = f"output/{scenario_id}_final_{{lang}}_p{{threads}}.bin"
+
+        for lang in ["java", "rust"]:
+            for threads in thread_counts:
+                final_rel = final_template.replace("{lang}", lang).replace("{threads}", str(threads))
+                cmd = get_command(config, scenario_id, lang, threads) + ["--dump-final", final_rel]
+                print(f"  {lang} P={threads}...", end=" ", flush=True)
+                result = subprocess.run(cmd, cwd=str(root), capture_output=True, text=True)
+                if result.returncode != 0:
+                    print(f"FAILED\n{result.stderr}", file=sys.stderr)
+                    return False
+                # Flushed: the validator below writes straight to the inherited stdout.
+                print(result.stdout.strip(), flush=True)
+
+        validator_cmd = [
+            sys.executable, str(root / script_rel),
+            "--input", scenario["generator_output"],
+            "--steps-json", scenario["steps_output"],
+            "--final", final_template,
+            "--threads",
+        ] + [str(p) for p in thread_counts]
+        result = subprocess.run(validator_cmd, cwd=str(root))
+        if result.returncode != 0:
+            print(f"  Validation FAILED for {scenario_id}", file=sys.stderr)
+            return False
+
+    if not any_run:
+        print("  No scenarios declare a validate_script.")
+    print("Validate complete.")
+    return True
+
+
+def copy_steps_output(config, scenario_id, scenario, lang, threads, suffix=""):
+    """Copies the per-step JSON of the last run with `threads` workers into results/raw/steps/."""
+    src_rel = get_steps_output(scenario, lang, threads)
+    if src_rel is None:
+        return
+    src = get_project_root() / src_rel
+    if not src.exists():
+        print(f"  WARNING: step file not found: {src}", file=sys.stderr)
+        return
+    shutil.copyfile(src, results_path(config, "raw", "steps", f"{scenario_id}_{lang}_p{threads}{suffix}.json"))
+
+
+def consolidate_all_steps(config, scenarios):
+    for scenario_id, scenario in scenarios.items():
+        out = consolidate_steps(config, scenario_id, scenario)
+        if out:
+            print(f"  Per-step data -> {out}")
 
 
 def phase_timing(config, scenarios, runs, warmup):
@@ -145,12 +211,11 @@ def phase_timing(config, scenarios, runs, warmup):
 
     for scenario_id, scenario in scenarios.items():
         print(f"\n--- {scenario['name']} ---")
+        thread_counts = scenario.get("threads")
 
         for lang in ["java", "rust"]:
-            if lang == "java":
-                cmd = get_java_command(config, scenario_id)
-            else:
-                cmd = get_rust_command(config, scenario_id)
+            # For threaded scenarios {threads} stays in the command; hyperfine fills it per P.
+            cmd = get_command(config, scenario_id, lang)
 
             cmd_str = subprocess.list2cmdline(cmd)
             output_json = str(results_path(config, "raw", "hyperfine", f"{scenario_id}_{lang}.json"))
@@ -161,39 +226,57 @@ def phase_timing(config, scenarios, runs, warmup):
                 "--warmup", str(warmup),
                 "--export-json", output_json,
                 "--style", "full",
-                cmd_str,
             ]
+            per_p = ""
+            if thread_counts:
+                hyperfine_cmd += ["--parameter-list", "threads", ",".join(str(p) for p in thread_counts)]
+                per_p = f" per P in {thread_counts}"
+            hyperfine_cmd.append(cmd_str)
 
-            print(f"  Running hyperfine for {lang}: {runs} runs, {warmup} warmup...")
+            print(f"  Running hyperfine for {lang}: {runs} runs, {warmup} warmup{per_p}...")
             result = subprocess.run(hyperfine_cmd, cwd=str(root))
             if result.returncode != 0:
                 print(f"  hyperfine FAILED for {lang}", file=sys.stderr)
                 return False
 
+            # Each P writes its own file, so it now holds the last measured run for that P.
+            for threads in thread_counts or []:
+                copy_steps_output(config, scenario_id, scenario, lang, threads)
+
     consolidate_timing(config, scenarios)
     consolidate_latency(config, scenarios)
+    consolidate_all_steps(config, scenarios)
     print("Timing complete.")
     return True
+
+
+def timing_stats(r):
+    return {
+        "mean": r["mean"],
+        "stddev": r["stddev"],
+        "median": r["median"],
+        "min": r["min"],
+        "max": r["max"],
+        "times": r["times"],
+    }
 
 
 def consolidate_timing(config, scenarios):
     timing_file = results_path(config, "parsed", "timing.json")
     timing = load_json(timing_file) if timing_file.exists() else {}
-    for scenario_id in scenarios:
+    for scenario_id, scenario in scenarios.items():
         timing[scenario_id] = {}
         for lang in ["java", "rust"]:
             path = results_path(config, "raw", "hyperfine", f"{scenario_id}_{lang}.json")
             if path.exists():
                 data = load_json(path)
-                r = data["results"][0]
-                timing[scenario_id][lang] = {
-                    "mean": r["mean"],
-                    "stddev": r["stddev"],
-                    "median": r["median"],
-                    "min": r["min"],
-                    "max": r["max"],
-                    "times": r["times"],
-                }
+                if "threads" in scenario:
+                    # One hyperfine result per parameter value: {"by_threads": {"1": {...}, ...}}
+                    timing[scenario_id][lang] = {"by_threads": {
+                        r["parameters"]["threads"]: timing_stats(r) for r in data["results"]
+                    }}
+                else:
+                    timing[scenario_id][lang] = timing_stats(data["results"][0])
     save_json(timing, timing_file)
 
 
@@ -217,44 +300,55 @@ def phase_resources(config, scenarios, runs):
 
     for scenario_id, scenario in scenarios.items():
         print(f"\n--- {scenario['name']} ---")
+        variants = get_thread_variants(scenario, "resource_threads")
+        if not variants:
+            print("  No resource_threads configured, skipping.")
+            continue
 
         for lang in ["java", "rust"]:
-            if lang == "java":
-                cmd = get_java_command(config, scenario_id)
-            else:
-                cmd = get_rust_command(config, scenario_id)
+            for threads, suffix in variants:
+                cmd = get_command(config, scenario_id, lang, threads)
+                label = lang if threads is None else f"{lang} P={threads}"
+                if threads is not None:
+                    # Drop step copies of an earlier session that may have had more runs.
+                    steps_dir = results_path(config, "raw", "steps")
+                    for stale in steps_dir.glob(f"{scenario_id}_{lang}{suffix}_run*.json"):
+                        stale.unlink()
 
-            all_run_results = []
+                all_run_results = []
 
-            for run_idx in range(runs):
-                run_output = str(results_path(
-                    config, "raw", "resource_monitor",
-                    f"{scenario_id}_{lang}_run{run_idx}.json",
-                ))
+                for run_idx in range(runs):
+                    run_output = str(results_path(
+                        config, "raw", "resource_monitor",
+                        f"{scenario_id}_{lang}{suffix}_run{run_idx}.json",
+                    ))
 
-                monitor_cmd = [
-                    sys.executable, str(monitor_script),
-                    "--output", run_output,
-                    "--interval-ms", str(interval_ms),
-                    "--",
-                ] + cmd
+                    monitor_cmd = [
+                        sys.executable, str(monitor_script),
+                        "--output", run_output,
+                        "--interval-ms", str(interval_ms),
+                        "--",
+                    ] + cmd
 
-                print(f"  {lang} run {run_idx + 1}/{runs}...", end=" ", flush=True)
-                result = subprocess.run(monitor_cmd, cwd=str(root), capture_output=True, text=True)
-                if result.returncode != 0:
-                    print(f"FAILED\n{result.stderr}", file=sys.stderr)
-                    continue
-                print(result.stdout.strip())
-                all_run_results.append(load_json(run_output))
+                    print(f"  {label} run {run_idx + 1}/{runs}...", end=" ", flush=True)
+                    result = subprocess.run(monitor_cmd, cwd=str(root), capture_output=True, text=True)
+                    if result.returncode != 0:
+                        print(f"FAILED\n{result.stderr}", file=sys.stderr)
+                        continue
+                    print(result.stdout.strip())
+                    all_run_results.append(load_json(run_output))
+                    if threads is not None:
+                        copy_steps_output(config, scenario_id, scenario, lang, threads, f"_run{run_idx}")
 
-            if all_run_results:
-                aggregated = aggregate_resource_runs(all_run_results)
-                save_json(aggregated, results_path(
-                    config, "raw", "resource_monitor",
-                    f"{scenario_id}_{lang}_aggregated.json",
-                ))
+                if all_run_results:
+                    aggregated = aggregate_resource_runs(all_run_results)
+                    save_json(aggregated, results_path(
+                        config, "raw", "resource_monitor",
+                        f"{scenario_id}_{lang}{suffix}_aggregated.json",
+                    ))
 
     consolidate_resources(config, scenarios)
+    consolidate_all_steps(config, scenarios)
     print("Resources complete.")
     return True
 
@@ -287,9 +381,22 @@ def aggregate_resource_runs(run_results):
 def consolidate_resources(config, scenarios):
     resources_file = results_path(config, "parsed", "resources.json")
     resources = load_json(resources_file) if resources_file.exists() else {}
-    for scenario_id in scenarios:
+    for scenario_id, scenario in scenarios.items():
+        variants = get_thread_variants(scenario, "resource_threads")
+        if not variants:
+            continue
         resources[scenario_id] = {}
         for lang in ["java", "rust"]:
+            if "threads" in scenario:
+                by_threads = {}
+                for threads, suffix in variants:
+                    path = results_path(config, "raw", "resource_monitor",
+                                        f"{scenario_id}_{lang}{suffix}_aggregated.json")
+                    if path.exists():
+                        by_threads[str(threads)] = load_json(path)
+                if by_threads:
+                    resources[scenario_id][lang] = {"by_threads": by_threads}
+                continue
             path = results_path(config, "raw", "resource_monitor", f"{scenario_id}_{lang}_aggregated.json")
             if path.exists():
                 resources[scenario_id][lang] = load_json(path)
@@ -305,24 +412,34 @@ def phase_gc(config, scenarios, runs):
 
     for scenario_id, scenario in scenarios.items():
         print(f"\n--- {scenario['name']} (Java GC) ---")
-
-        gc_log_path = str(results_path(config, "raw", "gc_logs", f"{scenario_id}_gc.log"))
-        cmd = get_java_command_with_gc(config, scenario_id, gc_log_path)
-
-        print(f"  Running Java with GC logging...")
-        result = subprocess.run(cmd, cwd=str(root), capture_output=True, text=True)
-        if result.returncode != 0:
-            print(f"  FAILED:\n{result.stderr}", file=sys.stderr)
+        variants = get_thread_variants(scenario, "resource_threads")
+        if not variants:
+            print("  No resource_threads configured, skipping.")
             continue
 
-        if os.path.exists(gc_log_path):
-            parsed = parse_gc_log(gc_log_path)
-            out_path = results_path(config, "parsed", f"gc_pauses_{scenario_id}.json")
-            save_json(parsed, out_path)
-            print(f"  Parsed {parsed['total_pauses']} GC pauses -> {out_path}")
-        else:
-            print(f"  WARNING: GC log not created at {gc_log_path}")
+        for threads, suffix in variants:
+            gc_log_path = str(results_path(config, "raw", "gc_logs", f"{scenario_id}{suffix}_gc.log"))
+            cmd = get_java_command_with_gc(config, scenario_id, gc_log_path, threads)
 
+            label = "" if threads is None else f" (P={threads})"
+            print(f"  Running Java with GC logging{label}...")
+            result = subprocess.run(cmd, cwd=str(root), capture_output=True, text=True)
+            if result.returncode != 0:
+                print(f"  FAILED:\n{result.stderr}", file=sys.stderr)
+                continue
+            if threads is not None:
+                # Same run as the GC log: lets the pauses be placed on the step timeline.
+                copy_steps_output(config, scenario_id, scenario, "java", threads, "_gc")
+
+            if os.path.exists(gc_log_path):
+                parsed = parse_gc_log(gc_log_path)
+                out_path = results_path(config, "parsed", f"gc_pauses_{scenario_id}{suffix}.json")
+                save_json(parsed, out_path)
+                print(f"  Parsed {parsed['total_pauses']} GC pauses -> {out_path}")
+            else:
+                print(f"  WARNING: GC log not created at {gc_log_path}")
+
+    consolidate_all_steps(config, scenarios)
     print("GC phase complete.")
     return True
 
@@ -331,7 +448,7 @@ def main():
     parser = argparse.ArgumentParser(description="Benchmark runner: Java vs Rust")
     parser.add_argument(
         "--phases", nargs="+",
-        choices=["build", "generate", "timing", "resources", "gc", "all"],
+        choices=["build", "generate", "validate", "timing", "resources", "gc", "all"],
         default=["all"],
         help="Which phases to run",
     )
@@ -348,7 +465,7 @@ def main():
 
     phases = args.phases
     if "all" in phases:
-        phases = ["build", "generate", "timing", "resources", "gc"]
+        phases = ["build", "generate", "validate", "timing", "resources", "gc"]
 
     all_scenarios = get_scenarios(config)
     if args.scenarios:
@@ -370,6 +487,10 @@ def main():
         success = phase_build(config, scenarios) and success
     if "generate" in phases:
         success = phase_generate(config, scenarios, regen=args.regen_data) and success
+    if "validate" in phases and not phase_validate(config, scenarios):
+        # No measurements from an implementation that failed validation.
+        print("\nValidation failed; remaining phases skipped.", file=sys.stderr)
+        sys.exit(1)
     if "timing" in phases:
         success = phase_timing(config, scenarios, runs, warmup) and success
     if "resources" in phases:
