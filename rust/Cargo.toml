@@ -15,4 +15,8 @@ path = "src/streaming/main.rs"
 name = "csv"
 path = "src/csv/main.rs"
 
+[[bin]]
+name = "particles"
+path = "src/particles/main.rs"
+
 [dependencies]
