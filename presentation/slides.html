@@ -1,0 +1,707 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<title>Java vs Rust</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Icon set (24x24 stroke icons), used as <svg class="icon"><use href="#i-..."/></svg> -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-memory" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="10" rx="1.5"/><path d="M7 10v4M11 10v4M15 10v4M6 17v3M10 17v3M14 17v3M18 17v3"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></symbol>
+    <symbol id="i-threads" viewBox="0 0 24 24"><path d="M3 6h14M3 12h14M3 18h14"/><path d="M15 3l3 3-3 3M15 9l3 3-3 3M15 15l3 3-3 3"/><path d="M21 3v18"/></symbol>
+    <symbol id="i-cpu" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1.5"/><rect x="9.5" y="9.5" width="5" height="5"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M6 2h8l5 5v15H6z"/><path d="M14 2v5h5M9 12h7M9 16h7"/></symbol>
+    <symbol id="i-wave" viewBox="0 0 24 24"><path d="M2 12h4l2-6 4 12 3-9 2 3h5"/></symbol>
+    <symbol id="i-cup" viewBox="0 0 24 24"><path d="M4 10h13v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z"/><path d="M17 11h1.5a2.5 2.5 0 0 1 0 5H17"/><path d="M8 3c-1 1.5 1 2.5 0 4M12 3c-1 1.5 1 2.5 0 4"/></symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/><circle cx="12" cy="12" r="6.5"/></symbol>
+    <symbol id="i-hand" viewBox="0 0 24 24"><path d="M8 13V5a1.5 1.5 0 0 1 3 0v6M11 10V3.5a1.5 1.5 0 0 1 3 0V10M14 10V5a1.5 1.5 0 0 1 3 0v8c0 4-2.5 8-7 8-3 0-4.5-1.5-6-4l-1.5-3a1.5 1.5 0 0 1 2.6-1.5L8 15"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></symbol>
+    <symbol id="i-tail" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M5 18c2-12 4-12 6-6s4 5 9 5"/></symbol>
+    <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M7 18h11a4 4 0 0 0 0-8 6 6 0 0 0-11.5 1.5A3.5 3.5 0 0 0 7 18z"/></symbol>
+    <symbol id="i-coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15 9.5c-.5-1-1.6-1.5-3-1.5-1.7 0-3 .8-3 2s1.3 1.7 3 2 3 .8 3 2-1.3 2-3 2c-1.4 0-2.5-.5-3-1.5M12 6v2M12 16v2"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></symbol>
+    <symbol id="i-question" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.2v.1"/></symbol>
+    <symbol id="i-flask" viewBox="0 0 24 24"><path d="M9 3h6M10 3v6L4.5 19a1.5 1.5 0 0 0 1.3 2h12.4a1.5 1.5 0 0 0 1.3-2L14 9V3"/><path d="M7 15h10"/></symbol>
+    <symbol id="i-code" viewBox="0 0 24 24"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/></symbol>
+    <symbol id="i-ruler" viewBox="0 0 24 24"><path d="M3 17L17 3l4 4L7 21z"/><path d="M7 13l2 2M10 10l2 2M13 7l2 2"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5"/></symbol>
+    <symbol id="i-warn" viewBox="0 0 24 24"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.1"/></symbol>
+    <symbol id="i-box" viewBox="0 0 24 24"><path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4M12 11v10"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l5.5-3.5z"/></symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/></symbol>
+    <symbol id="i-python" viewBox="0 0 24 24"><path d="M12 3c-4 0-4 1.5-4 3v2h4.5v1H6c-2 0-3 1.5-3 4s1 4 3 4h2v-2.5c0-1.5 1-2.5 2.5-2.5h4c1.5 0 2.5-1 2.5-2.5V6c0-1.5-1.5-3-5-3z"/><path d="M12 21c4 0 4-1.5 4-3v-2h-4.5v-1H18c2 0 3-1.5 3-4"/><circle cx="10" cy="5.6" r=".6"/></symbol>
+  </defs>
+</svg>
+
+<!-- ========================= WSTĘP ========================= -->
+
+<!-- 1 -->
+<section class="slide title-slide">
+  <div class="bar"></div>
+  <h1>Analiza porównawcza wybranych cech języków Java i Rust na podstawie programów realizujących równoważne funkcjonalności</h1>
+  <div class="meta">
+    <div class="who">Karol Mac</div>
+    <div>Opiekun: dr inż. Łukasz Gałka</div>
+    <div class="muted">Politechnika Lubelska · Projekt naukowy – realizacja</div>
+  </div>
+</section>
+
+<!-- 2: pytanie do sali (autor jeszcze dopracuje treść) -->
+<section class="slide">
+  <div class="body col center" style="gap:56px">
+    <div class="row center" style="gap:72px">
+      <div class="col center" style="gap:8px"><svg class="icon java" style="width:150px;height:150px"><use href="#i-cup"/></svg><div class="vs java">Java</div></div>
+      <div style="font-size:90px;font-weight:800;color:var(--muted)">vs</div>
+      <div class="col center" style="gap:8px"><svg class="icon rust" style="width:150px;height:150px"><use href="#i-gear"/></svg><div class="vs rust">Rust</div></div>
+    </div>
+    <div class="quiz-q" style="margin:0 60px">Kto uważa, że program w&nbsp;Ruście jest <u>zawsze</u> szybszy od tego samego programu w&nbsp;Javie?</div>
+    <div class="row center muted" style="font-size:38px;gap:18px"><svg class="icon" style="width:60px;height:60px"><use href="#i-hand"/></svg> podnieś rękę</div>
+  </div>
+</section>
+
+<!-- 3: Discord -->
+<section class="slide">
+  <h2>Discord: z Go na Rust <span class="tag">2020</span></h2>
+  <div class="body">
+    <div class="col" style="flex:1.45">
+      <div class="card plain" style="padding:24px 28px">
+        <svg id="discord-chart" viewBox="0 0 1000 470" style="width:100%;display:block"></svg>
+      </div>
+    </div>
+    <div class="col" style="flex:1;justify-content:center">
+      <div class="card"><div class="kicker">serwis „Read States”</div>GC w Go wymuszany <b>co 2 min</b></div>
+      <div class="card java-card" style="border-color:#555;background:#f1f1f1">Regularne <b>skoki latencji</b> i CPU</div>
+      <div class="card rust-card">Rust: <b>brak skoków</b></div>
+      <div class="card warn"><svg class="icon"><use href="#i-warn"/></svg> To <b>Go</b>, nie Java</div>
+    </div>
+  </div>
+  <div style="text-align:center;font-size:44px;font-weight:700;margin-top:30px">Czy to samo dotyczy <span class="java">Javy</span> z nowoczesnym G1?</div>
+</section>
+
+<!-- 4: warunki idealne vs rzeczywistość -->
+<section class="slide">
+  <h2>Warunki idealne vs rzeczywistość</h2>
+  <div class="body col" style="justify-content:center;gap:44px">
+    <div class="vsgrid">
+      <div class="kicker">BENCHMARK MÓWI</div><div></div><div class="kicker">UŻYTKOWNIK / FIRMA ODCZUWA</div>
+      <div class="card plain row"><svg class="icon icon-xl"><use href="#i-chart"/></svg><span>„średnio”</span></div>
+      <div class="arrowcell">→</div>
+      <div class="card row"><svg class="icon icon-xl"><use href="#i-tail"/></svg><span><b>skrajne</b> latencje<br><span class="muted" style="font-size:32px">p99, max</span></span></div>
+      <div class="card plain row"><svg class="icon icon-xl"><use href="#i-cpu"/></svg><span>czas CPU</span></div>
+      <div class="arrowcell">→</div>
+      <div class="card row"><svg class="icon icon-xl"><use href="#i-cloud"/></svg><span><b>rachunek za RAM</b><br><span class="muted" style="font-size:32px">kontenery, chmura</span></span></div>
+    </div>
+    <div class="benchlinks">
+      <div><b>Benchmarks Game</b>: średni czas, <i>cpu secs</i> · <a href="https://benchmarksgame-team.pages.debian.net/benchmarksgame/">benchmarksgame-team.pages.debian.net</a></div>
+      <div><b>TechEmpower</b>: żądania na sekundę · <a href="https://www.techempower.com/benchmarks/">techempower.com/benchmarks</a></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= CEL, PYTANIA BADAWCZE, ZAKRES ========================= -->
+
+<!-- 5 -->
+<section class="slide">
+  <h2>Cel pracy</h2>
+  <div class="body col" style="justify-content:center;gap:48px">
+    <div class="card warn row" style="align-items:center;gap:40px;font-size:42px;padding:44px 48px">
+      <svg class="icon" style="width:110px;height:110px;flex:none"><use href="#i-question"/></svg>
+      <div><div class="kicker">Problem</div>Wybór języka często opiera się na przekonaniach, brakuje porównań <b>identycznych programów</b> w różnych obciążeniach</div>
+    </div>
+    <div class="card ok row" style="align-items:center;gap:40px;font-size:42px;padding:44px 48px">
+      <svg class="icon" style="width:110px;height:110px;flex:none"><use href="#i-target"/></svg>
+      <div><div class="kicker">Cel</div>Zmierzyć różnice <span class="java">Javy 25</span> i <span class="rust">Rusta</span>: <b>czas, pamięć, wpływ GC, skalowalność</b> w 4 scenariuszach</div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 -->
+<section class="slide">
+  <h2>Pytania badawcze</h2>
+  <div class="body grid2 hyp" style="grid-template-rows:1fr 1fr">
+    <div class="card row"><svg class="icon icon-xl" style="flex:none"><use href="#i-clock"/></svg><div><h3>1 · czas</h3>Jak duża jest różnica czasu wykonania i od czego zależy?</div></div>
+    <div class="card row"><svg class="icon icon-xl" style="flex:none"><use href="#i-memory"/></svg><div><h3>2 · pamięć</h3>Ile pamięci zajmuje każdy język i jak zmienia się ona w czasie?</div></div>
+    <div class="card row"><svg class="icon icon-xl" style="flex:none"><use href="#i-trash"/></svg><div><h3>3 · GC</h3>Czy pauzy GC są widoczne w latencji, a jeśli tak, to w której części rozkładu?</div></div>
+    <div class="card row"><svg class="icon icon-xl" style="flex:none"><use href="#i-threads"/></svg><div><h3>4 · współbieżność</h3>Jak oba języki skalują się wraz z liczbą wątków?</div></div>
+  </div>
+</section>
+
+<!-- 7 -->
+<section class="slide">
+  <h2>Zakres pracy</h2>
+  <div class="body col" style="justify-content:center">
+    <svg viewBox="0 0 1728 440" style="width:100%">
+      <line x1="150" y1="130" x2="1578" y2="130" stroke="#d5dbe3" stroke-width="10" stroke-linecap="round"/>
+      <g font-family="Ubuntu Sans, Noto Sans, sans-serif" text-anchor="middle" fill="#1d2733">
+        <g transform="translate(150,130)"><circle r="110" fill="#eef1f5" stroke="#3d4a5c" stroke-width="5"/><use href="#i-flask" x="-54" y="-54" width="108" height="108" stroke="#3d4a5c" fill="none" stroke-width="2"/><text y="184" font-size="44" font-weight="700">Problem</text><text y="236" font-size="34" fill="#5b6878">pytania badawcze</text></g>
+        <g transform="translate(507,130)"><circle r="110" fill="#eef1f5" stroke="#3d4a5c" stroke-width="5"/><use href="#i-code" x="-54" y="-54" width="108" height="108" stroke="#3d4a5c" fill="none" stroke-width="2"/><text y="184" font-size="44" font-weight="700">Implementacja</text><text y="236" font-size="34" fill="#5b6878">4 scenariusze × 2 języki</text><text y="280" font-size="34" fill="#5b6878">tylko biblioteki standardowe</text></g>
+        <g transform="translate(864,130)"><circle r="110" fill="#eef1f5" stroke="#3d4a5c" stroke-width="5"/><use href="#i-python" x="-54" y="-54" width="108" height="108" stroke="#3d4a5c" fill="none" stroke-width="2"/><text y="184" font-size="44" font-weight="700">Pipeline</text><text y="236" font-size="34" fill="#5b6878">pomiarowy (Python)</text></g>
+        <g transform="translate(1221,130)"><circle r="110" fill="#eef1f5" stroke="#3d4a5c" stroke-width="5"/><use href="#i-ruler" x="-54" y="-54" width="108" height="108" stroke="#3d4a5c" fill="none" stroke-width="2"/><text y="184" font-size="44" font-weight="700">Pomiary</text><text y="236" font-size="34" fill="#5b6878">czas · RAM · GC · latencja</text></g>
+        <g transform="translate(1578,130)"><circle r="110" fill="#eef1f5" stroke="#3d4a5c" stroke-width="5"/><use href="#i-search" x="-54" y="-54" width="108" height="108" stroke="#3d4a5c" fill="none" stroke-width="2"/><text y="184" font-size="44" font-weight="700">Analiza</text><text y="236" font-size="34" fill="#5b6878">i wnioski</text></g>
+      </g>
+    </svg>
+  </div>
+</section>
+
+<!-- ========================= METODA ========================= -->
+
+<!-- 8 -->
+<section class="slide">
+  <h2>Java vs Rust: dwa modele wykonania</h2>
+  <div class="body col models" style="gap:44px;justify-content:center">
+    <div class="card java-card" style="padding:34px 36px">
+      <div class="flow">
+        <div class="step" style="border-color:var(--java)"><code>.java</code></div><span class="arrow">→</span>
+        <div class="step" style="border-color:var(--java)">javac</div><span class="arrow">→</span>
+        <div class="step" style="border-color:var(--java)">bytecode</div><span class="arrow">→</span>
+        <div class="step" style="border-color:var(--java);background:var(--java-soft);flex:1">JVM: interpreter → JIT C1/C2</div>
+        <div class="step" style="border-color:var(--java);background:var(--java);color:#fff"><svg class="icon"><use href="#i-trash"/></svg> G1 GC</div>
+      </div>
+      <div style="font-size:30px;margin-top:16px" class="muted">kod wykonuje środowisko uruchomieniowe (JVM) · pamięć zwalnia garbage collector</div>
+    </div>
+    <div class="card rust-card" style="padding:34px 36px">
+      <div class="flow">
+        <div class="step" style="border-color:var(--rust)"><code>.rs</code></div><span class="arrow">→</span>
+        <div class="step" style="border-color:var(--rust)">rustc</div><span class="arrow">→</span>
+        <div class="step" style="border-color:var(--rust)">LLVM</div><span class="arrow">→</span>
+        <div class="step" style="border-color:var(--rust);background:var(--rust-soft);flex:1">natywny plik wykonywalny</div>
+        <div class="step" style="border-color:var(--rust);background:var(--rust);color:#fff">ownership · <code style="background:rgba(255,255,255,.25)">Drop</code></div>
+      </div>
+      <div style="font-size:30px;margin-top:16px" class="muted">kompilacja przed uruchomieniem · pamięć zwalniana przy wyjściu ze scope'u</div>
+    </div>
+    <div class="card plain row" style="align-items:center;gap:30px">
+      <svg class="icon icon-lg" style="flex:none"><use href="#i-question"/></svg>
+      <div><b>Dlaczego ta para?</b> Dwa skrajne modele zarządzania pamięcią: <span class="java">GC</span> vs <span class="rust">ownership</span>, oba w backendzie i systemach</div>
+    </div>
+  </div>
+</section>
+
+<!-- 9 -->
+<section class="slide">
+  <h2>4 scenariusze</h2>
+  <div class="body grid4 scen">
+    <div class="card col" style="gap:18px"><svg class="icon icon-xl"><use href="#i-cpu"/></svg><h3 style="margin:0">S1 · CPU</h3><div>Mandelbrot 4096×4096 → PPM</div><div class="muted" style="margin-top:auto;font-size:28px">JIT vs LLVM</div></div>
+    <div class="card col" style="gap:18px"><svg class="icon icon-xl"><use href="#i-file"/></svg><h3 style="margin:0">S2 · I/O</h3><div>CSV 50 mln wierszy (~5 GB), filtr top-1%</div><div class="muted" style="margin-top:auto;font-size:28px">parsowanie, alokacje</div></div>
+    <div class="card col" style="gap:18px"><svg class="icon icon-xl"><use href="#i-threads"/></svg><h3 style="margin:0">S3 · współbieżność</h3><div>Dynamika molekularna LJ, 108 000 cząstek, P wątków + bariera</div><div class="muted" style="margin-top:auto;font-size:28px">skalowanie</div></div>
+    <div class="card col" style="gap:18px"><svg class="icon icon-xl"><use href="#i-wave"/></svg><h3 style="margin:0">S4 · pamięć</h3><div>Strumień 10⁹ zdarzeń IoT, z-score + średnia krocząca</div><div class="muted" style="margin-top:auto;font-size:28px">RAM, latencja</div></div>
+  </div>
+</section>
+
+<!-- 10 -->
+<section class="slide">
+  <h2>Dane wejściowe</h2>
+  <div class="body col" style="justify-content:center">
+    <table class="data" style="font-size:35px">
+      <thead><tr><th></th><th style="text-align:left">Co</th><th>Rozmiar</th><th>Seed</th></tr></thead>
+      <tbody>
+        <tr><td><b>S1</b> CPU</td><td style="text-align:left">4096×4096 px, ≤ 1000 iteracji</td><td>brak wejścia</td><td>—</td></tr>
+        <tr><td><b>S2</b> I/O</td><td style="text-align:left">50 mln transakcji, 7 kolumn</td><td>~4,7 GB</td><td>42</td></tr>
+        <tr><td><b>S3</b> współb.</td><td style="text-align:left">108 000 / 4 000 cząstek, sieć FCC,<br>prędkości Maxwella-Boltzmanna</td><td>5,2 MB / 0,2 MB</td><td>42</td></tr>
+        <tr><td><b>S4</b> pamięć</td><td style="text-align:left">10⁹ zdarzeń, 1000 sensorów, 2% anomalii</td><td>20 GB</td><td>42</td></tr>
+      </tbody>
+    </table>
+    <div class="card plain" style="margin-top:36px;font-size:30px"><svg class="icon"><use href="#i-flask"/></svg> S3: parametry jak w benchmarku <b>LJ LAMMPS</b>: ρ* = 0,8442 · T* = 1,44 · r<sub>c</sub> = 2,5 · Δt = 0,005</div>
+  </div>
+</section>
+
+<!-- 11 -->
+<section class="slide">
+  <h2>Projekt eksperymentu</h2>
+  <div class="body" style="gap:44px">
+    <div class="col" style="flex:1.6;gap:0">
+      <div class="xgrid">
+        <div></div><div class="xhead java"><svg class="icon"><use href="#i-cup"/></svg> Java 25</div><div class="xhead rust"><svg class="icon"><use href="#i-gear"/></svg> Rust</div>
+        <div class="xrow">S1 · CPU</div><div class="xcell"><span class="chip">czas</span><span class="chip">RAM</span><span class="chip">GC</span></div><div class="xcell"><span class="chip">czas</span><span class="chip">RAM</span></div>
+        <div class="xrow">S2 · I/O</div><div class="xcell"><span class="chip">czas</span><span class="chip">RAM</span><span class="chip">GC</span></div><div class="xcell"><span class="chip">czas</span><span class="chip">RAM</span></div>
+        <div class="xrow">S3 · współb.</div><div class="xcell"><span class="chip">czas</span><span class="chip">RAM</span><span class="chip">GC</span><span class="chip p">× 7 P</span></div><div class="xcell"><span class="chip">czas</span><span class="chip">RAM</span><span class="chip p">× 7 P</span></div>
+        <div class="xrow">S4 · pamięć</div><div class="xcell"><span class="chip">czas</span><span class="chip">RAM</span><span class="chip">GC</span></div><div class="xcell"><span class="chip">czas</span><span class="chip">RAM</span></div>
+      </div>
+      <div class="legend3">
+        <div><span class="chip">czas</span> hyperfine: 3 rozgrzewki + 10 pomiarów</div>
+        <div><span class="chip">RAM</span> RSS co 10 ms, 5 przebiegów</div>
+        <div><span class="chip">GC</span> log <code>-Xlog:gc*</code>, 1 przebieg</div>
+        <div><span class="chip p">P</span> wątki {1, 2, 3, 4, 6, 8, 12} · N = 108k / 4k</div>
+      </div>
+    </div>
+    <div class="col" style="flex:1;justify-content:center">
+      <div class="card"><div class="kicker">Wspólne warunki</div>
+        <ul style="font-size:31px"><li>tylko biblioteki standardowe</li><li>kod idiomatyczny</li><li>ten sam algorytm i dane</li><li>domyślne flagi</li></ul></div>
+      <div class="card ok"><div class="kicker">Walidacja poprawności</div>
+        <ul style="font-size:29px"><li>S3: Java ↔ Rust, pozycje &lt; 10⁻⁶</li><li>S3: dryf energii &lt; 10⁻³</li><li>S3: wynik niezależny od P</li><li>S2: identyczne pliki wyjściowe</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- 12 -->
+<section class="slide">
+  <h2>Metryki</h2>
+  <div class="body grid4" style="grid-template-rows:1fr 1fr;gap:26px">
+    <div class="card col" style="gap:12px;font-size:30px"><svg class="icon icon-lg"><use href="#i-clock"/></svg><h3 style="margin:0">Czas wykonania</h3><div class="muted">mediana z hyperfine</div></div>
+    <div class="card col" style="gap:12px;font-size:30px"><svg class="icon icon-lg"><use href="#i-memory"/></svg><h3 style="margin:0">Szczytowy RSS</h3><div class="muted">ile RAM-u proces zabrał systemowi</div></div>
+    <div class="card col" style="gap:12px;font-size:30px"><svg class="icon icon-lg"><use href="#i-chart"/></svg><h3 style="margin:0">RAM w czasie</h3><div class="muted">jak pamięć rośnie i wraca do OS</div></div>
+    <div class="card col" style="gap:12px;font-size:30px"><svg class="icon icon-lg"><use href="#i-trash"/></svg><h3 style="margin:0">Pauzy GC</h3><div class="muted">ile, jak długie, kiedy</div></div>
+    <div class="card col" style="gap:12px;font-size:30px"><svg class="icon icon-lg"><use href="#i-tail"/></svg><h3 style="margin:0">Latencja zdarzenia</h3><div class="muted">p99 = 99% zdarzeń szybszych niż…</div></div>
+    <div class="card col" style="gap:12px;font-size:30px"><svg class="icon icon-lg"><use href="#i-play"/></svg><h3 style="margin:0">Czas kroku</h3><div class="muted">jeden krok symulacji S3</div></div>
+    <div class="card col" style="gap:12px;font-size:30px"><svg class="icon icon-lg"><use href="#i-threads"/></svg><h3 style="margin:0">S(P) = T(1) / T(P)</h3><div class="muted">przyspieszenie na P wątkach</div></div>
+    <div class="card col" style="gap:12px;font-size:30px"><svg class="icon icon-lg"><use href="#i-target"/></svg><h3 style="margin:0">E(P) = S(P) / P</h3><div class="muted">efektywność, ideał = 1</div></div>
+  </div>
+  <div class="card warn" style="margin-top:26px;font-size:30px;padding:18px 30px"><b>RSS, nie heap used</b>: to widzi system operacyjny i za to się płaci</div>
+</section>
+
+<!-- 13 -->
+<section class="slide">
+  <h2>Środowisko i narzędzia</h2>
+  <div class="body grid3" style="grid-template-rows:1fr 1fr">
+    <div class="card col" style="gap:12px"><svg class="icon icon-xl"><use href="#i-cpu"/></svg><h3 style="margin:0">AMD Ryzen 5 7500X3D</h3><div class="muted">6 rdzeni / 12 wątków</div></div>
+    <div class="card col" style="gap:12px"><svg class="icon icon-xl"><use href="#i-memory"/></svg><h3 style="margin:0">32 GB RAM</h3><div class="muted">Windows 11</div></div>
+    <div class="card col" style="gap:12px"><svg class="icon icon-xl"><use href="#i-play"/></svg><h3 style="margin:0">hyperfine</h3><div class="muted">czas wykonania</div></div>
+    <div class="card java-card col" style="gap:12px"><svg class="icon icon-xl java"><use href="#i-cup"/></svg><h3 style="margin:0">OpenJDK 25.0.2</h3><div class="muted">G1 · <code>-Xms512m -Xmx8g</code></div></div>
+    <div class="card rust-card col" style="gap:12px"><svg class="icon icon-xl rust"><use href="#i-gear"/></svg><h3 style="margin:0">Rust 1.98.0</h3><div class="muted">edition 2024<br><code style="white-space:nowrap">cargo build --release</code></div></div>
+    <div class="card col" style="gap:12px"><svg class="icon icon-xl"><use href="#i-python"/></svg><h3 style="margin:0">Python</h3><div class="muted" style="font-size:28px">psutil: RSS · numpy: statystyki<br>matplotlib + seaborn: wykresy</div></div>
+  </div>
+</section>
+
+<!-- ========================= S1: CPU ========================= -->
+
+<!-- 14 -->
+<section class="slide">
+  <h2>S1 · CPU: zbiór Mandelbrota</h2>
+  <div class="body" style="gap:70px;align-items:center">
+    <div class="chart" style="height:860px;width:860px;flex:none"><img src="assets/mandelbrot.png" style="border-radius:16px"></div>
+    <div class="col grow" style="gap:36px">
+      <div class="card" style="font-size:44px"><b>4096 × 4096</b> pikseli</div>
+      <div class="card" style="font-size:44px">czyste obliczenia <b>zmiennoprzecinkowe</b></div>
+      <div class="card" style="font-size:44px"><span class="java">JIT</span> vs <span class="rust">LLVM</span></div>
+      <div class="caption" style="text-align:left">Miniatura z tym samym algorytmem i paletą (1000 × 1000)</div>
+    </div>
+  </div>
+</section>
+
+<!-- 15 -->
+<section class="slide">
+  <h2>S1 · CPU <span class="tag">pytanie</span></h2>
+  <div class="quizwrap"><div class="quiz-q">O ile szybszy jest Rust w liczeniu Mandelbrota?</div>
+  <div class="tiles">
+    <div class="tile"><div class="letter">A</div><div class="val">2×</div></div>
+    <div class="tile"><div class="letter">B</div><div class="val">30%</div></div>
+    <div class="tile"><div class="letter">C</div><div class="val">6%</div></div>
+  </div></div>
+</section>
+
+<!-- 16 -->
+<section class="slide">
+  <h2>S1 · CPU: wynik
+    <span class="answer" style="margin-left:auto"><span class="opt">A 2×</span><span class="opt">B 30%</span><span class="opt correct">C 6%</span></span></h2>
+  <div class="body">
+    <div class="chart grow" style="justify-content:flex-start">
+      <div class="figure" style="height:840px">
+        <img src="assets/ram_s1.png" style="height:100%">
+        <div class="note java-note" style="left:17%;top:22%">JVM: ~88 MB już na starcie</div>
+        <div class="note rust-note" style="left:34%;top:63%">Rust: rośnie z buforem obrazu</div>
+        <div class="note" style="left:58%;top:6%">peak <span class="java">138</span> vs <span class="rust">52</span> MB</div>
+      </div>
+    </div>
+    <div class="col" style="width:400px;flex:none;align-items:center;gap:10px">
+      <div class="keynum" style="font-size:120px">~6%</div>
+      <div class="vs" style="text-align:center;font-size:32px">Java <b>×1,06</b><br><span class="java">5,69 s</span> vs <span class="rust">5,38 s</span></div>
+      <img src="assets/exec_s1.png" style="width:390px;margin-top:auto">
+    </div>
+  </div>
+</section>
+
+<!-- ========================= S2: I/O ========================= -->
+
+<!-- 17 -->
+<section class="slide">
+  <h2>S2 · I/O: filtrowanie CSV</h2>
+  <div class="body col" style="gap:64px;justify-content:center">
+    <div class="csv">
+      <div class="csv-head">transaction_id,timestamp_ms,<b>amount</b>,sender_id,receiver_id,category,description</div>
+      <div>1,1700000000664,<b>11133.99</b>,ACC303832645883,ACC245864938384,TRANSFER,Payment ref #98847493</div>
+      <div>2,1700000000778,<b>67670.27</b>,ACC600832336208,ACC648913461122,INVESTMENT,Payment ref #04265799</div>
+      <div>3,1700000000818,<b>9370.43</b>,ACC555050052120,ACC028355454532,UTILITY,Payment ref #26687537</div>
+      <div class="muted">… × 50 000 000 wierszy (~5 GB)</div>
+    </div>
+    <div class="flow" style="justify-content:center;gap:14px">
+      <div class="step big"><div class="kicker" style="font-size:22px;color:var(--muted)">PASS 1</div>wczytaj wszystkie kwoty</div><span class="arrow">→</span>
+      <div class="step big">sortuj</div><span class="arrow">→</span>
+      <div class="step big" style="background:var(--accent-soft)">próg top-1%</div><span class="arrow">→</span>
+      <div class="step big"><div class="kicker" style="font-size:22px;color:var(--muted)">PASS 2</div>filtruj <code>amount ≥ próg</code></div><span class="arrow">→</span>
+      <div class="step big">zapis CSV</div>
+    </div>
+  </div>
+</section>
+
+<!-- 18 -->
+<section class="slide">
+  <h2>S2 · I/O <span class="tag">pytanie</span></h2>
+  <div class="quizwrap"><div class="quiz-q">Ile razy szybciej Rust przefiltruje ~5 GB CSV?</div>
+  <div class="tiles">
+    <div class="tile"><div class="letter">A</div><div class="val">1,1×</div></div>
+    <div class="tile"><div class="letter">B</div><div class="val">2×</div></div>
+    <div class="tile"><div class="letter">C</div><div class="val">10×</div></div>
+  </div></div>
+</section>
+
+<!-- 19 -->
+<section class="slide">
+  <h2>S2 · I/O: wynik
+    <span class="answer" style="margin-left:auto"><span class="opt">A 1,1×</span><span class="opt correct">B 2×</span><span class="opt">C 10×</span></span></h2>
+  <div class="body">
+    <div class="chart grow" style="justify-content:flex-start">
+      <div class="figure" style="height:840px">
+        <img src="assets/ram_s2.png" style="height:100%">
+        <div class="note java-note" style="left:15%;top:24%">„schodki” G1: regiony<br>nie wracają do OS</div>
+        <div class="note rust-note" style="left:36%;top:73%"><code>Drop</code> zwalnia wektor od razu</div>
+        <div class="note" style="left:58%;top:5%">peak <span class="java">2068</span> vs <span class="rust">485</span> MB</div>
+      </div>
+    </div>
+    <div class="col" style="width:400px;flex:none;align-items:center;gap:10px">
+      <div class="keynum">×2,0</div>
+      <div class="vs" style="text-align:center;font-size:32px"><span class="java">21,84 s</span> vs <span class="rust">10,78 s</span></div>
+      <img src="assets/exec_s2.png" style="width:390px;margin-top:auto">
+    </div>
+  </div>
+</section>
+
+<!-- 20 -->
+<section class="slide">
+  <h2>S2 · I/O: pauzy GC w Javie</h2>
+  <div class="body">
+    <div class="chart" style="flex:none">
+      <div class="figure" style="width:1300px">
+        <img src="../results/charts/scenario2/gc_pause_timeline.png" style="width:100%">
+        <div class="ring" style="left:47%;top:14%;width:13%;height:76%"></div>
+        <div class="note warn-note" style="left:33%;top:102%">↑ ~3,5 s bez pauz: sortowanie <code>double[]</code> (bez alokacji)</div>
+      </div>
+    </div>
+    <div class="col grow" style="justify-content:center;gap:26px">
+      <div class="card"><div class="big">134</div>pauzy (wszystkie Young)</div>
+      <div class="card"><div class="big">0,58 ms</div>mediana · maks. 1,42 ms</div>
+      <div class="card ok"><div class="big">81 ms</div>łącznie, ~0,4% czasu</div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= S3: WSPÓŁBIEŻNOŚĆ ========================= -->
+
+<!-- 21 -->
+<section class="slide">
+  <h2>S3 · współbieżność: dynamika molekularna</h2>
+  <div class="body" style="gap:28px">
+    <div class="col" style="flex:none;gap:6px;align-items:center">
+      <img src="../results/charts/scenario3/snapshot_step0000.png" style="height:600px">
+      <div class="caption" style="font-size:30px"><b>krok 0</b>: kryształ (FCC)</div>
+    </div>
+    <div class="col center" style="font-size:80px;color:var(--muted);flex:none;padding-bottom:80px">→</div>
+    <div class="col" style="flex:none;gap:6px;align-items:center">
+      <img src="../results/charts/scenario3/snapshot_step1000.png" style="height:600px">
+      <div class="caption" style="font-size:30px"><b>krok 1000</b>: ciecz</div>
+    </div>
+    <div class="col grow" style="justify-content:center;gap:14px">
+      <div class="kicker" style="font-size:24px;font-weight:700;color:var(--muted);letter-spacing:2px">JEDEN KROK</div>
+      <div class="phase">A · pozycje</div><div class="barrier">bariera</div>
+      <div class="phase serial">B · siatka komórek <span>(szeregowo)</span></div><div class="barrier">bariera</div>
+      <div class="phase hot">C · siły</div><div class="barrier">bariera</div>
+      <div class="phase">D · prędkości</div><div class="barrier">bariera</div>
+      <div class="muted" style="font-size:26px;margin-top:6px">P wątków roboczych</div>
+    </div>
+  </div>
+  <div class="caption" style="margin-top:8px">Snapshoty z przebiegu 4 000 cząstek. Pomiary: 108 000 cząstek, 200 kroków.</div>
+</section>
+
+<!-- 22 -->
+<section class="slide">
+  <h2>S3 · współbieżność <span class="tag">pytanie</span></h2>
+  <div class="quizwrap"><div class="quiz-q">Który język lepiej skaluje się na 12 wątkach?</div>
+  <div class="tiles">
+    <div class="tile"><div class="letter">A</div><div class="val java" style="font-size:92px">Java</div></div>
+    <div class="tile"><div class="letter">B</div><div class="val rust" style="font-size:92px">Rust</div></div>
+    <div class="tile"><div class="letter">C</div><div class="val" style="font-size:92px">remis</div></div>
+  </div></div>
+</section>
+
+<!-- 23 -->
+<section class="slide">
+  <h2>S3 · współbieżność: wynik
+    <span class="answer" style="margin-left:auto"><span class="opt">A Java</span><span class="opt">B Rust</span><span class="opt correct">C remis</span></span></h2>
+  <div class="body" style="gap:30px">
+    <div class="chart" style="flex:none">
+      <div class="figure" style="height:840px">
+        <img src="../results/charts/scenario3/speedup.png" style="height:100%">
+        <div class="note warn-note" style="left:56%;top:66%">P = 8: 8 wątków na 6 rdzeniach<br>+ bariera czeka na najwolniejszy</div>
+      </div>
+    </div>
+    <div class="col grow" style="gap:18px;align-items:center;justify-content:center">
+      <div class="keynum" style="font-size:96px"><span class="java">6,8</span> <span class="muted" style="font-size:60px">vs</span> <span class="rust">6,9</span></div>
+      <div class="vs" style="font-size:30px">S(12)</div>
+      <img src="../results/charts/scenario3/efficiency.png" style="width:100%">
+    </div>
+  </div>
+</section>
+
+<!-- 24: rozbicie kroku na fazy -->
+<section class="slide">
+  <h2>S3 · gdzie idzie czas kroku?</h2>
+  <div class="body col" style="justify-content:center">
+    <div class="chart"><img src="../results/charts/scenario3/phase_breakdown.png" style="width:100%"></div>
+    <div class="row center" style="gap:30px;margin-top:20px">
+      <div class="card" style="font-size:32px">faza sił (C) dominuje: <span class="java">190</span> vs <span class="rust">139</span> ms przy P = 1</div>
+      <div class="card" style="font-size:32px">część szeregowa (B): <b>0,3–0,5%</b></div>
+      <div class="card plain" style="font-size:32px">Rust <b>~1,4×</b> szybszy przy każdym P</div>
+    </div>
+  </div>
+</section>
+
+<!-- 25 -->
+<section class="slide">
+  <h2>S3 · czas kroku: czy GC psuje barierę?</h2>
+  <div class="body" style="gap:30px">
+    <div class="chart" style="flex:none">
+      <div class="figure" style="width:1190px">
+        <img src="../results/charts/scenario3/step_time_timeline.png" style="width:100%">
+        <div class="note java-note" style="left:42%;top:76%">tylko 2 pauzy G1, po ~1,4 ms</div>
+      </div>
+    </div>
+    <div class="col grow" style="gap:20px;justify-content:center">
+      <div class="kicker" style="font-size:24px;font-weight:700;color:var(--muted);letter-spacing:2px">CZAS KROKU, P = 6</div>
+      <div class="pct"><span>p50</span><b class="java">39,3</b><b class="rust">27,5</b><i>ms</i></div>
+      <div class="pct"><span>p99</span><b class="java">51,1</b><b class="rust">37,6</b><i>ms</i></div>
+      <div class="pct"><span>p99/p50</span><b class="java">1,30</b><b class="rust">1,37</b><i></i></div>
+      <div class="card warn" style="font-size:28px;padding:18px 22px">Przewidywany efekt bariery <b>nie wystąpił</b></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= S4: PAMIĘĆ / IoT ========================= -->
+
+<!-- 26 -->
+<section class="slide">
+  <h2>S4 · pamięć: strumień zdarzeń IoT</h2>
+  <div class="body col s4desc" style="gap:64px;justify-content:center">
+    <div>
+      <div class="kicker" style="font-size:28px;font-weight:700;color:var(--muted);letter-spacing:2px;margin-bottom:14px">JEDNO ZDARZENIE: REKORD 20 BAJTÓW</div>
+      <div class="record">
+        <div style="flex:8"><b>timestamp_ns</b><span>u64 · 8 B</span></div>
+        <div style="flex:4"><b>sensor_id</b><span>u32 · 4 B</span></div>
+        <div style="flex:8" class="hot"><b>value</b><span>f64 · 8 B</span></div>
+      </div>
+    </div>
+    <div>
+      <div class="pipe">
+        <div class="pstep"><i>1</i><b>odczyt rekordu</b><span>z pliku 20 GB</span></div><span class="arrow">→</span>
+        <div class="pstep"><i>2</i><b>stan sensora</b><span>mapa: 1000 sensorów × okno 128 wartości</span></div><span class="arrow">→</span>
+        <div class="pstep"><i>3</i><b>średnia i σ okna</b><span>liczone krocząco</span></div><span class="arrow">→</span>
+        <div class="pstep warn"><i>4</i><b>anomalia?</b><span>|value − średnia| &gt; 3σ</span></div>
+      </div>
+      <div class="pipe-span"><svg class="icon"><use href="#i-clock"/></svg><span>latencja zdarzenia = czas kroków 1–4, mierzona dla <b>każdego</b> zdarzenia</span></div>
+    </div>
+    <div class="row center" style="gap:30px">
+      <div class="card" style="font-size:40px"><b>10⁹</b> zdarzeń</div>
+      <div class="card" style="font-size:40px"><b>2%</b> anomalii</div>
+    </div>
+  </div>
+</section>
+
+<!-- 27 -->
+<section class="slide">
+  <h2>S4 · pamięć <span class="tag">pytanie</span></h2>
+  <div class="quizwrap"><div class="quiz-q">Ile razy więcej RAM zużyje Java?</div>
+  <div class="tiles">
+    <div class="tile"><div class="letter">A</div><div class="val">1,5×</div></div>
+    <div class="tile"><div class="letter">B</div><div class="val">5×</div></div>
+    <div class="tile"><div class="letter">C</div><div class="val">50×</div></div>
+  </div></div>
+</section>
+
+<!-- 28 -->
+<section class="slide">
+  <h2>S4 · pamięć: wynik
+    <span class="answer" style="margin-left:auto"><span class="opt">A 1,5×</span><span class="opt">B 5×</span><span class="opt correct">C 50×</span></span></h2>
+  <div class="body">
+    <div class="chart grow" style="justify-content:flex-start">
+      <div class="figure" style="height:840px">
+        <img src="assets/ram_s4.png" style="height:100%">
+        <div class="note java-note" style="left:20%;top:23%">schodki G1 → plateau ~350 MB</div>
+        <div class="note rust-note" style="left:36%;top:73%">Rust: płasko, ~6,5 MB</div>
+      </div>
+    </div>
+    <div class="col" style="width:400px;flex:none;align-items:center;gap:10px">
+      <div class="keynum" style="font-size:170px">×54</div>
+      <div class="vs" style="text-align:center;font-size:32px"><span class="java">351 MB</span> vs <span class="rust">6,5 MB</span></div>
+      <div class="muted" style="text-align:center;font-size:28px;margin-top:10px">czas: Java ×1,09</div>
+      <img src="assets/exec_s4.png" style="width:390px;margin-top:auto">
+    </div>
+  </div>
+</section>
+
+<!-- 29 -->
+<section class="slide">
+  <h2>S4 · latencja: gdzie widać GC?</h2>
+  <div class="body" style="gap:36px">
+    <div class="chart grow">
+      <div class="figure" style="width:100%">
+        <img src="../results/charts/scenario4/latency_percentiles.png" style="width:100%">
+        <div class="note ok-note" style="left:13%;top:62%">p50–p99.9: identyczne</div>
+        <div class="note warn-note" style="left:46%;top:24%">max = 1 zdarzenie,<br>szum systemu</div>
+      </div>
+    </div>
+    <div class="chart grow">
+      <div class="figure" style="width:100%">
+        <img src="assets/tail_chart.png" style="width:100%">
+      </div>
+    </div>
+  </div>
+  <div class="row" style="gap:28px;margin-top:20px;align-items:center">
+    <div class="card java-card" style="font-size:32px;flex:1"><b>97 vs 11</b> zdarzeń &gt; 0,4 ms ≈ 146 pauz G1 po ~0,5 ms</div>
+    <div class="card ok" style="font-size:40px;font-weight:800;flex:1;text-align:center">GC kosztuje, ale to nie Discord</div>
+  </div>
+</section>
+
+<!-- ========================= SYNTEZA ========================= -->
+
+<!-- 30 -->
+<section class="slide">
+  <h2>Zbiorczo: 4 scenariusze</h2>
+  <div class="body col" style="justify-content:center">
+    <div class="chart"><img src="assets/summary.png" style="width:100%"></div>
+    <div class="caption" style="font-size:26px">Java / Rust: mediana hyperfine (czas) i średni szczytowy RSS z 5 przebiegów; S3 przy P = 6</div>
+  </div>
+</section>
+
+<!-- 31 -->
+<section class="slide">
+  <h2>Odpowiedzi</h2>
+  <div class="body col" style="gap:24px;justify-content:center">
+    <div class="card plain verdict"><div class="vh"><svg class="icon"><use href="#i-clock"/></svg> 1 · czas</div><div>Rust szybszy wszędzie: S1 ×1,06 · S4 ×1,09 · S3 ×1,38–1,44 · S2 ×2,03</div></div>
+    <div class="card plain verdict"><div class="vh"><svg class="icon"><use href="#i-memory"/></svg> 2 · pamięć</div><div>RSS<sub>Java</sub> / RSS<sub>Rust</sub>: S1 ×2,7 · S2 ×4,3 · S3 (P = 6) ×12,8 · S4 ×54</div></div>
+    <div class="card plain verdict"><div class="vh"><svg class="icon"><use href="#i-trash"/></svg> 3 · GC</div><div>p50–p99.9 identyczne; skrajnie 97 vs 11 zdarzeń &gt; 0,4 ms. <b>Efekt mały</b></div></div>
+    <div class="card plain verdict"><div class="vh"><svg class="icon"><use href="#i-threads"/></svg> 4 · współb.</div><div>Skalowanie prawie identyczne: E(6) = 84–88% · |ΔS(P)| ≤ 4% · S(12): 6,8 vs 6,9</div></div>
+  </div>
+</section>
+
+<!-- 32: wnioski (autor jeszcze dopracuje treść) -->
+<section class="slide">
+  <h2>Wnioski</h2>
+  <div class="card plain" style="font-size:40px;text-align:center;padding:24px">
+    Rust zawsze szybszy? <b>Tak, ale od 6% do ×2.</b> Za to pamięć: <b>od ×2,7 do ×54</b>
+  </div>
+  <div class="body grid3" style="margin-top:28px;gap:28px">
+    <div class="card rust-card" style="font-size:33px"><h3 class="rust">Rust, gdy…</h3>
+      <ul><li>liczy się pamięć: kontenery, embedded, krótkie CLI</li><li>masowe I/O z parsowaniem</li><li>przewidywalny czas wykonania</li></ul></div>
+    <div class="card java-card" style="font-size:33px"><h3 class="java">Java, gdy…</h3>
+      <ul><li>dominują obliczenia: JIT traci do kodu natywnego tylko ~6%</li><li>liczy się ekosystem i koszt zespołu</li><li>opóźnienie GC realne, ale małe (~0,5 ms)</li></ul></div>
+    <div class="card" style="font-size:33px"><h3>Współbieżność</h3>
+      <ul><li>skalowanie identyczne</li><li>język zmienia tylko punkt startu</li></ul></div>
+  </div>
+  <div class="card warn row" style="margin-top:28px;font-size:27px;padding:16px 28px;gap:36px;align-items:center">
+    <b style="flex:none">Ograniczenia:</b>
+    <span>1 maszyna, Windows (zegar 100 ns, szum schedulera)</span>
+    <span>domyślne flagi GC</span>
+    <span>kod idiomatyczny, nieoptymalizowany</span>
+  </div>
+</section>
+
+<!-- 33 -->
+<section class="slide">
+  <h2>Źródła</h2>
+  <ol class="sources">
+    <li>J. Howarth, „Why Discord is switching from Go to Rust”, Discord Blog, 4.02.2020. <a href="https://discord.com/blog/why-discord-is-switching-from-go-to-rust">discord.com/blog/why-discord-is-switching-from-go-to-rust</a></li>
+    <li>D. Detlefs, C. Flood, S. Heller, T. Printezis, „Garbage-First Garbage Collection”, ISMM ’04, ACM, 2004, s. 37–48. <a href="https://doi.org/10.1145/1029873.1029879">doi.org/10.1145/1029873.1029879</a></li>
+    <li>G. M. Amdahl, „Validity of the single processor approach to achieving large scale computing capabilities”, AFIPS ’67, 1967, s. 483–485. <a href="https://doi.org/10.1145/1465482.1465560">doi.org/10.1145/1465482.1465560</a></li>
+    <li>A. P. Thompson i in., „LAMMPS – a flexible simulation tool for particle-based materials modeling at the atomic, meso, and continuum scales”, Computer Physics Communications 271, 108171, 2022. <a href="https://doi.org/10.1016/j.cpc.2021.108171">doi.org/10.1016/j.cpc.2021.108171</a></li>
+    <li>LAMMPS, benchmark LJ (<code>bench/in.lj</code>). <a href="https://github.com/lammps/lammps/tree/develop/bench">github.com/lammps/lammps/tree/develop/bench</a></li>
+    <li>S. Klabnik, C. Nichols, C. Krycho, „The Rust Programming Language”. <a href="https://doc.rust-lang.org/book/">doc.rust-lang.org/book</a></li>
+    <li>Oracle, „Garbage-First (G1) Garbage Collector”, HotSpot VM GC Tuning Guide, Release 25. <a href="https://docs.oracle.com/en/java/javase/25/gctuning/garbage-first-g1-garbage-collector1.html">docs.oracle.com/en/java/javase/25/gctuning</a></li>
+    <li>OpenJDK, „JEP 248: Make G1 the Default Garbage Collector”. <a href="https://openjdk.org/jeps/248">openjdk.org/jeps/248</a></li>
+    <li>D. Peter, „hyperfine: A command-line benchmarking tool”. <a href="https://github.com/sharkdp/hyperfine">github.com/sharkdp/hyperfine</a></li>
+    <li>G. Rodola, „psutil”. <a href="https://github.com/giampaolo/psutil">github.com/giampaolo/psutil</a></li>
+    <li>J. D. Hunter, „Matplotlib: A 2D Graphics Environment”, Computing in Science &amp; Engineering 9(3), 2007. <a href="https://doi.org/10.1109/MCSE.2007.55">doi.org/10.1109/MCSE.2007.55</a></li>
+    <li>M. L. Waskom, „seaborn: statistical data visualization”, JOSS 6(60), 3021, 2021. <a href="https://doi.org/10.21105/joss.03021">doi.org/10.21105/joss.03021</a></li>
+    <li>C. R. Harris i in., „Array programming with NumPy”, Nature 585, 357–362, 2020. <a href="https://doi.org/10.1038/s41586-020-2649-2">doi.org/10.1038/s41586-020-2649-2</a></li>
+    <li>The Computer Language Benchmarks Game. <a href="https://benchmarksgame-team.pages.debian.net/benchmarksgame/">benchmarksgame-team.pages.debian.net/benchmarksgame</a> · TechEmpower, „Web Framework Benchmarks”. <a href="https://www.techempower.com/benchmarks/">techempower.com/benchmarks</a></li>
+    <li>OpenJDK, „JDK 25”. <a href="https://openjdk.org/projects/jdk/25/">openjdk.org/projects/jdk/25</a> · Rust Project, „Rust”. <a href="https://www.rust-lang.org/">rust-lang.org</a></li>
+  </ol>
+</section>
+
+<!-- 34 -->
+<section class="slide title-slide" style="align-items:center;text-align:center">
+  <div class="bar" style="margin:0 auto 56px"></div>
+  <div style="font-size:110px;font-weight:800;margin-bottom:56px">Dziękuję za uwagę</div>
+  <div style="font-size:34px;max-width:1500px;line-height:1.35;margin-bottom:44px" class="muted">Analiza porównawcza wybranych cech języków Java i Rust na podstawie programów realizujących równoważne funkcjonalności</div>
+  <div class="meta"><div class="who">Karol Mac</div><div>Opiekun: dr inż. Łukasz Gałka</div></div>
+</section>
+
+<!-- 35: wszystkie liczby (presentation/scripts/key_numbers.py) -->
+<section class="slide">
+  <h2>Wszystkie liczby</h2>
+  <div class="body col" style="justify-content:center">
+    <table class="data">
+      <thead><tr><th></th><th>S1 CPU</th><th>S2 I/O</th><th>S3 (108k, P = 6)</th><th>S4 IoT</th></tr></thead>
+      <tbody>
+        <tr><td>Czas Java [s]</td><td class="j">5,69</td><td class="j">21,84</td><td class="j">7,72 <span class="muted">(P=1: 39,07)</span></td><td class="j">82,37</td></tr>
+        <tr><td>Czas Rust [s]</td><td class="r">5,38</td><td class="r">10,78</td><td class="r">5,36 <span class="muted">(P=1: 28,24)</span></td><td class="r">75,57</td></tr>
+        <tr><td><b>Czas Java / Rust</b></td><td>×1,06</td><td>×2,03</td><td>×1,44 <span class="muted">(P=1: ×1,38)</span></td><td>×1,09</td></tr>
+        <tr><td>Peak RSS Java [MB]</td><td class="j">138</td><td class="j">2068</td><td class="j">294</td><td class="j">351</td></tr>
+        <tr><td>Peak RSS Rust [MB]</td><td class="r">51,7</td><td class="r">485</td><td class="r">23,1</td><td class="r">6,5</td></tr>
+        <tr><td><b>RSS Java / Rust</b></td><td>×2,7</td><td>×4,3</td><td>×12,8</td><td>×53,7</td></tr>
+        <tr><td>Pauzy GC (Java)</td><td>0</td><td>134 · med. 0,58 ms</td><td>3 · śr. 1,83 ms</td><td>146 · śr. 0,52 ms</td></tr>
+        <tr><td>Inne</td><td>—</td><td>—</td><td>krok p50: <span class="java">39,3</span> / <span class="rust">27,5</span> ms<br>p99: <span class="java">51,1</span> / <span class="rust">37,6</span> ms</td><td>p50 = p99 = 0,2 µs<br>p99.9 = 0,4 µs (oba)</td></tr>
+      </tbody>
+    </table>
+    <div class="caption" style="margin-top:16px">Czas: mediana hyperfine (10 pomiarów). RSS: średnia szczytów z 5 przebiegów, MB = 1024² B (jak na wykresach).</div>
+  </div>
+</section>
+
+<script>
+// Page numbers: n/N
+(function () {
+  const slides = [...document.querySelectorAll('.slide')];
+  slides.forEach((s, i) => {
+    const el = document.createElement('div');
+    el.className = 'pagenum';
+    el.textContent = (i + 1) + '/' + slides.length;
+    s.appendChild(el);
+  });
+})();
+
+// Slide 3: schematic latency-over-time (illustration, not data)
+(function () {
+  const svg = document.getElementById('discord-chart');
+  const W = 1000, H = 470, x0 = 90, x1 = 980, y0 = 30, y1 = 390, minutes = 10;
+  const X = m => x0 + (x1 - x0) * m / minutes;
+  let seed = 7;
+  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const go = [], rust = [];
+  for (let i = 0; i <= 500; i++) {
+    const m = minutes * i / 500;
+    const phase = m % 2;
+    const spike = phase > 1.9 ? Math.exp(-Math.pow((phase - 1.95) / 0.02, 2)) * 230 : 0;
+    go.push([X(m), y1 - 70 - rnd() * 16 - spike]);
+    rust.push([X(m), y1 - 45 - rnd() * 8]);
+  }
+  const path = pts => 'M' + pts.map(p => p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' L');
+  let ticks = '';
+  for (let m = 0; m <= minutes; m += 2) {
+    ticks += `<line x1="${X(m)}" y1="${y0}" x2="${X(m)}" y2="${y1}" stroke="#e5e9ef" stroke-width="2"/>` +
+             `<text x="${X(m)}" y="${y1 + 40}" text-anchor="middle" font-size="28" fill="#5b6878">${m} min</text>`;
+  }
+  svg.innerHTML = ticks +
+    `<line x1="${x0}" y1="${y1}" x2="${x1}" y2="${y1}" stroke="#1d2733" stroke-width="3"/>` +
+    `<line x1="${x0}" y1="${y0}" x2="${x0}" y2="${y1}" stroke="#1d2733" stroke-width="3"/>` +
+    `<text x="40" y="${(y0 + y1) / 2}" transform="rotate(-90 40 ${(y0 + y1) / 2})" text-anchor="middle" font-size="28" fill="#5b6878">latencja</text>` +
+    `<path d="${path(go)}" fill="none" stroke="#555" stroke-width="3.5"/>` +
+    `<path d="${path(rust)}" fill="none" stroke="#348ABD" stroke-width="4"/>` +
+    `<g font-size="30" font-weight="700"><rect x="${x0 + 30}" y="${y0 + 6}" width="28" height="8" fill="#555"/><text x="${x0 + 70}" y="${y0 + 20}" fill="#555">Go</text>` +
+    `<rect x="${x0 + 150}" y="${y0 + 6}" width="28" height="8" fill="#348ABD"/><text x="${x0 + 190}" y="${y0 + 20}" fill="#348ABD">Rust</text></g>` +
+    `<text x="${X(5)}" y="${H - 4}" text-anchor="middle" font-size="26" fill="#5b6878">czas</text>`;
+})();
+</script>
+</body>
+</html>
