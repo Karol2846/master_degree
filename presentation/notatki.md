@@ -135,8 +135,9 @@ Wniosek: język nie zmienia skalowania, tylko punkt startu.
 
 **25. Czas kroku (1:00)**
 Spodziewałem się, że pauza GC w jednym wątku przez barierę zatrzyma wszystkie i wydłuży ogon czasu kroku. Tak się nie stało.
-W pętli są tylko 2 pauzy po około 1,4 ms na 200 kroków po około 39 ms, a skoki czasu kroku Javy nie pokrywają się z pauzami.
-Java jest wolniejsza równomiernie (mediana 39 vs 27,5 ms). Najprawdopodobniej wynika to z układu danych: tablica referencji do obiektów i boxing w listach komórek oznaczają skoki po pamięci.
+Wykres pokazuje P = 12, jeden z przebiegów z monitorem RSS. W pętli są tylko 2 pauzy po około 1,4 ms na 200 kroków po około 29 ms, a skoki czasu kroku nie pokrywają się z pauzami.
+Garb w krokach 46–60 jest w Ruście, nie w Javie. Takie kilkukrokowe spowolnienia trafiają losowo w oba języki, i tylko gdy wątków jest co najmniej tyle co rdzeni: system zabiera rdzeń jednemu wątkowi, a bariera zatrzymuje resztę. To nie GC ani JIT, bo Rust ma je tak samo.
+Java jest wolniejsza równomiernie (mediana 28,7 vs 21,3 ms). Najprawdopodobniej wynika to z układu danych: tablica referencji do obiektów i boxing w listach komórek oznaczają skoki po pamięci.
 Uczciwie: nie używałem profilera, więc to interpretacja wsparta tym, że różnica siedzi w fazie liczenia sił.
 
 ## S4: pamięć / IoT (3:05)

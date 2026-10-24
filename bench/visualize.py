@@ -895,8 +895,10 @@ def chart_step_time_timeline(config, formats):
             continue
         java_entry = steps.get("java", {}).get(str(p), {})
         rust_entry = steps.get("rust", {}).get(str(p), {})
-        # Java from the GC-logged run (pauses can be aligned), Rust from the last hyperfine run.
-        java_run = java_entry.get("gc_run")
+        # Both lines from the last hyperfine run. GC logging is off there, so pauses come from the
+        # separate GC-logged Java run, placed at the step in which they happened in that run.
+        java_run = java_entry.get("timing_run")
+        java_gc_run = java_entry.get("gc_run")
         rust_run = rust_entry.get("timing_run")
         if not (java_run and rust_run):
             continue
@@ -914,7 +916,8 @@ def chart_step_time_timeline(config, formats):
             ax.plot(np.arange(1, len(step_ms) + 1), step_ms, color=color, linewidth=1.2, label=name)
 
         gc_path = results_path(config, "parsed", f"gc_pauses_{scenario_id}_p{p}.json")
-        gc_xs, gc_ms = gc_pauses_on_steps(load_json(gc_path), java_run) if gc_path.exists() else ([], [])
+        gc_xs, gc_ms = (gc_pauses_on_steps(load_json(gc_path), java_gc_run)
+                        if gc_path.exists() and java_gc_run else ([], []))
         for gx in gc_xs:
             ax.axvline(gx, color=JAVA_COLOR, linestyle=":", linewidth=0.8, alpha=0.5)
         if gc_xs:
@@ -926,7 +929,7 @@ def chart_step_time_timeline(config, formats):
         ax.set_title(f"Step Time Timeline (P = {p}): {scenario_label(scenario_id)}")
         ax.legend(loc="upper right")
         ax_gc.set_ylabel("G1 pause [ms]")
-        ax_gc.set_xlabel(f"Step  ({len(gc_xs)} Java GC pauses during the loop)")
+        ax_gc.set_xlabel(f"Step  ({len(gc_xs)} Java GC pauses during the loop, from a separate GC-logged run)")
         fig.tight_layout(h_pad=0.4)
         save_chart(fig, chart_dir(config, scenario_id) / "step_time_timeline.pdf", formats)
 

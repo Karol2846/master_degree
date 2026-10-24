@@ -8,6 +8,7 @@ Writes to presentation/assets/:
     ram_s{1,2,4}.png   RSS over time (all runs faded, median run bold), same plot as bench/visualize.py
     exec_s{1,2,4}.png  execution time, hyperfine median (error bar = stddev)
     tail_chart.png     S4: number of events in the latency tail (>= 0.1 / 0.4 / 0.8 ms)
+    step_timeline_s3.png  S3: step time at P = 12 (resource-monitor run 1), slowdown hitting Rust
     summary.png        Java/Rust ratio of execution time and peak RSS for all 4 scenarios
 
 The per-scenario RAM/time PNGs under results/charts/scenario{1,2,4}/ predate the current data
@@ -28,7 +29,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 from matplotlib.ticker import FuncFormatter  # noqa: E402
 
-from visualize import JAVA_COLOR, RUST_COLOR, plot_rss_runs, setup_style  # noqa: E402
+from visualize import JAVA_COLOR, RUST_COLOR, gc_pauses_on_steps, plot_rss_runs, setup_style  # noqa: E402
 
 PARSED = ROOT / "results" / "parsed"
 ASSETS = ROOT / "presentation" / "assets"
@@ -135,6 +136,47 @@ def chart_tail():
     save(fig, "tail_chart.png")
 
 
+def chart_step_timeline():
+    """S3 step time at P = 12 from resource-monitor run 1: a case where the multi-step slowdown hits Rust.
+    GC pauses come from the separate GC-logged Java run. Drawn in the bench/visualize.py style
+    (normal font sizes), the same layout as results/charts/scenario3/step_time_timeline.png."""
+    p, run_id = 12, 1
+    raw = ROOT / "results" / "raw" / "steps"
+    runs = [(json.loads((raw / f"scenario3_{lang}_p{p}_run{run_id}.json").read_text()), color, name)
+            for lang, color, name in [("java", JAVA_COLOR, "Java 25"), ("rust", RUST_COLOR, "Rust")]]
+    java_gc_run = load("steps_scenario3.json")["java"][str(p)]["gc_run"]
+    gc_xs, gc_ms = gc_pauses_on_steps(load(f"gc_pauses_scenario3_p{p}.json"), java_gc_run)
+
+    with plt.rc_context():
+        setup_style()
+        fig, (ax, ax_gc) = plt.subplots(2, 1, figsize=(10, 5.5), sharex=True,
+                                        gridspec_kw={"height_ratios": [3, 1]})
+        warmup = java_gc_run["discarded_steps"]
+        ax.axvspan(0.5, warmup + 0.5, color="0.5", alpha=0.12, linewidth=0,
+                   label=f"Excluded from statistics (first {warmup} steps)")
+        ax_gc.axvspan(0.5, warmup + 0.5, color="0.5", alpha=0.12, linewidth=0)
+
+        for run, color, name in runs:
+            step_ms = [v / 1e6 for v in run["step_ns"]]
+            ax.plot(np.arange(1, len(step_ms) + 1), step_ms, color=color, linewidth=1.2, label=name)
+
+        for gx in gc_xs:
+            ax.axvline(gx, color=JAVA_COLOR, linestyle=":", linewidth=0.8, alpha=0.5)
+        ax_gc.vlines(gc_xs, 0, gc_ms, color=JAVA_COLOR, linewidth=1.5)
+        ax_gc.plot(gc_xs, gc_ms, "o", color=JAVA_COLOR, markersize=4)
+        ax_gc.set_ylim(bottom=0)
+
+        ax.set_ylabel("Step time [ms]")
+        ax.set_title(f"Step Time Timeline (P = {p}): Concurrency - Particle Sim (108k)")
+        ax.legend(loc="upper right")
+        ax_gc.set_ylabel("G1 pause [ms]")
+        ax_gc.set_xlabel(f"Step  ({len(gc_xs)} Java GC pauses during the loop, from a separate GC-logged run)")
+        fig.tight_layout(h_pad=0.4)
+        fig.savefig(ASSETS / "step_timeline_s3.png", dpi=300)
+        plt.close(fig)
+    print(f"  Saved: {(ASSETS / 'step_timeline_s3.png').relative_to(ROOT)}")
+
+
 def chart_summary(timing, resources):
     mib = 1024 ** 2
     t, r = timing, resources
@@ -189,6 +231,7 @@ def main():
     chart_ram(resources)
     chart_exec(timing)
     chart_tail()
+    chart_step_timeline()
     chart_summary(timing, resources)
 
 
