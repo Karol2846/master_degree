@@ -21,80 +21,38 @@
 
 Java i Rust zarządzają pamięcią dynamiczną na dwa różne sposoby.
 W Javie nieosiągalne obiekty zwalnia odśmiecacz pamięci (ang. \textit{garbage collector}, GC) działający w maszynie wirtualnej.
-W Ruście czas życia każdej wartości wynika z reguł własności (ang. \textit{ownership}), które sprawdza kompilator, a pamięć jest zwalniana w chwili, gdy właściciel wychodzi poza swój zakres~\cite{matsakis2014,klabnik-rustbook}.
-Prace porównujące oba podejścia pytają zwykle o trzy rzeczy: ile GC kosztuje w czasie i pamięci, o ile jego pauzy wydłużają czas odpowiedzi programu i czy model własności te koszty usuwa, czy tylko przenosi gdzie indziej.
+W Ruście kompilator sprawdza reguły własności (ang. \textit{ownership}): każda wartość ma jednego właściciela, a pamięć jest zwalniana, gdy właściciel wychodzi poza swój zakres~\cite{klabnik-rustbook}.
+Porównanie obu podejść sprowadza się do trzech pytań: ile GC kosztuje w czasie wykonania, o ile jego pauzy wydłużają czas odpowiedzi programu i czy model własności eliminuje te koszty, czy jedynie zmienia ich postać.
 
-\subsection{Koszt odśmiecania}
-
-Hertz i Berger~\cite{hertz2005} porównali kolektory z idealizowanym zarządcą pamięci, który na podstawie zarejestrowanego wcześniej śladu wykonania zwalnia każdy obiekt tuż przed tym, jak staje się nieosiągalny.
-Kolektor generacyjny dorównał mu dopiero przy pięciokrotnie większej stercie.
-Przy stercie trzykrotnie większej był średnio o 17\% wolniejszy, a przy dwukrotnie większej o blisko 70\%.
-To jedno z niewielu badań, w których oba modele uruchomiono na tych samych programach, ale ma dwa ograniczenia.
-Zarządca odniesienia zwalnia pamięć najwcześniej, jak się da, czego nie osiąga ani ręczne \texttt{free}, ani model własności.
-Pomiary wykonano też na badawczej maszynie wirtualnej Jikes RVM, a nie na produkcyjnej JVM.
-Z tych liczb wynika więc kształt kompromisu między czasem a pamięcią, ale nie narzut, jakiego można się spodziewać w dzisiejszym OpenJDK.
-
-Rok wcześniej Blackburn, Cheng i McKinley~\cite{blackburn2004} doszli do wniosku pozornie przeciwnego.
-Kolektor generacyjny może przyspieszyć sam program, bo alokacja w ciągłym obszarze i kopiowanie młodych obiektów poprawiają lokalność odwołań do pamięci podręcznej.
-Autorzy wprost polemizują z przekonaniem, że najlepszy GC to brak GC.
-Sprzeczności między tymi pracami nie ma.
-Hertz i Berger mierzą koszt całkowity przy ograniczonej stercie, a Blackburn i in. pokazują, że część tego kosztu wraca w postaci lepszej lokalności.
-W programach, które tworzą dużo krótko żyjących obiektów, Java nie musi więc przegrywać z Rustem na czasie wykonania, ale powinna zużywać więcej pamięci.
-
-Nowsze dane podają Cai i in.~\cite{cai2022}, którzy zbadali pięć produkcyjnych kolektorów OpenJDK 17.
+Cai i in.~\cite{cai2022} zbadali pięć produkcyjnych kolektorów OpenJDK 17.
 Od czasu wykonania odjęli te koszty GC, które da się zmierzyć bezpośrednio, a najmniejszy z otrzymanych wyników uznali za koszt samej aplikacji.
 W ten sposób wyznaczyli dolną granicę narzutu GC.
 Przy umiarkowanym rozmiarze sterty kolektory wydłużały czas wykonania co najmniej o 7--82\%, a liczbę cykli procesora o 6--92\%.
-W odróżnieniu od dwóch poprzednich prac ta dotyczy kolektorów, których używa się w praktyce, a podanie dolnej granicy zamiast jednej wartości chroni przed zawyżeniem wyniku.
-Rozrzut od 7 do 82\% oznacza, że koszt GC zależy głównie od programu i rozmiaru sterty.
-Dlatego w niniejszej pracy porównano kilka scenariuszy o różnym profilu alokacji.
-
-\subsection{Pauzy i opóźnienia}
+Podanie dolnej granicy zamiast jednej wartości chroni przed zawyżeniem wyniku, a badane kolektory są tymi, których używa się w praktyce.
+Praca nie porównuje jednak Javy z językiem bez GC, więc nie mówi, ile Java traci względem Rusta.
+Rozrzut od 7 do 82\% pokazuje też, że koszt GC silnie zależy od programu, dlatego w niniejszej pracy porównano kilka scenariuszy o różnym profilu alokacji.
 
 Kolektory zatrzymujące wszystkie wątki aplikacji (ang. \textit{stop-the-world}) niewiele zmieniają w średnim czasie odpowiedzi, ale wydłużają ogon jego rozkładu.
-G1, domyślny kolektor OpenJDK od wersji 9~\cite{jep248}, ma godzić przepustowość z krótkimi pauzami~\cite{detlefs2004}.
-Dzieli stertę na regiony i w każdym cyklu wybiera ich tyle, żeby z dużym prawdopodobieństwem zmieścić się w zadanym czasie pauzy (domyślnie 200 ms~\cite{oracle-g1-25}).
-G1 nie gwarantuje tego czasu, bo długość pauzy zależy od liczby żywych obiektów, które trzeba skopiować.
-
+Domyślny kolektor OpenJDK, G1, dzieli stertę na regiony i w każdym cyklu wybiera ich tyle, żeby zmieścić się w zadanym czasie pauzy, domyślnie 200 ms~\cite{oracle-g1-25}.
+Nie gwarantuje tego czasu, bo długość pauzy zależy od liczby żywych obiektów, które trzeba skopiować.
 Shenandoah i ZGC skracają pauzy, wykonując większość pracy współbieżnie z aplikacją.
 Według Cai i in.~\cite{cai2022} te nowsze kolektory są wyraźnie droższe od starszych, a w części testów dawały gorsze opóźnienia aplikacji niż kolektory \textit{stop-the-world}.
 Zhao, Blackburn i McKinley~\cite{zhao2022} zaproponowali kolektor LXR, który w wyszukiwarce Lucene przy ciasnej stercie miał 10-krotnie niższy 99,99. percentyl opóźnienia i 7,8-krotnie wyższą przepustowość niż Shenandoah.
-Z obu prac wynika, że krótsze pauzy nie przekładają się automatycznie na niższe opóźnienia aplikacji.
-Kolektory trzeba więc porównywać na wysokich percentylach rozkładu opóźnień.
-LXR jest przy tym prototypem badawczym zbudowanym na platformie MMTk i nie ma go w standardowym JDK.
+LXR jest jednak prototypem badawczym zbudowanym na platformie MMTk i nie ma go w standardowym JDK.
+Z obu prac wynika, że krótsze pauzy nie przekładają się automatycznie na niższe opóźnienia aplikacji, więc kolektory trzeba porównywać na wysokich percentylach rozkładu opóźnień.
 
-Jako przykład z praktyki często podaje się wpis inżyniera firmy Discord~\cite{howarth2020}.
-Firma przepisała usługę z Go na Rust, bo mniej więcej co dwie minuty pojawiały się w niej skoki opóźnień, które autor wiąże z wymuszanymi przebiegami GC.
-Po migracji skoki zniknęły, a zużycie procesora i pamięci spadło.
-Jako dowód to źródło jest słabe.
-Opisuje jeden system, nie podaje pełnej metodyki pomiaru i dotyczy środowiska uruchomieniowego Go 1.9, a nie JVM.
-Porównuje też dwie różne implementacje, więc poprawy nie można przypisać wyłącznie sposobowi zarządzania pamięcią.
-
-\subsection{Koszty modelu własności}
-
-Kompilator Rusta statycznie sprawdza, czy każda wartość ma dokładnie jednego właściciela i czy żadna referencja (pożyczenie, ang. \textit{borrow}) nie żyje dłużej niż wartość, do której się odnosi~\cite{matsakis2014,klabnik-rustbook}.
-W projekcie RustBelt~\cite{jung2018} formalnie udowodniono poprawność tych reguł dla istotnego podzbioru języka, także dla bibliotek, które wewnętrznie korzystają z kodu \texttt{unsafe}.
-Program w Ruście nie ma więc osobnej fazy odśmiecania, a pamięć jest zwalniana w miejscu wynikającym ze struktury kodu.
-
-Bezpieczeństwo pamięci w Ruście też ma jednak swój koszt.
+Program w Ruście nie ma osobnej fazy odśmiecania, bo miejsce zwolnienia pamięci wynika ze struktury kodu~\cite{klabnik-rustbook}.
+Bezpieczeństwo pamięci kosztuje jednak także tutaj.
 Zhang i in.~\cite{zhang2022} stwierdzili, że badane programy w Ruście były średnio 1,77 raza wolniejsze od odpowiedników w C, a 52,7\% tego narzutu przypadało na sprawdzanie zakresów indeksów.
 Po wyłączeniu kontroli wykonywanych w czasie działania programu różnica praktycznie znikała.
-Badanie obejmuje małe programy testowe i porównuje Rust z C, a nie z językiem z GC.
-Pokazuje jednak, że Rust płaci za bezpieczeństwo pamięci w czasie działania programu, tyle że w innej postaci niż Java.
-Drugi koszt pojawia się przy współdzielonych strukturach danych.
-Gdy jeden właściciel nie wystarcza, programista używa liczników referencji (\texttt{Rc}, \texttt{Arc}), które obciążają każde skopiowanie wskaźnika.
-Zwolnienie dużej struktury może wtedy wywołać kaskadę dealokacji trwającą proporcjonalnie do jej rozmiaru~\cite{jones2023}.
-Także w Ruście pojedyncza operacja może się więc wydłużyć, ale moment, w którym to nastąpi, wynika z kodu, a nie z decyzji środowiska uruchomieniowego.
+Badanie obejmuje małe programy testowe i porównuje Rust z C, nie z językiem z GC.
+Pokazuje jednak, że bezpieczeństwo pamięci w Ruście również wiąże się z narzutem w czasie wykonania, choć ma on inną postać niż w Javie.
 
-\subsection{Wnioski}
-
-Kompromis między czasem a pamięcią w językach z GC i jego zależność od rozmiaru sterty są dobrze zbadane~\cite{hertz2005,cai2022}.
-W badaniach własnych należy więc oczekiwać, że Java zużyje więcej pamięci niż Rust, niezależnie od wyników czasowych.
-Mniej jasny jest wpływ GC na ogon rozkładu opóźnień.
-Wyniki zależą od kolektora, rozmiaru sterty i obciążenia~\cite{cai2022,zhao2022}, a przewagę modelu własności w tym zakresie potwierdzają głównie opisy pojedynczych wdrożeń~\cite{howarth2020}.
-W przeanalizowanej literaturze nie znaleziono natomiast badania, które porównywałoby rozkład opóźnień programów w Javie z domyślnym kolektorem współczesnego JDK i w Ruście, implementujących ten sam algorytm, z pauzami GC odczytanymi z logów maszyny wirtualnej.
-Prace o GC porównują kolektory w obrębie JVM, a prace o wydajności Rusta odnoszą go głównie do C i C++.
-Tej luki dotyczą scenariusze badawcze dotyczące zarządzania pamięcią i współbieżności, opisane w rozdziale~\ref{chap:metoda}.
+Narzut GC w czasie wykonania jest więc dobrze zmierzony dla współczesnych kolektorów OpenJDK~\cite{cai2022}.
+Mniej jasny jest wpływ GC na ogon rozkładu opóźnień, bo wyniki zależą od kolektora, rozmiaru sterty i obciążenia~\cite{cai2022,zhao2022}.
+W przeanalizowanej literaturze nie znaleziono badania, które porównywałoby rozkład opóźnień programów w Javie z domyślnym kolektorem współczesnego JDK i w Ruście, implementujących ten sam algorytm, z pauzami GC odczytanymi z logów maszyny wirtualnej.
+Prace o GC porównują kolektory w obrębie JVM, a prace o wydajności Rusta odnoszą go głównie do C.
+Tej luki dotyczą scenariusze badawcze związane z zarządzaniem pamięcią i współbieżnością, opisane w rozdziale~\ref{chap:metoda}.
 
 \section{Współbieżność i skalowalność obliczeń równoległych}
 
