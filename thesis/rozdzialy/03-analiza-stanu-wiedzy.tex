@@ -9,25 +9,187 @@
 % Podrozdziały poniżej to propozycja — zmień według potrzeb.
 
 \section{Metody porównywania języków programowania}
+\label{sec:metody-porownywania}
 
-% TODO
+Wydajność języków programowania porównuje się zwykle za pośrednictwem konkretnych programów, kompilatorów i środowisk uruchomieniowych.
+Wynik porównania powinien zleżeć od tego, w jaki sposób powstały programy i na ile są sobie równoważne.
+W~przeanalizowanych pracach stosowano trzy podejścia: zestaw programów testowych pisanych niezależnie w wielu językach przez równych autorów, idiomatyczne aplikacje napisane od podstaw przez jednego autora oraz statystyczną analizę danych z wielu repozytoriów kodu.
+
+Pereira i in.~\cite{pereira2021} zmierzyli czas wykonania, zajętość pamięci i zużycie energii programów z Computer Language Benchmarks Game (CLBG) w 27 językach i zestawili je w rankingu.
+CLBG zawiera krótkie programy - poniżej 300 linii, napisane przez różnych autorów, programy były zoptymalizowane pod konkretne zastosowanie~\cite{vankempen2025}.
+Van Kempen i in.~\cite{vankempen2025} wykazali, że implementacje tego samego zadania w różnych językach różni się stopniem równoległości i użyciem bibliotek.
+W zadaniu regex-redux wersja w C++ była 8,9 raza wolniejsza od wersji w C, ponieważ korzystała z biblioteki Boost zamiast PCRE.
+Wersja impleemntacji mandelbrot w TypeScripcie działała 21 razy dłużej niż w JavaScripcie, bo była zaimplementowana sekwencyjnie, podczas gdy wersja w JavaScripcie używała 28 rdzeni.
+Po ujednoliceniu implementacji, autorzy nie stwierdzili istotnego wpływu implementacji języka na zużycie energii - poza wpływem wynikającym z samego czasu wykonania.
+Analiza dotyczy przede wszystkim zużycia energii, ale jej wyniki pokazują, że część różnic przypisywanych w rankingach samym językom pochodzi w istocie z różnic w implementacji programów.
+Wyniki Pereiry i in. dla Javy i Rusta omówiono w podrozdziale~\ref{sec:porownania-rust}.
+
+Inne podejście zastosowali Lion i in.~\cite{lion2022}, którzy napisali od początku 6 aplikacji w C++, Go, Javie, JavaScripcie i Pythonie, z wariantów utworzyli 12 testów (LangBench).
+Implementacje w poszczególnych językach mają te same algorytmy i ten sam przepływ danych, autorzy pisali kod idiomatyczny dla każdego języka.
+OpenJDK był średnio 1,43 raza wolniejszy od C++ i zajmował średnio 3,38 raza więcej pamięci.
+Jednak w 3 z 12 testów Go i OpenJDK działały szybciej niż C++.
+Podejście z~\cite{lion2022} zapewnia większą równoważność programów niż CLBG, ale wymaga biegłości we wszystkich badanych językach.
+Program sudoku w C++ zajmował 3,46 MB pamięci, a po zastosowaniu optymalizacji podczas kompilacji - już 1,33 MB. LangBench nie obejmuje Rusta i nie pozwala odnieść tych wyników do języka bez GC.
+
+Trzecie podejście polega na statystycznej analizie danych z istniejących projektów.
+Furia, Torkar i Feldt~\cite{furia2022} ponownie przeanalizowali modelami bayesowskimi zbiór projektów w serwisie GitHub.
+Pierwotnie na tym zbiorze badano związek języka programowania z liczbą błędów.
+Stwierdzili, że wpływ języka zależy od innych warunków, a obserwowane różnice dotyczą konkretnych projktów i nie da się ich przypisaćk onkretnemu językowi.
+Według autorów nie ma prostej i ogólnej odpowiedzi na pytanie, które języki są bardziej podatne na błędy.
+A przynajmniej na podstawie tych dnaych.
+Badanie dotyczy jakości kodu, ilustruje jednak ograniczenia danych obserwacyjnych, w których język jest użyty w konkretnym projekcie, zespole i domenie
+
+Metody porównywania języków są dobrze znane, natomiast interpretacja wyników badań pozostaje sporna.
+Rankingi oparte na CLBG są szeroko cytowane~\cite{pereira2021}, mimo że porównywane w nich programy nie są równoważne~\cite{vankempen2025}.
+Zestawy aplikacji pisanych od podstaw lepiej kontrolują równoważność implementacji~\cite{lion2022}, ale są nieliczne, a analizowany zestaw nie obejmuje Rusta.
+Javę i Rusta na programach napisanych według jednej specyfikacji porównali Zheng i Luo~\cite{zheng2026}, niestety wyłącznie na modelach obliczeniowych, z pomiarem czasu wewnątrz procesu - co wpływało na wyniki badń (podrozdział~\ref{sec:porownania-rust}).
+W przeanalizowanej literaturze nie znaleziono takiego porównania dla programów obciążających operacje wejścia-wyjścia ani porównania obejmującego czas całego procesu.
 
 \section{Pomiar wydajności programów w środowiskach z kompilacją JIT}
+\label{sec:pomiar-jit}
 
-% TODO
+Rust jest językiem kompilowanym przed uruchomieniem (ang. \textit{ahead-of-time}, AOT), więc procesor od początku uruchomienia wykonuje gotowy kod maszynowy~\cite{klabnik-rustbook}.
+Maszyna wirtualna javy (JVM) najpierw interpretuje kod bajtowy Javy i zbiera profile wykonania metod, najczęściej wykonywane metody tłumaczy na kod maszynowy kompilator JIT (ang. \textit{just-in-time})~\cite{jep515}.
+Do zakończenia tej fazy, nazywanej rozgrzewaniem (ang. \textit{warmup}), program działa wolniej~\cite{jep515}.
+Wynik porównania zależy więc od sposobu pomiaru - czy pomiar obejmuje fazę rozgrzewnia JVM, czy nie.
+
+Przy pomiarze w stanie ustalonym (ang. \textit{steady state}) odrzuca się pierwsze iteracje testu, a test powtarza się w kilku osobnych procesach JVM.
+W narzędziu JMH (Java Microbenchmark Harness) liczbę iteracji rozgrzewających i procesów ustala autor testu~\cite{traini2023}.
+Traini i in.~\cite{traini2023} sprawdzili, czy konfiguracja obejmuje całe rozgrzewanie, na 586 ustawieniach JMH z 30 projektów.
+Każdy test wykonali w 10 procesach trwających co najmniej 6 minut, początek stanu ustalonego wyznaczali automatycznie.
+Stanu ustalonego nie osiągnęło 10,9\% procesów, a w 43,5\% testów osiągnęła go tylko część procesów.
+Konfiguracje przyjęte przez autorów trafnie wskazywały koniec rozgrzewania tylko w 19\% procesów.
+Próba jest statystycznie znacząca, ale obejmuje wyłącznie mikrobenchmarki uruchamiane w JDK 8 i 11 na jednym serwerze, a według autorów inne wersje JVM mogą dać inne wyniki.
+
+Osobnym problemem jest wybór mierzonej fazy działania programu.
+Van Kempen i in.~\cite{vankempen2025} uruchamiali programy CLBG w Javie wielokrotnie w jednym procesie.
+Pierwsza iteracja programu mandelbrot zawsze trwała 2,7 raza dłużej niż średnia z 15 iteracji, w innych programach ta tendencja równiez była widoczna.
+Autorzy łączą tę różnicę z kompilacją JIT, interpretacją kodu bajtowego oraz inicjalizacją pamięci i GC.
+Blackburn i in.~\cite{blackburn2025} opisując zestaw DaCapo Chopin, odróżniają pomiar pierwszej iteracji, z ładowaniem klas i kompilacją JIT, od pomiaru na rogrzannym JVM.
+Według autorów wybór jednej z tych faz powinien być dokonany biorą pod uwagę tezy, jakie badanie ma uzasadnić.
+W ich badaniu z OpenJDK 21 wystarczało 10 uruchomień, aby w 95\% uzyskać rozgrzany JVM.
+
+Nowe wersje JDK przenoszą część kosztów startu i rozgrzewania do uruchomienia treningowego.
+JEP 483 wprowadził w JDK 24 pamięć podręczną AOT z klasami wczytanymi i połączonymi w trakcie takiego uruchomienia, co pozwoliło skrócić start aplikacji Spring PetClinic z 4,486 s do 2,604 s~\cite{jep483}.
+JEP 515 dodał w JDK 25 zapisywanie w pamięci profili metod, dzięki czemu kompilator JIT może generować kod maszynowy zaraz po starcie~\cite{jep515}.
+Wynik dla PetClinic jest oczywiście pojedynczym przykładem, bez informacji o szerszym znaczeniu statystycznym.
+Pokazuje jednak, że podział czasu programu w Javie na start, rozgrzewanie i stan ustalony zależy od wersji i konfiguracji JDK.
+
+Rozgrzewanie i brak gwarancji osiągnięcia stanu ustalonego są dobrze udokumentowane dla mikrobenchmarków Javy~\cite{traini2023}.
+Sporne pozostaje, którą fazę działania programu mierzyć, ponieważ zależy to od celu badania~\cite{blackburn2025}, a wybór ten zmienia wynik porównania języków~\cite{vankempen2025}.
 
 \section{Automatyczne odśmiecanie pamięci a model własności}
+\label{sec:gc-a-ownership}
 
-% TODO
+Java i Rust zarządzają pamięcią dynamiczną na dwa różne sposoby.
+W Javie niuzywane obiekty zwalnia odśmiecacz pamięci (ang. \textit{garbage collector}, GC) działający w JVM.
+W Ruście kompilator sprawdza reguły własności (ang. \textit{ownership}): każda wartość ma jednego właściciela, a pamięć jest zwalniana, gdy właściciel wychodzi poza swój zakres~\cite{klabnik-rustbook}.
+Porównanie obu podejść sprowadza się do trzech pytań: ile GC kosztuje w czasie wykonania, o ile jego pauzy wydłużają czas odpowiedzi programu i czy model własności eliminuje te koszty, czy jedynie zmienia ich postać.
+
+Cai i in.~\cite{cai2022} zbadali pięć produkcyjnych kolektorów OpenJDK 17.
+Od czasu wykonania odjęli koszty GC których nie da się zmierzyć bezpośrednio, a najmniejszy z nich uznali za koszt samej aplikacji.
+W ten sposób wyznaczyli dolną granicę narzutu GC.
+Przy umiarkowanym rozmiarze sterty GC wydłużał czas wykonania co najmniej o 7--82\%, a liczbę cykli procesora o 6--92\%.
+Praca porównuje Jave na różnych wersjach GC, nie da się stwierdzić ile java traci wzgledem języka bez GC, na przykład Rusta.
+Rozrzut między 7-82\% pokazuje, że koszt GC silnie zależy rodzaju programu.
+
+Odśmiecacze zatrzymujące wszystkie wątki aplikacji (ang. \textit{stop-the-world}) nie zmieniają średniego czasu odpowiedzi, wpływają tylko ogon rozkładu.
+Domyślny kolektor OpenJDK, G1, dzieli stertę na regiony i w każdym cyklu wybiera ich tyle, żeby zmieścić się w zadeklarowanym czasie pauzy - domyślnie 200 ms~\cite{oracle-g1-25}.
+Shenandoah i ZGC skracają pauzy, wykonując większość pracy współbieżnie z aplikacją~\cite{flood2016,jep333}.
+Według Cai i in.~\cite{cai2022} nowsze GC są wyraźnie droższe od starszych, a w części testów dawały gorsze opóźnienia niż kolektory \textit{stop-the-world}.
+Zhao, Blackburn i McKinley~\cite{zhao2022} zaproponowali kolektor LXR, który w wyszukiwarce Lucene przy małej stercie miał 10-krotnie niższy 99,99\. percentyl opóźnienia i 7,8-krotnie wyższą przepustowość niż Shenandoah.
+LXR jest dopiero prototypem badawczym zbudowanym na platformie MMTk i nie jest dostępny w standardowym JDK.
+Z obu prac wynika, że krótkie pauzy nie przekładają się automatycznie na mniejsze opóźnienia aplikacji, więc GC trzeba porównywać na wysokich percentylach rozkładu opóźnień.
+
+W Ruście nie występuje osobna faza odśmiecania, miejsce zwolnienia pamięci wynika ze struktury kodu~\cite{klabnik-rustbook}.
+Kosztem jest natomiast bezpieczeństwo pamięci.
+Zhang i in.~\cite{zhang2022} stwierdzili, że badane programy napisane w Ruście były średnio 1,77 raza wolniejsze niż odpowiedniki w C, znaczna część narzutu (52,7\%) przypadała na sprawdzanie zakresów indeksów.
+Przy wyłączonych kontrolach różnica praktycznie znikała.
+Badanie obejmuje małe programy testowe i porównuje Rust z C, nie z językiem z GC.
+Pokazuje jednak, że bezpieczeństwo pamięci w Ruście również wiąże się z narzutem w czasie wykonania, choć ma on inną postać niż w Javie.
+
+Z jednej strony narzut GC w czasie wykonania jest więc dobrze zmierzony dla współczesnych kolektorów OpenJDK~\cite{cai2022}.
+Z drugiej strony znacznie mniej jasny jest wpływ GC na ogon rozkładu opóźnień, bo wyniki zależą od kolektora, rozmiaru sterty i obciążenia~\cite{cai2022,zhao2022}.
+W przeanalizowanej literaturze nie znaleziono badania, które porównywałoby rozkład opóźnień programów w Javie z domyślnym kolektorem współczesnego JDK i w Ruście, implementujących ten sam algorytm, z pauzami GC odczytanymi z logów maszyny wirtualnej.
+Prace o GC porównują kolektory w obrębie JVM, z kolei prace o wydajności Rusta odnoszą go głównie do C.
 
 \section{Współbieżność i skalowalność obliczeń równoległych}
+\label{sec:wspolbieznosc}
 
-% TODO
+Program równoległy ze wspólną pamięcią powinien zachować spójność wspólnych danych i jednocześnie skracać czas obliczeń wraz ze wzrostem liczby rdzeni.
+Specyfikacja Javy definiuje wyścig danych (ang. \textit{data race}) jako dwa dostępy do tej samej zmiennej, z których co najmniej jeden jest zapisem, nieuporządkowane relacją \textit{happens-before}~\cite{oracle-jls-25}.
+Program bez wyścigów ma gwarancję sekwencyjnej spójności, a w programie z wyścigami możliwe są zachowania trudne do przewidzenia.
+Relację \textit{happens-before} tworzą między innymi klasy pakietu \texttt{java.util.concurrent}, na przykład działania wątku przed wywołaniem \texttt{CyclicBarrier.await} poprzedzają działania innych wątków po powrocie z tej metody~\cite{oracle-juc-25}.
+W Ruście wartość można przekazać do innego wątku tylko wtedy, gdy jej typ implementuje cechę \texttt{Send}, a współdzielić przez referencję, gdy implementuje cechę \texttt{Sync}~\cite{klabnik-rustbook}.
+Według autorów dokumentacji system typów i mechanizm pożyczania wykluczają w ten sposób wyścigi danych, choć nie chronią przed zakleszczeniami.
+Oba źródła opisują gwarancje języka i nie podają kosztu ich zapewnienia.
+
+Skalowalność ocenia się na podstawie przyspieszenia, czyli ilorazu czasu wykonania na jednym wątku i na $P$ wątkach, oraz efektywności, czyli przyspieszenia podzielonego przez $P$.
+Przyspieszenie ograniczają część sekwencyjna obliczeń (prawo Amdahla~\cite{amdahl1967}), oczekiwanie na barierze, nierówny przydział pracy i przepustowość pamięci.
+W Javie o rdzenie konkurują z wątkami aplikacji także wątki odśmiecacza G1, których liczba zależy od liczby dostępnych procesorów~\cite{oracle-g1-25}.
+Thompson i in.~\cite{thompson2022} opisali algorytmy równoległe programu dynamiki molekularnej LAMMPS, w tym dekompozycję przestrzenną, rozproszone listy sąsiadów i dynamiczne równoważenie obciążenia, ale artykuł nie porównuje języków programowania.
+
+Costanzo i in.~\cite{costanzo2021} porównali Rust z C na problemie N ciał na serwerze ze 112 wątkami sprzętowymi, zrównoleglając wersję w Ruście biblioteką Rayon, a wersję w C dyrektywami OpenMP.
+W podwójnej precyzji obie wersje miały praktycznie tę samą wydajność, a w pojedynczej wersja w C była szybsza najwyżej 1,18 raza.
+Wersja w Ruście korzystała jednak z zewnętrznych bibliotek i niestabilnych funkcji kompilatora, a wydajność podano tylko dla 56 i 112 wątków, bez krzywej przyspieszenia.
+Diehl i in.~\cite{diehl2024} napisali równoległy solwer jednowymiarowego równania przewodnictwa ciepła w dziesięciu językach, w tym w Javie i Ruście, i mierzyli czas do 40 rdzeni.
+Wersja w Ruście, napisana bez bloków \texttt{unsafe}, znalazła się wśród najszybszych razem z C++, a Java wśród języków o pośredniej wydajności.
+Wyniki przedstawiono tylko na wykresach z dopasowanymi krzywymi, a dopasowanie dla Javy na procesorze Intel miało współczynnik $R^2$ równy 0,03.
+Autorzy przyznają też, że ich biegłość w poszczególnych językach była różna, a wątki synchronizowano w Javie kolejką blokującą, w Ruście kanałami.
+
+Gwarancje bezpieczeństwa współbieżności obu języków są dobrze opisane~\cite{oracle-jls-25,klabnik-rustbook}, a wydajność równoległą Rusta porównywano głównie z C i C++~\cite{costanzo2021,diehl2024}.
+Sporne pozostaje, jaka część przewagi Rusta nad Javą w pracy Diehla i in.~\cite{diehl2024} wynika z samych języków, ponieważ obie wersje synchronizowano innymi mechanizmami, a autorzy znali poszczególne języki w różnym stopniu.
+W przeanalizowanej literaturze nie znaleziono porównania skalowalności Javy i Rusta na tym samym algorytmie dynamiki molekularnej, z tym samym podziałem pracy i tą samą barierą z biblioteki standardowej, obejmującego oprócz czasu całkowitego także rozkład czasu pojedynczego kroku.
 
 \section{Dotychczasowe porównania języka Rust z innymi językami}
+\label{sec:porownania-rust}
 
-% TODO
+Rust porównuje się z innymi językami głównie pod względem czasu wykonania, zajętości pamięci i zużycia energii.
+W przeanalizowanej literaturze bezpośrednich porównań z Javą jest niewiele, a ich wyniki zależą od sposobu pomiaru programu działającego w maszynie wirtualnej.
+
+Oba języki obejmuje ranking Pereiry i in.~\cite{pereira2021}, oparty na programach z CLBG omówionych w podrozdziale~\ref{sec:metody-porownywania}.
+W wynikach znormalizowanych względem najlepszego języka Rust uzyskał 1,04 dla czasu wykonania, 1,03 dla energii i 1,54 dla pamięci szczytowej, a Java odpowiednio 1,89, 1,98 i 6,01.
+Autorzy mierzyli cały proces, więc wynik Javy obejmuje start maszyny wirtualnej i okres, w którym kod nie jest jeszcze skompilowany przez JIT.
+Każdy program uruchomiono 10 razy w systemie Ubuntu 16.10 z jądrem 4.8, a wersje kompilatorów i maszyn wirtualnych autorzy przyjęli za dokumentacją CLBG z okresu badania.
+Ponadto programy CLBG nie są równoważne, co wykazali van Kempen i in.~\cite{vankempen2025}, dlatego różnicy między wartościami 1,04 i 1,89 nie można w całości przypisać językom.
+Wartość 6,01 dotyczy pamięci szczytowej krótkich programów i w przypadku Javy obejmuje także stały narzut maszyny wirtualnej.
+
+Zheng i Luo~\cite{zheng2026} porównali dziesięć języków, w tym Javę i Rusta, na sześciu modelach z biologii matematycznej, a w obu tych językach zaimplementowali ręcznie te same metody numeryczne.
+Wersja w Ruście była szybsza od wersji w Javie we wszystkich modelach, od ok. 1,4 raza w modelu reakcji z dyfuzją do ok. 12 razy przy całkowaniu równań różniczkowych zwyczajnych.
+Programy natywne, w tym w Ruście, zajmowały od 1,7 do 8,6 MB pamięci szczytowej, a programy w Javie od 43,4 do 787,1 MB.
+Czas mierzono wewnątrz procesu, z pominięciem tworzenia procesu i kompilacji JIT, po jednym przebiegu rozgrzewającym, który według samych autorów może nie wystarczyć do uruchomienia wszystkich poziomów optymalizacji HotSpot.
+W modelu równoległym wersja w Ruście korzystała z biblioteki Rayon, a wersja w Javie z puli ForkJoinPool, więc wynik obejmuje też różne mechanizmy szeregowania zadań.
+Pamięć mierzono tylko jako maksymalny rozmiar zbioru rezydentnego (RSS), a surowe dane pomiarowe autorzy zapowiedzieli udostępnić dopiero po przyjęciu artykułu.
+Autorzy przypisują też Pereirze i in. wynik, według którego programy natywne zużywają ok. 5\% energii programów w środowiskach zarządzanych, podczas gdy w tabeli Pereiry i in. Java zużyła 1,98 raza więcej energii niż C, a Rust 1,03 raza więcej.
+
+Porównania w rzeczywistych systemach dotyczą przede wszystkim Rusta i C.
+Li i in.~\cite{li2024} porównali sterowniki jądra Linux napisane w Ruście w projekcie Rust-for-Linux z odpowiednikami w C.
+W większości przypadków wydajność sterowników w Ruście różniła się od C o mniej niż 20\%.
+Sterownik karty sieciowej e1000 miał jednak 11 razy dłuższe opóźnienie odpowiedzi na ping, bo nie implementował między innymi pobierania danych z wyprzedzeniem.
+W sterownikach pamięci masowej przepustowość była do 61\% niższa lub do 67\% wyższa niż w C, zależnie od liczby zadań i rozmiaru bloku, a sterowniki w Ruście były po kompilacji od 1,2 do 2,4 raza większe.
+Wśród przyczyn spadków autorzy wymieniają kontrolę zakresów indeksów, zgodnie z wynikami Zhanga i in.~\cite{zhang2022} z podrozdziału~\ref{sec:gc-a-ownership}.
+Część różnic wynika jednak z niepełnej funkcjonalności sterowników w Ruście, więc porównywane implementacje nie są równoważne.
+Badanie obejmuje kilka sterowników i nie dotyczy języka z GC.
+
+Wydajność Rusta względem C jest więc dość dobrze zbadana zarówno na programach testowych~\cite{zhang2022}, jak i w rzeczywistym systemie~\cite{li2024}, podobnie jak wydajność Javy względem C++~\cite{lion2022}.
+Bezpośrednie porównanie Rusta z Javą opiera się w przeanalizowanej literaturze głównie na rankingu Pereiry i in.~\cite{pereira2021} i pracy Zhenga i Luo~\cite{zheng2026}.
+W rankingu Pereiry i in. Rust był ok. 1,8 raza szybszy i zajmował ok. 4 razy mniej pamięci, a u Zhenga i Luo był szybszy od ok. 1,4 do ok. 12 razy.
+Sporne pozostaje, jaka część tej różnicy wynika z języków, a jaka z różnic między programami~\cite{vankempen2025}, ze sposobu pomiaru programu w maszynie wirtualnej oraz ze starszych wersji kompilatorów i maszyny wirtualnej.
+W przeanalizowanej literaturze nie znaleziono porównania obu języków na równoważnych programach obciążających operacje wejścia-wyjścia lub przetwarzających strumień danych, z domyślnym kolektorem G1.
 
 \section{Podsumowanie przeglądu literatury}
+\label{sec:podsumowanie-literatury}
 
-% TODO: obszary, w których podjęcie badań jest uzasadnione (luka badawcza).
+Przeanalizowane prace porównują Rusta przede wszystkim z C i C++~\cite{zhang2022,li2024,costanzo2021}, a Javę z C++~\cite{lion2022} albo różne konfiguracje maszyny wirtualnej między sobą~\cite{cai2022,zhao2022}.
+Spośród przeanalizowanych prac Javę i Rusta bezpośrednio zestawiają ranking Pereiry i in.~\cite{pereira2021}, badanie Diehla i in.~\cite{diehl2024} oraz praca Zhenga i Luo~\cite{zheng2026}.
+W dwóch pierwszych implementacje nie są równoważne, ponieważ programy CLBG mają różnych autorów i różny stopień optymalizacji~\cite{vankempen2025}, a u Diehla i in. wątki w Javie i Ruście synchronizowano innymi mechanizmami.
+Zheng i Luo zaimplementowali te same metody numeryczne, ale badali wyłącznie programy obliczeniowe i mierzyli czas wewnątrz procesu, bez startu maszyny wirtualnej i kompilacji JIT.
+Wszystkie trzy prace podają czas wykonania, a Pereira i in. oraz Zheng i Luo także pamięć szczytową, bez osobnej analizy pauz GC i rozkładu opóźnień.
+Ranking Pereiry i in. powstał ponadto na starszych wersjach kompilatorów i maszyny wirtualnej.
+
+Na tej podstawie wyróżniono trzy obszary, w których podjęcie badań jest uzasadnione.
+Pierwszy obejmuje czas wykonania całych procesów, łącznie ze startem maszyny wirtualnej, oraz przebieg zajętości pamięci dla programów obliczeniowych i obciążających operacje wejścia-wyjścia, napisanych w obu językach według jednej specyfikacji i uruchamianych w aktualnych wersjach narzędzi (podrozdziały~\ref{sec:metody-porownywania},~\ref{sec:pomiar-jit} i~\ref{sec:porownania-rust}).
+Drugi dotyczy wpływu zarządzania pamięcią na rozkład opóźnień w programie przetwarzającym strumień 100 mln zdarzeń.
+W tym obszarze porównanie wymaga programu w Javie z domyślnym kolektorem G1, jego odpowiednika w Ruście i pauz GC odczytanych z logów maszyny wirtualnej (podrozdziały~\ref{sec:gc-a-ownership} i~\ref{sec:porownania-rust}).
+Trzeci dotyczy skalowalności obliczeń równoległych na tym samym algorytmie dynamiki molekularnej, z tym samym podziałem pracy i tą samą barierą z biblioteki standardowej, ocenianej na podstawie przyspieszenia i rozkładu czasu pojedynczego kroku (podrozdział~\ref{sec:wspolbieznosc}).
+Każdemu z tych obszarów odpowiada co najmniej jeden scenariusz badawczy opisany w rozdziale~\ref{chap:metoda}.
