@@ -1,38 +1,62 @@
-% Baza bibliografii (biblatex + biber). Wpisy poniżej to fikcyjne przykłady
-% używane w rozdziale 99-przyklady.tex — zastąp je własnymi źródłami.
+% Baza bibliografii (biblatex + biber, styl APA 7 — Wytyczne 2.7). Wpisy poniżej to fikcyjne
+% przykłady z Wytycznych, używane w rozdziale 99-przyklady.tex — zastąp je własnymi źródłami.
 % W bibliografii pojawiają się tylko pozycje zacytowane przez \cite{klucz}.
-
-@book{przyklad-ksiazka,
-  author    = {Kowalski, Jan and Nowak, Anna},
-  title     = {Tytuł przykładowej książki},
-  edition   = {2},
-  publisher = {Wydawnictwo Przykładowe},
-  location  = {Lublin},
-  year      = {2024},
-}
+%
+% Wskazówki dla APA:
+%  - DOI wpisuj w polu doi (bez https://doi.org/), zostanie wypisany jako link,
+%  - artykuł z numerem zamiast stron: eid = {452},
+%  - strona WWW bez daty: pomiń date/year i podaj urldate (→ „b.d.” i „Pobrane … z: …”),
+%  - wystąpienie konferencyjne (bez publikacji): @presentation z titleaddon = {referat} lub {plakat},
+%    eventtitle, venue i datą trwania konferencji — patrz przykład niżej; artykuł w materiałach
+%    konferencyjnych to zwykłe @inproceedings z booktitle,
+%  - polskie pozycje: langid = {polish}, angielskie: langid = {english}.
 
 @article{przyklad-artykul,
-  author  = {Smith, John and Doe, Jane},
-  title   = {Example Article Title},
-  journal = {Journal of Examples},
-  volume  = {12},
-  number  = {3},
-  pages   = {45--67},
-  year    = {2023},
+  author    = {Kowalski, Jan and Nowakowska, Anna B. and Smith, Zoe},
+  title     = {Wykorzystanie sieci neuronowych do klasyfikacji sygnałów {EEG}},
+  journaltitle = {Pamięć},
+  volume    = {4},
+  number    = {13},
+  pages     = {21--34},
+  date      = {2020},
+  doi       = {10.1007/s12144-018-1955},
+  langid    = {polish},
 }
 
-@inproceedings{przyklad-konferencja,
-  author    = {Wiśniewski, Piotr},
-  title     = {Tytuł referatu konferencyjnego},
-  booktitle = {Materiały Przykładowej Konferencji},
-  pages     = {101--110},
-  year      = {2025},
+@book{przyklad-ksiazka,
+  author    = {Kowalski, Jan and Nowakowska, Anna B.},
+  title     = {Zastosowania informatyki w inżynierii biomedycznej},
+  publisher = {WPWA},
+  date      = {2020},
+  langid    = {polish},
+}
+
+@incollection{przyklad-rozdzial,
+  author    = {Smith, Zoe},
+  title     = {Historia inżynierii biomedycznej i kierunki rozwoju cyfrowej medycyny},
+  editor    = {Kowalski, Jan and Nowakowski, Adam B.},
+  booktitle = {Zastosowania informatyki w inżynierii biomedycznej},
+  edition   = {2},
+  pages     = {12--23},
+  publisher = {WPWA},
+  date      = {2020},
+  langid    = {polish},
+}
+
+@presentation{przyklad-konferencja,
+  author    = {Andrzejewska, Wanda},
+  title     = {Zastosowanie eyetrackingu w analizie interakcji człowiek--interfejs},
+  titleaddon = {referat},
+  eventtitle = {XI Konferencja Inżynierii Interfejsów},
+  venue     = {Wrocław, Polska},
+  date      = {2019-09-18/2019-09-20},
+  langid    = {polish},
 }
 
 @online{przyklad-www,
-  author  = {{Nazwa Organizacji}},
-  title   = {Tytuł strony internetowej},
-  url     = {https://example.com/dokumentacja},
-  urldate = {2026-10-10},
-  year    = {2026},
+  author    = {Kowalski, Jan},
+  title     = {Przetwarzanie danych medycznych w systemach mobilnych},
+  url       = {https://liberilibri.pl},
+  urldate   = {2020-03-24},
+  langid    = {polish},
 }

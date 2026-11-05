@@ -1,0 +1,221 @@
+\ProvidesFile{polish-apa.lbx}[2026/11/05 polska lokalizacja biblatex-apa (Zasady dyplomowania WEiI)]
+%% biblatex-apa nie ma polskiej lokalizacji — ten plik ją uzupełnia.
+%% Nazwy ciągów jak w english-apa.lbx; tłumaczenia wg Zasad dyplomowania WEiI 2025, Załącznik 7
+%% (W:, red., wyd., s., artykuł, b.d., „Pobrane 24 marca 2020 z: https://…”, [referat], przew.).
+\InheritBibliographyExtras{polish}
+
+\NewBibliographyString{publication}
+\NewBibliographyString{jourarticle}
+\NewBibliographyString{revisededition}
+\NewBibliographyString{chair}
+\NewBibliographyString{chairs}
+\NewBibliographyString{typevolume}
+\NewBibliographyString{typevolumes}
+\NewBibliographyString{typeseries}
+\NewBibliographyString{typeseriess}
+\NewBibliographyString{typevolseries}
+\NewBibliographyString{typevolseriess}
+\NewBibliographyString{on}
+\NewBibliographyString{retrieved}
+\NewBibliographyString{available}
+\NewBibliographyString{from}
+\NewBibliographyString{archivedat}
+\NewBibliographyString{origyear}
+\NewBibliographyString{reviewof}
+\NewBibliographyString{with}
+\NewBibliographyString{supplement}
+\NewBibliographyString{commenton}
+\NewBibliographyString{manunpub}
+\NewBibliographyString{maninprep}
+\NewBibliographyString{mansub}
+\NewBibliographyString{producer}
+\NewBibliographyString{producers}
+\NewBibliographyString{execproducer}
+\NewBibliographyString{execproducers}
+\NewBibliographyString{execdirector}
+\NewBibliographyString{execdirectors}
+\NewBibliographyString{director}
+\NewBibliographyString{directors}
+\NewBibliographyString{writer}
+\NewBibliographyString{writers}
+\NewBibliographyString{host}
+\NewBibliographyString{hosts}
+\NewBibliographyString{guestexpert}
+\NewBibliographyString{guestexperts}
+\NewBibliographyString{narrator}
+\NewBibliographyString{narrators}
+\NewBibliographyString{film}
+\NewBibliographyString{tvseries}
+\NewBibliographyString{tvepisode}
+\NewBibliographyString{video}
+\NewBibliographyString{song}
+\NewBibliographyString{album}
+\NewBibliographyString{podcast}
+\NewBibliographyString{podcastepisode}
+\NewBibliographyString{interview}
+\NewBibliographyString{speech}
+\NewBibliographyString{lithograph}
+\NewBibliographyString{map}
+\NewBibliographyString{lecturenotes}
+\NewBibliographyString{powerpoint}
+\NewBibliographyString{photograph}
+\NewBibliographyString{photographs}
+\NewBibliographyString{present}
+\NewBibliographyString{painting}
+\NewBibliographyString{article}
+\NewBibliographyString{unitednations}
+\NewBibliographyString{charter}
+\NewBibliographyString{ofthe}
+\NewBibliographyString{tothe}
+
+\DeclareBibliographyStrings{%
+  inherit          = {polish},
+  bibliography     = {{Wykaz literatury}{Wykaz literatury}},
+  references       = {{Wykaz literatury}{Wykaz literatury}},
+  editor           = {{red\adddot}{red\adddot}},
+  editors          = {{red\adddot}{red\adddot}},
+  edition          = {{wyd\adddot}{wyd\adddot}},
+  page             = {{s\adddot}{s\adddot}},
+  pages            = {{s\adddot}{s\adddot}},
+  in               = {{w\addcolon}{w\addcolon}},
+  and              = {{i}{i}},
+  andothers        = {{i~in\adddot}{i~in\adddot}},
+  nodate           = {{b\adddot d\adddot}{b\adddot d\adddot}},
+  volume           = {{t\adddot}{t\adddot}},
+  volumes          = {{t\adddot}{t\adddot}},
+  jourarticle      = {{artykuł}{artykuł}},
+  article          = {{artykuł}{art\adddot}},
+  tothe            = {{do}{do}},
+  ofthe            = {{}{}},
+  unitednations    = {{Organizacja\space Narodów\space Zjednoczonych}{ONZ}},
+  charter          = {{karta}{karta}},
+  painting         = {{obraz}{obraz}},
+  present          = {{obecnie}{obecnie}},
+  song             = {{utwór}{utwór}},
+  album            = {{album}{album}},
+  map              = {{mapa}{mapa}},
+  photograph       = {{fotografia}{fot\adddot}},
+  photographs      = {{fotografie}{fot\adddot}},
+  powerpoint       = {{slajdy\space PowerPoint}{slajdy\space PowerPoint}},
+  lecturenotes     = {{notatki\space z\space wykładu}{notatki\space z\space wykładu}},
+  podcast          = {{podcast}{podcast}},
+  podcastepisode   = {{odcinek\space podcastu}{odcinek\space podcastu}},
+  interview        = {{wywiad}{wywiad}},
+  speech           = {{nagranie\space wystąpienia}{nagranie\space wystąpienia}},
+  lithograph       = {{litografia}{litogr\adddot}},
+  video            = {{wideo}{wideo}},
+  film             = {{film}{film}},
+  tvseries         = {{serial\space telewizyjny}{serial\space TV}},
+  tvepisode        = {{odcinek\space serialu\space telewizyjnego}{odcinek\space serialu\space TV}},
+  narrator         = {{narrator}{narr\adddot}},
+  narrators        = {{narratorzy}{narr\adddot}},
+  producer         = {{producent}{prod\adddot}},
+  producers        = {{producenci}{prod\adddot}},
+  execproducer     = {{producent\space wykonawczy}{prod\adddot\space wyk\adddot}},
+  execproducers    = {{producenci\space wykonawczy}{prod\adddot\space wyk\adddot}},
+  execdirector     = {{dyrektor\space wykonawczy}{dyr\adddot\space wyk\adddot}},
+  execdirectors    = {{dyrektorzy\space wykonawczy}{dyr\adddot\space wyk\adddot}},
+  director         = {{reżyser}{reż\adddot}},
+  directors        = {{reżyserzy}{reż\adddot}},
+  writer           = {{scenarzysta}{scen\adddot}},
+  writers          = {{scenarzyści}{scen\adddot}},
+  host             = {{prowadzący}{prow\adddot}},
+  hosts            = {{prowadzący}{prow\adddot}},
+  guestexpert      = {{ekspert}{ekspert}},
+  guestexperts     = {{eksperci}{eksperci}},
+  with             = {{z}{z}},
+  manunpub         = {{niepublikowany\space manuskrypt}{niepublikowany\space manuskrypt}},
+  maninprep        = {{manuskrypt\space w\space przygotowaniu}{manuskrypt\space w\space przygotowaniu}},
+  mansub           = {{manuskrypt\space złożony\space do\space publikacji}{manuskrypt\space złożony\space do\space publikacji}},
+  supplement       = {{suplement}{supl\adddot}},
+  part             = {{część}{cz\adddot}},
+  revisededition   = {{wydanie\space poprawione}{wyd\adddotspace popr\adddot}},
+  commenton        = {{komentarz\space do}{komentarz\space do}},
+  on               = {{na}{na}},
+  retrieved        = {{pobrane}{pobrane}},
+  available        = {{dostępne}{dostępne}},
+  from             = {{z\addcolon}{z\addcolon}},
+  archivedat       = {{zarchiwizowane\space w}{zarchiwizowane\space w}},
+  reprintas        = {{przedruk\space jako}{przedruk\space jako}},
+  reprintfrom      = {{przedruk\space z}{przedruk\space z}},
+  reviewof         = {{recenzja}{recenzja}},
+  paragraph        = {{akapit}{akap\adddot}},
+  paragraphs       = {{akapity}{akap\adddot}},
+  mathesis         = {{praca\space magisterska}{praca\space magisterska}},
+  phdthesis        = {{rozprawa\space doktorska}{rozprawa\space doktorska}},
+  origyear         = {{oryginał\space opublikowano}{oryginał\space opublikowano}},
+  chair            = {{przew\adddot}{przew\adddot}},
+  chairs           = {{przew\adddot}{przew\adddot}},
+  typevolume       = {{redaktor\space tomu}{red\adddot\space tomu}},
+  typevolumes      = {{redaktorzy\space tomu}{red\adddot\space tomu}},
+  typeseries       = {{redaktor\space serii}{red\adddot\space serii}},
+  typeseriess      = {{redaktorzy\space serii}{red\adddot\space serii}},
+  typevolseries    = {{redaktor\space serii\space i\space tomu}{red\adddot\space serii\space i\space tomu}},
+  typevolseriess   = {{redaktorzy\space serii\space i\space tomu}{red\adddot\space serii\space i\space tomu}},
+  annodomini       = {{n\adddot e\adddot}{n\adddot e\adddot}},
+  beforechrist     = {{p\adddot n\adddot e\adddot}{p\adddot n\adddot e\adddot}},
+  commonera        = {{n\adddot e\adddot}{n\adddot e\adddot}},
+  beforecommonera  = {{p\adddot n\adddot e\adddot}{p\adddot n\adddot e\adddot}},
+  publication      = {{publikacja}{publikacja}}
+}
+
+% Daty po polsku: „24 marca 2020”, „18–20 września 2019” (dzień, miesiąc w dopełniaczu, rok),
+% a w dacie z adresu URL bez przecinka przed „z:” — „Pobrane 24 marca 2020 z: https://…”.
+\DeclareBibliographyExtras{%
+  \def\urldatecomma{\addspace}%
+  \protected\def\pollubapa@data#1#2#3#4#5{%
+    \ifboolexpr{ (test {\ifentrytype{article}}
+                  or (test {\ifentrytype{inbook}} and not test {\ifnameundef{editor}}))
+                 and not test {\iffieldequalstr{entrysubtype}{nonacademic}} }
+      {\clearfield{labelmonth}%
+       \clearfield{labelday}}
+      {}%
+    \iffieldundef{#4}% DAY
+      {}%
+      {\stripzeros{\thefield{#4}}%
+       \iffieldundef{#3}{}{\nobreakspace}}%
+    \iffieldundef{#3}% MONTH
+      {}%
+      {\iffieldundef{#4}%
+         {\mkbibmonth{\thefield{#3}}}%
+         {\lbx@pl@mkbibmonth{\thefield{#3}}}%
+       \iffieldundef{#1}{}{\space}}%
+    \iffieldundef{#2}% YEARDIVISION
+      {}%
+      {\iffieldbibstring{#2}{\bibcplstring{\thefield{#2}}}{\thefield{#2}}%
+       \iffieldundef{#1}{}{\space}}%
+    \iffieldundef{#1}% YEAR
+      {}%
+      {\iffieldbibstring{#1}{\bibncpstring{\thefield{#1}}}{\thefield{#1}}#5}}%
+  \protected\def\mkbibdateapalong#1#2#3#4{\pollubapa@data{#1}{#2}{#3}{#4}{}}%
+  \protected\def\mkbibdateapalongextra#1#2#3#4{\pollubapa@data{#1}{#2}{#3}{#4}{\printfield{extradate}}}%
+  \protected\def\mkbibdateapalongmdy#1#2#3#4{\pollubapa@data{#1}{#2}{#3}{#4}{}}%
+  % Zakresy dat po polsku: „18–20 września 2019”, „30 września – 2 października 2019”,
+  % „2019–2020”. Zastępują \mkdaterangeapalong(extra) z apa.bbx, które składają po angielsku.
+  % #1 — prefiks daty (label, url, event…), #2 — dopisek po roku (extradate dla daty etykiety).
+  \protected\def\pollubapa@zakres#1#2{%
+    \begingroup
+      \blx@metadateinfo{#1}%
+      \iffieldundef{#1year}{}
+        {\printtext[#1date]{%
+           \datecircaprint
+           \iffieldundef{#1endyear}
+             {\pollubapa@data{#1year}{#1yeardivision}{#1month}{#1day}{#2}}
+             {\iffieldequalstr{#1endyear}{}% zakres otwarty
+                {\pollubapa@data{#1year}{#1yeardivision}{#1month}{#1day}{}%
+                 \bibdatedash\bibstring{present}}
+                {\iffieldsequal{#1year}{#1endyear}
+                   {\iffieldsequal{#1month}{#1endmonth}
+                      {\iffieldsequal{#1day}{#1endday}
+                         {}
+                         {\stripzeros{\thefield{#1day}}\bibdatedash}}
+                      {\pollubapa@data{}{}{#1month}{#1day}{}\bibdatedash}}
+                   {\pollubapa@data{#1year}{#1yeardivision}{#1month}{#1day}{}\bibdatedash}%
+                 \pollubapa@data{#1endyear}{#1endyeardivision}{#1endmonth}{#1endday}{#2}}}%
+           \dateuncertainprint}}%
+    \endgroup}%
+  \renewcommand*{\mkdaterangeapalong}[1]{\pollubapa@zakres{#1}{}}%
+  \renewcommand*{\mkdaterangeapalongextra}[1]{\pollubapa@zakres{#1}{\printfield{extradate}}}%
+}
+
+\endinput

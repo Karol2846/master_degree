@@ -1,37 +1,34 @@
-% Strona tytułowa — układ z szablonu Word (Politechnika Lubelska, WEiI).
+% Strona tytułowa — układ wg wzoru z Załącznika nr 5 do Zasad dyplomowania WEiI (2025).
 % Dane pochodzą z metadane.tex; tutaj zmieniasz tylko układ.
-% Odstępy pionowe odtwarzają puste akapity z Worda (wymierzone na wydruku oryginału).
+% Całość czcionką bezszeryfową (jak we wzorze), wyrównana do lewej, bez numeru strony.
 \begingroup
 \thispagestyle{empty}
 \setstretch{1}
 \setlength{\parindent}{0pt}
+\raggedright
 \hyphenpenalty=10000
 \exhyphenpenalty=10000
-\sloppy
-\hbadness=10000  % wyjustowany tytuł bez dzielenia wyrazów — rozciągnięte odstępy są zamierzone (jak w Wordzie)
 \lineskiplimit=-\maxdimen  % odstępy zawsze liczone od linii bazowych (także po dużym napisie)
-\fontsize{12}{13.8}\selectfont
+\sffamily\color{pollubtekst}
+\fontsize{10}{12}\selectfont
 
-\includegraphics[width=8.75cm]{logo-weii}\par
-\vspace{27pt}
-{\raggedright\sffamily\fontsize{46}{52.9}\selectfont\color{pollubtekst}%
-  Praca dyplomowa \PracaRodzaj\par}
-\vspace{18.8pt}
-{\color{pollubtekst}%
-  Na kierunku \PracaKierunek\par
-  \ifdefempty{\PracaSpecjalnosc}{}{w specjalności \PracaSpecjalnosc\par}}
-\vspace{36.3pt}
-{\fontsize{15}{17.25}\selectfont\bfseries \PracaTytul\par}
-\vspace{17.25pt}
-{\fontsize{15}{17.25}\selectfont\bfseries \foreignlanguage{english}{\PracaTytulAng}\par}
-\vspace{52.7pt}
-{\fontsize{16}{18.4}\selectfont\bfseries \PracaAutor\par}
-\vspace{12.4pt}
-{\color{pollubtekst}Nr albumu: \PracaNrAlbumu\par}
-\vspace{21.9pt}
-{\color{pollubtekst}Promotor: \PracaPromotor\par}
+\includegraphics[width=7.5cm]{logo-weii}\par
+\vspace*{3.2cm}
+{\fontsize{36}{40}\selectfont Praca dyplomowa\\ \PracaRodzaj\par}
+\vspace{16pt}
+na kierunku \PracaKierunek\par
+\ifdefempty{\PracaBlokDyplomowania}{}{na bloku dyplomowania \PracaBlokDyplomowania\par}
+\vspace{28pt}
+{\fontsize{15}{18}\selectfont \PracaTytul\par}
+\vspace{18pt}
+{\fontsize{15}{18}\selectfont \foreignlanguage{english}{\PracaTytulAng}\par}
+\vspace{56pt}
+{\fontsize{15}{18}\selectfont \PracaAutor\par}
+\vspace{8pt}
+{\fontsize{9}{11}\selectfont \PracaNrAlbumu\par}
+\vspace{20pt}
+{\fontsize{11}{13}\selectfont Promotor: \PracaPromotor\par}
 \vfill
-{\fontsize{10}{11.5}\selectfont\hspace*{0.245cm}\PracaMiejscowosc{} \PracaRok\par}
-\vspace{4.5pt}
+{\fontsize{8}{10}\selectfont \PracaMiejscowosc{} \PracaRok\par}
 \endgroup
 \cleardoublepage  % przy druku dwustronnym: pusta strona 2 (rewers strony tytułowej)

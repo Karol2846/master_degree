@@ -2,6 +2,7 @@
 % !BIB program = biber
 %
 % Plik główny — „skleja” całą pracę. Kompilacja: make (albo latexmk), wynik: build/main.pdf
+% Układ wg Zasad dyplomowania WEiI (2025), Załącznik 7, pkt 1.2–1.3.
 %
 \documentclass{pollubthesis}   % [oneside] — wydruk jednostronny (bez marginesów lustrzanych)
 
@@ -11,25 +12,26 @@
 \begin{document}
 
 \input{strony-wstepne/strona-tytulowa}
-\spistresci
+% Tu, w wydruku, wkłada się podpisane dokumenty z procedury antyplagiatowej (oświadczenie studenta
+% i raporty) — nie są częścią tego PDF-a i nie mają numerów stron.
 \input{strony-wstepne/streszczenie}
 \input{strony-wstepne/abstract}
+\spistresci
+% Alfabetyczny wykaz oznaczeń — tylko jeśli promotor uzna go za zasadny.
 
 \input{rozdzialy/01-wstep}
 \input{rozdzialy/02-cel-i-zakres-pracy}
-\input{rozdzialy/03-podstawy-teoretyczne}
-\input{rozdzialy/04-metodologia-badan}
-\input{rozdzialy/05-wyniki}
-\input{rozdzialy/06-wnioski}
+\input{rozdzialy/03-analiza-stanu-wiedzy}
+\input{rozdzialy/04-metoda-badan}
+\input{rozdzialy/05-charakterystyka-obiektu-badan}
+\input{rozdzialy/06-wyniki-badan}
+\input{rozdzialy/07-wnioski}
 
 \input{rozdzialy/99-przyklady}    % ŚCIĄGA z przykładami (rysunek, tabela, listing, cytowanie) — usuń przed oddaniem
 
 \printbibliography[heading=bibintoc]
 
-% Spisy — w oryginale ich nie było; odkomentuj, jeśli promotor ich wymaga:
-% \listoffigures
-% \listoftables
-% \listof{wykres}{Spis wykresów}
-% \lstlistoflistings
+% Załączniki (jeśli są): \appendix, a po nim \chapter{…}.
+% Spisów rysunków, tabel i wzorów się nie umieszcza (Wytyczne 1.3).
 
 \end{document}

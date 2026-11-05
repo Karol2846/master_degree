@@ -4,12 +4,15 @@
 
 \section{Tekst, cytowania i odwołania}
 
-Zwykły akapit jest wyjustowany, ma wcięcie 1,27~cm i~interlinię 1,5. Cytowanie pojedynczej
+Zwykły akapit jest wyjustowany, ma wcięcie 0,85~cm i~interlinię 1,5. Cytowanie pojedynczej
 pozycji wygląda tak~\cite{przyklad-ksiazka}, kilku naraz tak~\cite{przyklad-artykul,
-przyklad-konferencja,przyklad-www}. Kolejność w~bibliografii wynika z~kolejności pierwszego
-cytowania. Odwołania do innych miejsc: rozdział~\ref{chap:wstep}, rysunek~\ref{fig:przyklad},
-tabela~\ref{tab:przyklad}, wzór~\eqref{eq:przyklad}, listing~\ref{lst:java}\footnote{Przypis
-dolny wstawia się poleceniem \texttt{\textbackslash footnote}.}.
+przyklad-konferencja,przyklad-www,przyklad-rozdzial}. Odwołanie stawia się zwykle na końcu zdania,
+tuż przed kropką. Bibliografia jest uporządkowana alfabetycznie według nazwisk pierwszych autorów
+(APA~7), więc numer pozycji nie zależy od kolejności cytowania. Odwołania do innych miejsc:
+rozdział~\ref{chap:wstep}, rys.~\ref{fig:przyklad}, tabela~\ref{tab:przyklad},
+wzór~\eqref{eq:przyklad}, listing~\ref{lst:java}\footnote{Przypis dolny wstawia się poleceniem
+\texttt{\textbackslash footnote}.}. Odwołanie do rysunku musi pojawić się w~tekście przed
+rysunkiem.
 
 Jednoliterowe spójniki i~przyimki (a, i, o, u, w, z) wiąże się z~następnym słowem tyldą:
 \texttt{w\textasciitilde{}pracy}, aby nie zostawały na końcu wiersza. Liczby z~przecinkiem
@@ -32,10 +35,12 @@ dziesiętnym: \num{1234.5} albo z~jednostką: \SI{12.5}{\milli\second}.
   \item drugi krok.
 \end{enumerate}
 
-\section{Rysunek, wykres i tabela}
+\section{Rysunek i tabela}
 
-Rysunek wstawiany jest z~katalogu \texttt{grafika/} (najlepiej w~PDF lub PNG). Podpis jest pod
-rysunkiem, numeracja jest ciągła w~całej pracy.
+Na rys.~\ref{fig:przyklad} przedstawiono przykładowy rysunek. Rysunek wstawiany jest z~katalogu
+\texttt{grafika/} (najlepiej w~PDF lub PNG). Podpis jest pod rysunkiem, bez kropki na końcu;
+numeracja biegnie osobno w~każdym rozdziale (rys.~1.1, 1.2, \dots, 2.1, \dots). Wykresy również
+wstawia się jako rysunki.
 
 \begin{figure}[htbp]
   \centering
@@ -44,34 +49,24 @@ rysunkiem, numeracja jest ciągła w~całej pracy.
   \label{fig:przyklad}
 \end{figure}
 
-Wykresy mają osobną numerację (w~oryginale „Wykres 1”, „Wykres 2”, …). Jeśli wolisz traktować
-je jak rysunki, użyj zwykłego \texttt{figure}.
-
-\begin{wykres}[htbp]
-  \centering
-  \includegraphics[width=0.5\textwidth]{example-image-a}
-  \caption{Przykładowy wykres}
-  \label{wyk:przyklad}
-\end{wykres}
-
-Tabela w~stylu oryginału: pełna siatka, szary wiersz nagłówka, wyśrodkowane komórki, podpis pod
-tabelą (aby przenieść podpis nad tabelę, przesuń \texttt{\textbackslash caption} przed
-\texttt{tabular}).
+W~tabeli~\ref{tab:przyklad} zamieszczono przykładowy wygląd tabeli: podpis \emph{nad} tabelą
+(\texttt{\textbackslash caption} przed \texttt{tabular}), czcionka 11~pt, pełna siatka. Wszystkie
+tabele w~pracy powinny wyglądać podobnie. Miana podaje się bez nawiasów kwadratowych, np.
+„czas, ms”, a nie „czas [ms]”.
 
 \begin{table}[htbp]
   \centering
+  \caption{Przykładowy wygląd tabeli}
+  \label{tab:przyklad}
   \begin{tabular}{|c|c|c|}
     \hline
-    \rowcolor{tabnaglowek}
-    \textbf{Kolumna 1} & \textbf{Kolumna 2} & \textbf{Kolumna 3} \\
+    Wariant & Współczynnik & Czas, ms \\
     \hline
     A & \num{0.95} & \num{120} \\
     \hline
     B & \num{0.87} & \num{340} \\
     \hline
   \end{tabular}
-  \caption{Przykładowa tabela}
-  \label{tab:przyklad}
 \end{table}
 
 \section{Wzory i listingi}
