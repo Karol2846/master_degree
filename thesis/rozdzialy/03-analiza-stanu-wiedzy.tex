@@ -72,17 +72,14 @@ Autorzy wiążą tę różnicę z kompilacją JIT, ale także z interpretacją k
 Wartości liczbowe podano jednak tylko dla dwóch programów, bez rozdzielenia udziału tych przyczyn.
 Blackburn i in.~\cite{blackburn2025}, opisując zestaw DaCapo Chopin, zalecają, aby wybór między pomiarem pierwszej iteracji, obejmującej kompilację JIT i ładowanie klas, a pomiarem iteracji po rozgrzaniu wynikał z tez, które badanie ma uzasadnić.
 W ich konfiguracji z OpenJDK 21 wystarczało 10 uruchomień, aby uzyskać wąskie 95-procentowe przedziały ufności, przy czym jest to wskazówka praktyczna dla zestawu DaCapo.
-W niniejszej pracy narzędzie hyperfine mierzy czas całego procesu, więc wynik Javy obejmuje uruchomienie JVM, interpretację i kompilację JIT.
+W niniejszej pracy mierzono czas całego procesu, więc wynik Javy obejmuje uruchomienie JVM, interpretację i kompilację JIT, a udziału tych faz nie wyodrębniono.
 Odpowiada to jednorazowemu uruchomieniu programu wsadowego i nie opisuje długo działającej usługi.
-Trzy uruchomienia rozgrzewające są osobnymi procesami, dlatego mogą wypełnić pamięć podręczną systemu plików, ale nie przenoszą skompilowanego kodu do mierzonych procesów.
-Mierzone programy działają od około 2 do ponad 80 s, więc udział rozgrzewania jest prawdopodobnie mniejszy niż w programach CLBG, ale nie zmierzono go osobno.
-Pomiary czasu przetwarzania zdarzeń i czasu kroków symulacji obejmują początek działania programu, dlatego wartości maksymalne w Javie mogą pochodzić zarówno z pauz GC, jak i z kompilacji JIT.
 
 Nowe wersje JDK przenoszą część kosztów startu i rozgrzewania do wcześniejszego uruchomienia treningowego.
 JEP 483 wprowadził w JDK 24 pamięć podręczną AOT z klasami wczytanymi i połączonymi w trakcie takiego uruchomienia, co skróciło start aplikacji Spring PetClinic z 4,486 s w JDK 23 do 2,604 s~\cite{jep483}.
-JEP 515 dodał w JDK 25 zapisywanie w tej pamięci profili metod, dzięki którym kompilator JIT może generować kod maszynowy zaraz po starcie, a czas krótkiego programu przykładowego spadł z 90 ms do 73 ms~\cite{jep515}.
-Są to pojedyncze przykłady autorów zmian, bez informacji o rozrzucie wyników.
-Pokazują jednak, że podział czasu programu w Javie na start, rozgrzewanie i stan ustalony zależy od wersji i konfiguracji JDK.
+JEP 515 dodał w JDK 25 zapisywanie w tej pamięci profili metod, dzięki którym kompilator JIT może generować kod maszynowy zaraz po starcie~\cite{jep515}.
+Wynik dla PetClinic jest pojedynczym przykładem autorów zmiany, bez informacji o rozrzucie.
+Pokazuje jednak, że podział czasu programu w Javie na start, rozgrzewanie i stan ustalony zależy od wersji i konfiguracji JDK.
 W niniejszej pracy JDK 25 uruchamiano bez pamięci podręcznej AOT, więc wyniki dotyczą maszyny wirtualnej bez uruchomienia treningowego.
 
 Rozgrzewanie i brak gwarancji osiągnięcia stanu ustalonego są dobrze udokumentowane dla mikrobenchmarków Javy~\cite{traini2023}.
@@ -143,7 +140,7 @@ W wersji w Ruście wątki widzą wspólny stan tylko przez współdzieloną refe
 Bariery wykluczają rywalizację o te blokady, ale ich pobieranie jest dodatkową operacją, której wersja w Javie nie wykonuje.
 
 Skalowalność opisuje przyspieszenie, czyli iloraz czasu wykonania na jednym wątku i na $P$ wątkach, oraz efektywność, czyli przyspieszenie podzielone przez $P$.
-Przyspieszenie ograniczają część sekwencyjna obliczeń (prawo Amdahla), oczekiwanie na barierze, nierówny przydział pracy i przepustowość pamięci.
+Przyspieszenie ograniczają część sekwencyjna obliczeń (prawo Amdahla~\cite{amdahl1967}), oczekiwanie na barierze, nierówny przydział pracy i przepustowość pamięci.
 Thompson i in.~\cite{thompson2022} opisali algorytmy równoległe programu dynamiki molekularnej LAMMPS, w tym dekompozycję przestrzenną, rozproszone listy sąsiadów i dynamiczne równoważenie obciążenia, ale artykuł nie porównuje języków programowania.
 W niniejszej pracy parametry symulacji przyjęto jak w benchmarku Lennarda-Jonesa z LAMMPS, ale implementacja jest prostsza.
 Każdy z $P$ wątków dostaje stały blok cząstek, a listy komórek przebudowuje jeden wątek, co stanowi część sekwencyjną w sensie prawa Amdahla.
@@ -176,19 +173,8 @@ W wynikach znormalizowanych względem najlepszego języka Rust uzyskał 1,04 dla
 Autorzy mierzyli cały proces, więc wynik Javy obejmuje start maszyny wirtualnej i okres, w którym kod nie jest jeszcze skompilowany przez JIT.
 Każdy program uruchomiono 10 razy w systemie Ubuntu 16.10 z jądrem 4.8, a więc z kompilatorami i maszyną wirtualną z okresu wydania tego systemu.
 Ponadto programy CLBG nie są równoważne, co wykazali van Kempen i in.~\cite{vankempen2025}, dlatego różnicy między wartościami 1,04 i 1,89 nie można w całości przypisać językom.
-W niniejszej pracy czas również obejmuje cały proces, ale użyto JDK 25 i aktualnej stabilnej wersji Rusta.
-
-Zheng i Luo~\cite{zheng2026} zaimplementowali sześć modeli biologii matematycznej w dziesięciu językach, w tym w Ruście 1.95, Javie (OpenJDK 21) i Go 1.24.
-W Ruście, Javie, Go i C integrator Dormanda--Prince'a napisano ręcznie, bez bibliotek numerycznych.
-Rust był szybszy od Javy we wszystkich sześciu modelach.
-Przy całkowaniu równań różniczkowych zwyczajnych program w Ruście był 97 razy, a w Javie 8 razy szybszy od referencyjnego programu w Pythonie.
-W modelu reakcji i dyfuzji, ograniczonym przepustowością pamięci, wartości te wynosiły 65,0 i 46,5.
-Programy natywne zajmowały od 1,7 do 8,6 MB pamięci, a program w Javie od 43,4 do 787,1 MB.
-Pomiary wykonano na laptopie z procesorem hybrydowym w środowisku WSL2, bez ustalenia częstotliwości taktowania.
-Czas mierzono wewnątrz procesu po jednym przebiegu rozgrzewającym, a autorzy zaznaczają, że może on nie wystarczyć do pełnej optymalizacji kodu Javy.
-Jedno całkowanie w Ruście trwało 0,129 ms, więc przy tak krótkich odcinkach wynik Javy może zależeć od stanu kompilatora JIT.
-Pamięć mierzono jako maksymalny RSS procesu, który przy małym zbiorze roboczym odzwierciedla głównie stały narzut maszyny wirtualnej.
-Z tego powodu w niniejszej pracy oprócz wartości szczytowej rejestrowano przebieg zajętości pamięci w czasie, a programy działają od kilku sekund do ponad minuty.
+Wartość 6,01 dotyczy pamięci szczytowej krótkich programów, więc w przypadku Javy obejmuje także stały narzut maszyny wirtualnej.
+W niniejszej pracy czas również obejmuje cały proces, ale użyto JDK 25 i aktualnej stabilnej wersji Rusta, a oprócz szczytowej zajętości pamięci rejestrowano jej przebieg w czasie.
 
 Porównania w rzeczywistych systemach dotyczą przede wszystkim Rusta i C.
 Li i in.~\cite{li2024} porównali sterowniki jądra Linux napisane w Ruście w projekcie Rust-for-Linux z odpowiednikami w C.
@@ -201,9 +187,8 @@ Badanie obejmuje kilka sterowników i nie dotyczy języka z GC.
 W niniejszej pracy obie implementacje każdego scenariusza realizują ten sam zakres funkcji, a rozmiar pliku wykonywalnego jest jedną z mierzonych metryk.
 
 Wydajność Rusta względem C jest więc dość dobrze zbadana zarówno na programach testowych~\cite{zhang2022}, jak i w rzeczywistym systemie~\cite{li2024}, podobnie jak wydajność Javy względem C++~\cite{lion2022}.
-Oba przeanalizowane porównania Rusta z Javą wskazują na przewagę Rusta pod względem czasu i pamięci~\cite{pereira2021,zheng2026}.
-Sporna pozostaje wielkość tej przewagi, która w rankingu Pereiry i in. wynosi ok. 1,8 raza, a w pracy Zhenga i Luo od ok. 1,4 do ok. 12 razy, zależnie od modelu.
-Oba porównania dotyczą niewielkich programów obliczeniowych i w różny sposób uwzględniają kompilację JIT.
+Bezpośrednie porównanie Rusta z Javą opiera się w przeanalizowanej literaturze głównie na rankingu Pereiry i in.~\cite{pereira2021}, w którym Rust był ok. 1,8 raza szybszy i zajmował ok. 4 razy mniej pamięci.
+Sporne pozostaje, jaka część tej różnicy wynika z języków, a jaka z różnic między programami~\cite{vankempen2025} oraz ze starszych wersji kompilatorów i maszyny wirtualnej.
 W przeanalizowanej literaturze nie znaleziono porównania obu języków na równoważnych programach obciążających operacje wejścia-wyjścia lub przetwarzających strumień danych przez dłuższy czas, z JDK 25 i domyślnym kolektorem G1.
 Te obszary obejmują scenariusze badawcze opisane w rozdziale~\ref{chap:metoda}.
 
