@@ -58,11 +58,11 @@ Wynik porównania zależy więc od tego, czy mierzy się cały proces, czy tylko
 
 Przy pomiarze w stanie ustalonym (ang. \textit{steady state}) odrzuca się pierwsze iteracje testu, a test powtarza się w kilku osobnych procesach JVM.
 W narzędziu JMH (Java Microbenchmark Harness) liczbę iteracji rozgrzewających i procesów ustala autor testu~\cite{traini2023}.
-Traini i in.~\cite{traini2023} sprawdzili te założenia na 586 mikrobenchmarkach JMH z 30 projektów open source.
+Traini i in.~\cite{traini2023} sprawdzili, czy takie konfiguracje obejmują całe rozgrzewanie, na 586 mikrobenchmarkach JMH z 30 projektów open source.
 Każdy test wykonali w 10 procesach trwających co najmniej po 300 s, a początek stanu ustalonego wyznaczali automatycznie metodą wykrywania punktów zmiany.
 Stanu ustalonego nie osiągnęło 10,9\% procesów, a w 43,5\% testów osiągnęła go tylko część procesów.
 Konfiguracje przyjęte przez autorów testów trafnie wskazywały koniec rozgrzewania tylko w 19\% procesów.
-Badanie ma dużą skalę, ale dotyczy mikrobenchmarków w JDK 8 i 11 na jednym serwerze, a według autorów inne wersje JVM mogą dać inne wyniki.
+Próba jest duża, ale obejmuje wyłącznie mikrobenchmarki uruchamiane w JDK 8 i 11 na jednym serwerze, a według autorów inne wersje JVM mogą dać inne wyniki.
 W niniejszej pracy każdy z 10 pomiarów czasu jest osobnym procesem, więc rozrzut wyników Javy obejmuje także różnice w rozgrzewaniu.
 
 Osobnym problemem jest wybór mierzonej fazy działania programu.
@@ -70,10 +70,12 @@ Van Kempen i in.~\cite{vankempen2025} uruchamiali programy CLBG w Javie wielokro
 Pierwsza iteracja programu mandelbrot trwała 2,7 raza dłużej niż średnia z 15 iteracji, a programu fannkuch-redux 1,4 raza dłużej.
 Autorzy wiążą tę różnicę z kompilacją JIT, ale także z interpretacją kodu bajtowego oraz inicjalizacją pamięci i GC.
 Wartości liczbowe podano jednak tylko dla dwóch programów, bez rozdzielenia udziału tych przyczyn.
-Blackburn i in.~\cite{blackburn2025}, opisując zestaw DaCapo Chopin, zalecają, aby wybór między pomiarem pierwszej iteracji, obejmującej kompilację JIT i ładowanie klas, a pomiarem iteracji po rozgrzaniu wynikał z tez, które badanie ma uzasadnić.
-W ich konfiguracji z OpenJDK 21 wystarczało 10 uruchomień, aby uzyskać wąskie 95-procentowe przedziały ufności, przy czym jest to wskazówka praktyczna dla zestawu DaCapo.
-W niniejszej pracy mierzono czas całego procesu, więc wynik Javy obejmuje uruchomienie JVM, interpretację i kompilację JIT, a udziału tych faz nie wyodrębniono.
-Odpowiada to jednorazowemu uruchomieniu programu wsadowego i nie opisuje długo działającej usługi.
+Blackburn i in.~\cite{blackburn2025}, opisując zestaw DaCapo Chopin, odróżniają pomiar pierwszej iteracji, obejmującej kompilację JIT i ładowanie klas, od pomiaru iteracji po rozgrzaniu.
+Według autorów wybór jednej z tych faz powinien wynikać z tez, które badanie ma uzasadnić.
+W ich konfiguracji z OpenJDK 21 wystarczało 10 uruchomień, aby uzyskać wąskie 95-procentowe przedziały ufności.
+Tę samą liczbę uruchomień przyjęto w niniejszej pracy, choć wskazówka Blackburna i in. dotyczy zestawu DaCapo.
+Mierzono przy tym czas całego procesu, więc wynik Javy obejmuje uruchomienie JVM, interpretację i kompilację JIT, a udziału tych faz nie wyodrębniono.
+Taki pomiar odpowiada jednorazowemu uruchomieniu programu wsadowego i nie opisuje długo działającej usługi.
 
 Nowe wersje JDK przenoszą część kosztów startu i rozgrzewania do wcześniejszego uruchomienia treningowego.
 JEP 483 wprowadził w JDK 24 pamięć podręczną AOT z klasami wczytanymi i połączonymi w trakcie takiego uruchomienia, co skróciło start aplikacji Spring PetClinic z 4,486 s w JDK 23 do 2,604 s~\cite{jep483}.
@@ -84,8 +86,8 @@ W niniejszej pracy JDK 25 uruchamiano bez pamięci podręcznej AOT, więc wyniki
 
 Rozgrzewanie i brak gwarancji osiągnięcia stanu ustalonego są dobrze udokumentowane dla mikrobenchmarków Javy~\cite{traini2023}.
 Sporne pozostaje, którą fazę działania programu mierzyć, ponieważ zależy to od celu badania~\cite{blackburn2025}, a wybór ten zmienia wynik porównania języków~\cite{vankempen2025}.
-W przeanalizowanej literaturze nie znaleziono pomiaru udziału startu JVM i rozgrzewania w czasie całych programów trwających od kilku do kilkudziesięciu sekund, porównanych z odpowiednikami w Ruście, ani oceny wpływu pamięci podręcznej AOT na takie porównania.
-Przyjęty sposób pomiaru czasu i jego ograniczenia opisano w rozdziale~\ref{chap:metoda}.
+W przeanalizowanej literaturze nie znaleziono porównania Javy i Rusta, w którym mierzono by czas całych programów działających od kilku do kilkudziesięciu sekund na JDK 25.
+Takie porównanie przeprowadzono w niniejszej pracy, a przyjęty sposób pomiaru czasu i jego ograniczenia opisano w rozdziale~\ref{chap:metoda}.
 
 \section{Automatyczne odśmiecanie pamięci a model własności}
 \label{sec:gc-a-ownership}
@@ -139,14 +141,13 @@ W scenariuszu symulacji cząstek wersja w Javie zapisuje stan cząstek we wspól
 W wersji w Ruście wątki widzą wspólny stan tylko przez współdzieloną referencję, dlatego do jego modyfikacji bloki cząstek poszczególnych wątków opakowano w \texttt{Mutex}, a kopię pozycji i listy komórek w \texttt{RwLock}, czyli w typy implementujące \texttt{Sync}.
 Bariery wykluczają rywalizację o te blokady, ale ich pobieranie jest dodatkową operacją, której wersja w Javie nie wykonuje.
 
-Skalowalność opisuje przyspieszenie, czyli iloraz czasu wykonania na jednym wątku i na $P$ wątkach, oraz efektywność, czyli przyspieszenie podzielone przez $P$.
+Skalowalność ocenia się na podstawie przyspieszenia, czyli ilorazu czasu wykonania na jednym wątku i na $P$ wątkach, oraz efektywności, czyli przyspieszenia podzielonego przez $P$.
 Przyspieszenie ograniczają część sekwencyjna obliczeń (prawo Amdahla~\cite{amdahl1967}), oczekiwanie na barierze, nierówny przydział pracy i przepustowość pamięci.
 Thompson i in.~\cite{thompson2022} opisali algorytmy równoległe programu dynamiki molekularnej LAMMPS, w tym dekompozycję przestrzenną, rozproszone listy sąsiadów i dynamiczne równoważenie obciążenia, ale artykuł nie porównuje języków programowania.
 W niniejszej pracy parametry symulacji przyjęto jak w benchmarku Lennarda-Jonesa z LAMMPS, ale implementacja jest prostsza.
 Każdy z $P$ wątków dostaje stały blok cząstek, a listy komórek przebudowuje jeden wątek, co stanowi część sekwencyjną w sensie prawa Amdahla.
 Krok zawiera cztery synchronizacje barierą, więc jego czas wyznacza najwolniejszy wątek.
-Procesor użyty w badaniach ma 6 rdzeni fizycznych i 12 wątków sprzętowych, więc powyżej 6 wątków roboczych wątki dzielą rdzenie.
-W Javie o rdzenie konkurują także wątki odśmiecacza G1, których liczba zależy od liczby dostępnych procesorów~\cite{oracle-g1-25}, a pauzy mogą wydłużać ogon rozkładu czasu kroku, jak omówiono w podrozdziale~\ref{sec:gc-a-ownership}.
+W Javie z wątkami roboczymi konkurują o rdzenie wątki odśmiecacza G1, których liczba zależy od liczby dostępnych procesorów~\cite{oracle-g1-25}, a pauzy mogą wydłużać ogon rozkładu czasu kroku, jak omówiono w podrozdziale~\ref{sec:gc-a-ownership}.
 
 Costanzo i in.~\cite{costanzo2021} porównali Rust z C na problemie N ciał na serwerze ze 112 wątkami sprzętowymi, zrównoleglając wersję w Ruście biblioteką Rayon, a wersję w C dyrektywami OpenMP.
 W podwójnej precyzji obie wersje miały praktycznie tę samą wydajność, a w pojedynczej wersja w C była szybsza najwyżej 1,18 raza.
@@ -158,7 +159,7 @@ Autorzy przyznają też, że ich biegłość w poszczególnych językach była r
 Dlatego w niniejszej pracy obie implementacje używają tego samego podziału pracy i bariery z biblioteki standardowej, a dla każdego kroku zapisywany jest czas jego czterech faz.
 
 Gwarancje bezpieczeństwa współbieżności obu języków są dobrze opisane~\cite{oracle-jls-25,klabnik-rustbook}, a wydajność równoległą Rusta porównywano głównie z C i C++~\cite{costanzo2021,diehl2024}.
-Sporna pozostaje pozycja Javy, którą Diehl i in.~\cite{diehl2024} zaliczyli do języków o pośredniej wydajności, podczas gdy w zestawie LangBench OpenJDK był średnio 1,43 raza wolniejszy od C++ i skracał czas wykonania wraz z liczbą wątków~\cite{lion2022}.
+Sporne pozostaje, jaka część przewagi Rusta nad Javą w pracy Diehla i in.~\cite{diehl2024} wynika z samych języków, ponieważ obie wersje synchronizowano innymi mechanizmami, a autorzy znali poszczególne języki w różnym stopniu.
 W przeanalizowanej literaturze nie znaleziono porównania skalowalności Javy i Rusta na tym samym algorytmie dynamiki molekularnej, z identycznym podziałem pracy i synchronizacją barierą, obejmującego oprócz czasu całkowitego także rozkład czasu pojedynczego kroku.
 Takie porównanie przeprowadzono w scenariuszu opisanym w rozdziale~\ref{chap:metoda}.
 
