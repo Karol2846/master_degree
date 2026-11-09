@@ -82,26 +82,24 @@ Sporne pozostaje, którą fazę działania programu mierzyć, ponieważ zależy 
 \label{sec:gc-a-ownership}
 
 Java i Rust zarządzają pamięcią dynamiczną na dwa różne sposoby.
-W Javie nieosiągalne obiekty zwalnia odśmiecacz pamięci (ang. \textit{garbage collector}, GC) działający w maszynie wirtualnej.
+W Javie niuzywane obiekty zwalnia odśmiecacz pamięci (ang. \textit{garbage collector}, GC) działający w JVM.
 W Ruście kompilator sprawdza reguły własności (ang. \textit{ownership}): każda wartość ma jednego właściciela, a pamięć jest zwalniana, gdy właściciel wychodzi poza swój zakres~\cite{klabnik-rustbook}.
 Porównanie obu podejść sprowadza się do trzech pytań: ile GC kosztuje w czasie wykonania, o ile jego pauzy wydłużają czas odpowiedzi programu i czy model własności eliminuje te koszty, czy jedynie zmienia ich postać.
 
 Cai i in.~\cite{cai2022} zbadali pięć produkcyjnych kolektorów OpenJDK 17.
-Od czasu wykonania odjęli te koszty GC, które da się zmierzyć bezpośrednio, a najmniejszy z otrzymanych wyników uznali za koszt samej aplikacji.
+Od czasu wykonania odjęli koszty GC których nie da się zmierzyć bezpośrednio, a najmniejszy z nich uznali za koszt samej aplikacji.
 W ten sposób wyznaczyli dolną granicę narzutu GC.
-Przy umiarkowanym rozmiarze sterty kolektory wydłużały czas wykonania co najmniej o 7--82\%, a liczbę cykli procesora o 6--92\%.
-Podanie dolnej granicy zamiast jednej wartości chroni przed zawyżeniem wyniku, a badane kolektory są tymi, których używa się w praktyce.
-Praca nie porównuje jednak Javy z językiem bez GC, więc nie mówi, ile Java traci względem Rusta.
-Rozrzut od 7 do 82\% pokazuje też, że koszt GC silnie zależy od programu.
+Przy umiarkowanym rozmiarze sterty GC wydłużał czas wykonania co najmniej o 7--82\%, a liczbę cykli procesora o 6--92\%.
+Praca porównuje Jave na różnych wersjach GC, nie da się stwierdzić ile java traci wzgledem języka bez GC, na przykład Rusta.
+Rozrzut między 7-82\% pokazuje, że koszt GC silnie zależy rodzaju programu.
 
-Kolektory zatrzymujące wszystkie wątki aplikacji (ang. \textit{stop-the-world}) niewiele zmieniają w średnim czasie odpowiedzi, ale wydłużają ogon jego rozkładu.
-Domyślny kolektor OpenJDK, G1, dzieli stertę na regiony i w każdym cyklu wybiera ich tyle, żeby zmieścić się w zadanym czasie pauzy, domyślnie 200 ms~\cite{oracle-g1-25}.
-Nie gwarantuje tego czasu, bo długość pauzy zależy od liczby żywych obiektów, które trzeba skopiować.
-Shenandoah i ZGC skracają pauzy, wykonując większość pracy współbieżnie z aplikacją.
-Według Cai i in.~\cite{cai2022} te nowsze kolektory są wyraźnie droższe od starszych, a w części testów dawały gorsze opóźnienia aplikacji niż kolektory \textit{stop-the-world}.
-Zhao, Blackburn i McKinley~\cite{zhao2022} zaproponowali kolektor LXR, który w wyszukiwarce Lucene przy ciasnej stercie miał 10-krotnie niższy 99,99. percentyl opóźnienia i 7,8-krotnie wyższą przepustowość niż Shenandoah.
-LXR jest jednak prototypem badawczym zbudowanym na platformie MMTk i nie ma go w standardowym JDK.
-Z obu prac wynika, że krótsze pauzy nie przekładają się automatycznie na niższe opóźnienia aplikacji, więc kolektory trzeba porównywać na wysokich percentylach rozkładu opóźnień.
+Odśmiecacze zatrzymujące wszystkie wątki aplikacji (ang. \textit{stop-the-world}) nie zmieniają średniego czasu odpowiedzi, wpływają tylko ogon rozkładu.
+Domyślny kolektor OpenJDK, G1, dzieli stertę na regiony i w każdym cyklu wybiera ich tyle, żeby zmieścić się w zadeklarowanym czasie pauzy - domyślnie 200 ms~\cite{oracle-g1-25}.
+Shenandoah i ZGC skracają pauzy, wykonując większość pracy współbieżnie z aplikacją~\cite{flood2016,jep333}.
+Według Cai i in.~\cite{cai2022} nowsze GC są wyraźnie droższe od starszych, a w części testów dawały gorsze opóźnienia niż kolektory \textit{stop-the-world}.
+Zhao, Blackburn i McKinley~\cite{zhao2022} zaproponowali kolektor LXR, który w wyszukiwarce Lucene przy małej stercie miał 10-krotnie niższy 99,99\. percentyl opóźnienia i 7,8-krotnie wyższą przepustowość niż Shenandoah.
+LXR jest dopiero prototypem badawczym zbudowanym na platformie MMTk i nie jest dostępny w standardowym JDK.
+Z obu prac wynika, że krótkie pauzy nie przekładają się automatycznie na mniejsze opóźnienia aplikacji, więc GC trzeba porównywać na wysokich percentylach rozkładu opóźnień.
 
 Program w Ruście nie ma osobnej fazy odśmiecania, bo miejsce zwolnienia pamięci wynika ze struktury kodu~\cite{klabnik-rustbook}.
 Bezpieczeństwo pamięci kosztuje jednak także tutaj.
