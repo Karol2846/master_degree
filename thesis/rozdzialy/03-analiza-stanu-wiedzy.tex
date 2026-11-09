@@ -11,75 +11,72 @@
 \section{Metody porównywania języków programowania}
 \label{sec:metody-porownywania}
 
-Wydajność języków programowania porównuje się zawsze za pośrednictwem konkretnych programów, kompilatorów i środowisk uruchomieniowych.
-Wynik porównania zależy od tego, jak powstały te programy i w jakim stopniu są sobie równoważne.
-W przeanalizowanych pracach stosowano trzy podejścia: zestawy programów testowych pisanych niezależnie w wielu językach, aplikacje napisane od podstaw według jednej specyfikacji oraz statystyczną analizę danych z repozytoriów kodu.
+Wydajność języków programowania porównuje się zwykle za pośrednictwem konkretnych programów, kompilatorów i środowisk uruchomieniowych.
+Wynik porównania powinien zleżeć od tego, w jaki sposób powstały programy i na ile są sobie równoważne.
+W~przeanalizowanych pracach stosowano trzy podejścia: zestaw programów testowych pisanych niezależnie w wielu językach przez równych autorów, idiomatyczne aplikacje napisane od podstaw przez jednego autora oraz statystyczną analizę danych z wielu repozytoriów kodu.
 
-Pereira i in.~\cite{pereira2021} zmierzyli czas wykonania, zużycie energii i zajętość pamięci programów z Computer Language Benchmarks Game (CLBG) w 27 językach i na tej podstawie ułożyli rankingi języków.
-CLBG zawiera krótkie programy, liczące od 22 do 287 linii, które rozwiązują te same zadania, ale każdy z nich ma innego autora i jest zwykle optymalizowany pod kątem czasu wykonania~\cite{vankempen2025}.
-Van Kempen i in.~\cite{vankempen2025} wykazali, że implementacje jednego zadania w różnych językach różnią się stopniem zrównoleglenia, użyciem bibliotek zewnętrznych i wektoryzacją.
+Pereira i in.~\cite{pereira2021} zmierzyli czas wykonania, zajętość pamięci i zużycie energii programów z Computer Language Benchmarks Game (CLBG) w 27 językach i zestawili je w rankingu.
+CLBG zawiera krótkie programy - poniżej 300 linii, napisane przez różnych autorów, programy były zoptymalizowane pod konkretne zastosowanie~\cite{vankempen2025}.
+Van Kempen i in.~\cite{vankempen2025} wykazali, że implementacje tego samego zadania w różnych językach różni się stopniem równoległości i użyciem bibliotek.
 W zadaniu regex-redux wersja w C++ była 8,9 raza wolniejsza od wersji w C, ponieważ korzystała z biblioteki Boost zamiast PCRE.
-Wersja zadania mandelbrot w TypeScripcie działała 21 razy dłużej niż w JavaScripcie, bo była sekwencyjna, podczas gdy wersja w JavaScripcie używała średnio 28 rdzeni.
-Po ujednoliceniu implementacji i kontroli liczby aktywnych rdzeni autorzy nie stwierdzili istotnego wpływu implementacji języka na zużycie energii poza wpływem wynikającym z samego czasu wykonania.
-Analiza dotyczy przede wszystkim energii, ale jej wyniki pokazują, że część różnic przypisywanych w rankingach językom pochodzi z różnic między programami.
+Wersja impleemntacji mandelbrot w TypeScripcie działała 21 razy dłużej niż w JavaScripcie, bo była zaimplementowana sekwencyjnie, podczas gdy wersja w JavaScripcie używała 28 rdzeni.
+Po ujednoliceniu implementacji, autorzy nie stwierdzili istotnego wpływu implementacji języka na zużycie energii - poza wpływem wynikającym z samego czasu wykonania.
+Analiza dotyczy przede wszystkim zużycia energii, ale jej wyniki pokazują, że część różnic przypisywanych w rankingach samym językom pochodzi w istocie z różnic w implementacji programów.
 Wyniki Pereiry i in. dla Javy i Rusta omówiono w podrozdziale~\ref{sec:porownania-rust}.
 
-Drugie podejście zastosowali Lion i in.~\cite{lion2022}, którzy napisali od podstaw sześć aplikacji w C++, Go, Javie, JavaScripcie i Pythonie, a z ich wariantów utworzyli 12 testów tworzących zestaw LangBench.
-Implementacje w poszczególnych językach mają te same algorytmy i ten sam przepływ sterowania, przy czym autorzy starali się pisać kod idiomatyczny dla każdego języka.
-OpenJDK był średnio 1,43 raza wolniejszy od C++ skompilowanego GCC i zajmował średnio 3,38 raza więcej pamięci.
-W 3 z 12 testów Go i OpenJDK działały szybciej niż C++.
-Podejście to zapewnia większą równoważność programów niż CLBG, ale wymaga od autorów porównywalnej biegłości we wszystkich językach.
-Wynik zależał też od szczegółów implementacji w obrębie jednego języka.
-Program sudoku w C++ zajmował 3,46 MB pamięci, a po zastąpieniu strumieni iostream bezpośrednimi wywołaniami systemowymi i rezygnacji z łączenia biblioteki standardowej C++ tylko 1,33 MB.
-LangBench nie obejmuje Rusta i nie pozwala odnieść tych wyników do języka bez GC.
+Inne podejście zastosowali Lion i in.~\cite{lion2022}, którzy napisali od początku 6 aplikacji w C++, Go, Javie, JavaScripcie i Pythonie, z wariantów utworzyli 12 testów (LangBench).
+Implementacje w poszczególnych językach mają te same algorytmy i ten sam przepływ danych, autorzy pisali kod idiomatyczny dla każdego języka.
+OpenJDK był średnio 1,43 raza wolniejszy od C++ i zajmował średnio 3,38 raza więcej pamięci.
+Jednak w 3 z 12 testów Go i OpenJDK działały szybciej niż C++.
+Podejście z~\cite{lion2022} zapewnia większą równoważność programów niż CLBG, ale wymaga biegłości we wszystkich badanych językach.
+Program sudoku w C++ zajmował 3,46 MB pamięci, a po zastosowaniu optymalizacji podczas kompilacji - już 1,33 MB. LangBench nie obejmuje Rusta i nie pozwala odnieść tych wyników do języka bez GC.
 
 Trzecie podejście polega na statystycznej analizie danych z istniejących projektów.
-Furia, Torkar i Feldt~\cite{furia2022} ponownie przeanalizowali modelami bayesowskimi zbiór danych z projektów w serwisie GitHub, na którym wcześniej badano związek języka programowania z liczbą błędów.
-Stwierdzili, że wpływ języka silnie zależy od innych warunków, a część obserwowanych różnic dotyczy konkretnych projektów i nie da się jej przypisać językowi.
-Według autorów pytanie, które języki są bardziej podatne na błędy, nie ma prostej i ogólnej odpowiedzi, przynajmniej na podstawie tych danych.
-Badanie dotyczy jakości kodu, ale ilustruje ograniczenie danych obserwacyjnych, w których język jest powiązany z rodzajem projektu, zespołem i dziedziną zastosowania.
+Furia, Torkar i Feldt~\cite{furia2022} ponownie przeanalizowali modelami bayesowskimi zbiór projektów w serwisie GitHub.
+Pierwotnie na tym zbiorze badano związek języka programowania z liczbą błędów.
+Stwierdzili, że wpływ języka zależy od innych warunków, a obserwowane różnice dotyczą konkretnych projktów i nie da się ich przypisaćk onkretnemu językowi.
+Według autorów nie ma prostej i ogólnej odpowiedzi na pytanie, które języki są bardziej podatne na błędy.
+A przynajmniej na podstawie tych dnaych.
+Badanie dotyczy jakości kodu, ilustruje jednak ograniczenia danych obserwacyjnych, w których język jest użyty w konkretnym projekcie, zespole i domenie
 
-Metody porównywania języków są zatem dobrze opisane, natomiast interpretacja ich wyników pozostaje sporna.
+Metody porównywania języków są dobrze znane, natomiast interpretacja wyników badań pozostaje sporna.
 Rankingi oparte na CLBG są szeroko cytowane~\cite{pereira2021}, mimo że porównywane w nich programy nie są równoważne~\cite{vankempen2025}.
 Zestawy aplikacji pisanych od podstaw lepiej kontrolują równoważność implementacji~\cite{lion2022}, ale są nieliczne, a analizowany zestaw nie obejmuje Rusta.
-Javę i Rusta na programach napisanych według jednej specyfikacji porównali Zheng i Luo~\cite{zheng2026}, ale wyłącznie na modelach obliczeniowych i z pomiarem czasu wewnątrz procesu (podrozdział~\ref{sec:porownania-rust}).
+Javę i Rusta na programach napisanych według jednej specyfikacji porównali Zheng i Luo~\cite{zheng2026}, niestety wyłącznie na modelach obliczeniowych, z pomiarem czasu wewnątrz procesu - co wpływało na wyniki badń (podrozdział~\ref{sec:porownania-rust}).
 W przeanalizowanej literaturze nie znaleziono takiego porównania dla programów obciążających operacje wejścia-wyjścia ani porównania obejmującego czas całego procesu.
 
 \section{Pomiar wydajności programów w środowiskach z kompilacją JIT}
 \label{sec:pomiar-jit}
 
-Rust jest językiem kompilowanym przed uruchomieniem (ang. \textit{ahead-of-time}, AOT), więc program od początku działania wykonuje gotowy kod maszynowy~\cite{klabnik-rustbook}.
-Maszyna wirtualna HotSpot najpierw interpretuje kod bajtowy Javy i zbiera profile wykonania metod, a najczęściej wykonywane metody tłumaczy na kod maszynowy kompilator JIT (ang. \textit{just-in-time})~\cite{jep515}.
+Rust jest językiem kompilowanym przed uruchomieniem (ang. \textit{ahead-of-time}, AOT), więc procesor od początku uruchomienia wykonuje gotowy kod maszynowy~\cite{klabnik-rustbook}.
+Maszyna wirtualna javy (JVM) najpierw interpretuje kod bajtowy Javy i zbiera profile wykonania metod, najczęściej wykonywane metody tłumaczy na kod maszynowy kompilator JIT (ang. \textit{just-in-time})~\cite{jep515}.
 Do zakończenia tej fazy, nazywanej rozgrzewaniem (ang. \textit{warmup}), program działa wolniej~\cite{jep515}.
-Wynik porównania zależy więc od tego, czy mierzy się cały proces, czy tylko fazę po rozgrzaniu.
+Wynik porównania zależy więc od sposobu pomiaru - czy pomiar obejmuje fazę rozgrzewnia JVM, czy nie.
 
 Przy pomiarze w stanie ustalonym (ang. \textit{steady state}) odrzuca się pierwsze iteracje testu, a test powtarza się w kilku osobnych procesach JVM.
 W narzędziu JMH (Java Microbenchmark Harness) liczbę iteracji rozgrzewających i procesów ustala autor testu~\cite{traini2023}.
-Traini i in.~\cite{traini2023} sprawdzili, czy takie konfiguracje obejmują całe rozgrzewanie, na 586 mikrobenchmarkach JMH z 30 projektów open source.
-Każdy test wykonali w 10 procesach trwających co najmniej po 300 s, a początek stanu ustalonego wyznaczali automatycznie metodą wykrywania punktów zmiany.
+Traini i in.~\cite{traini2023} sprawdzili, czy konfiguracja obejmuje całe rozgrzewanie, na 586 ustawieniach JMH z 30 projektów.
+Każdy test wykonali w 10 procesach trwających co najmniej 6 minut, początek stanu ustalonego wyznaczali automatycznie.
 Stanu ustalonego nie osiągnęło 10,9\% procesów, a w 43,5\% testów osiągnęła go tylko część procesów.
-Konfiguracje przyjęte przez autorów testów trafnie wskazywały koniec rozgrzewania tylko w 19\% procesów.
-Próba jest duża, ale obejmuje wyłącznie mikrobenchmarki uruchamiane w JDK 8 i 11 na jednym serwerze, a według autorów inne wersje JVM mogą dać inne wyniki.
+Konfiguracje przyjęte przez autorów trafnie wskazywały koniec rozgrzewania tylko w 19\% procesów.
+Próba jest statystycznie znacząca, ale obejmuje wyłącznie mikrobenchmarki uruchamiane w JDK 8 i 11 na jednym serwerze, a według autorów inne wersje JVM mogą dać inne wyniki.
 
 Osobnym problemem jest wybór mierzonej fazy działania programu.
 Van Kempen i in.~\cite{vankempen2025} uruchamiali programy CLBG w Javie wielokrotnie w jednym procesie.
-Pierwsza iteracja programu mandelbrot trwała 2,7 raza dłużej niż średnia z 15 iteracji, a programu fannkuch-redux 1,4 raza dłużej.
-Autorzy wiążą tę różnicę z kompilacją JIT, ale także z interpretacją kodu bajtowego oraz inicjalizacją pamięci i GC.
-Wartości liczbowe podano jednak tylko dla dwóch programów, bez rozdzielenia udziału tych przyczyn.
-Blackburn i in.~\cite{blackburn2025}, opisując zestaw DaCapo Chopin, odróżniają pomiar pierwszej iteracji, obejmującej kompilację JIT i ładowanie klas, od pomiaru iteracji po rozgrzaniu.
-Według autorów wybór jednej z tych faz powinien wynikać z tez, które badanie ma uzasadnić.
-W ich konfiguracji z OpenJDK 21 wystarczało 10 uruchomień, aby uzyskać wąskie 95-procentowe przedziały ufności.
-Wskazówka ta dotyczy jednak programów z zestawu DaCapo i konfiguracji przyjętej przez autorów.
+Pierwsza iteracja programu mandelbrot zawsze trwała 2,7 raza dłużej niż średnia z 15 iteracji, w innych programach ta tendencja równiez była widoczna.
+Autorzy łączą tę różnicę z kompilacją JIT, interpretacją kodu bajtowego oraz inicjalizacją pamięci i GC.
+Blackburn i in.~\cite{blackburn2025} opisując zestaw DaCapo Chopin, odróżniają pomiar pierwszej iteracji, z ładowaniem klas i kompilacją JIT, od pomiaru na rogrzannym JVM.
+Według autorów wybór jednej z tych faz powinien być dokonany biorą pod uwagę tezy, jakie badanie ma uzasadnić.
+W ich badaniu z OpenJDK 21 wystarczało 10 uruchomień, aby w 95\% uzyskać rozgrzany JVM.
 
-Nowe wersje JDK przenoszą część kosztów startu i rozgrzewania do wcześniejszego uruchomienia treningowego.
-JEP 483 wprowadził w JDK 24 pamięć podręczną AOT z klasami wczytanymi i połączonymi w trakcie takiego uruchomienia, co skróciło start aplikacji Spring PetClinic z 4,486 s w JDK 23 do 2,604 s~\cite{jep483}.
-JEP 515 dodał w JDK 25 zapisywanie w tej pamięci profili metod, dzięki którym kompilator JIT może generować kod maszynowy zaraz po starcie~\cite{jep515}.
-Wynik dla PetClinic jest pojedynczym przykładem autorów zmiany, bez informacji o rozrzucie.
+Nowe wersje JDK przenoszą część kosztów startu i rozgrzewania do uruchomienia treningowego.
+JEP 483 wprowadził w JDK 24 pamięć podręczną AOT z klasami wczytanymi i połączonymi w trakcie takiego uruchomienia, co pozwoliło skrócić start aplikacji Spring PetClinic z 4,486 s do 2,604 s~\cite{jep483}.
+JEP 515 dodał w JDK 25 zapisywanie w pamięci profili metod, dzięki czemu kompilator JIT może generować kod maszynowy zaraz po starcie~\cite{jep515}.
+Wynik dla PetClinic jest oczywiście pojedynczym przykładem, bez informacji o szerszym znaczeniu statystycznym.
 Pokazuje jednak, że podział czasu programu w Javie na start, rozgrzewanie i stan ustalony zależy od wersji i konfiguracji JDK.
 
 Rozgrzewanie i brak gwarancji osiągnięcia stanu ustalonego są dobrze udokumentowane dla mikrobenchmarków Javy~\cite{traini2023}.
 Sporne pozostaje, którą fazę działania programu mierzyć, ponieważ zależy to od celu badania~\cite{blackburn2025}, a wybór ten zmienia wynik porównania języków~\cite{vankempen2025}.
-W przeanalizowanej literaturze nie znaleziono porównania Javy i Rusta, w którym mierzono by czas całych programów działających od kilku do kilkudziesięciu sekund.
 
 \section{Automatyczne odśmiecanie pamięci a model własności}
 \label{sec:gc-a-ownership}
