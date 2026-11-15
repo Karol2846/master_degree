@@ -22,7 +22,7 @@ W zadaniu regex-redux wersja w C++ była 8,9 raza wolniejsza od wersji w C, poni
 Wersja impleemntacji mandelbrot w TypeScripcie działała 21 razy dłużej niż w JavaScripcie, bo była zaimplementowana sekwencyjnie, podczas gdy wersja w JavaScripcie używała 28 rdzeni.
 Po ujednoliceniu implementacji, autorzy nie stwierdzili istotnego wpływu implementacji języka na zużycie energii - poza wpływem wynikającym z samego czasu wykonania.
 Analiza dotyczy przede wszystkim zużycia energii, ale jej wyniki pokazują, że część różnic przypisywanych w rankingach samym językom pochodzi w istocie z różnic w implementacji programów.
-Wyniki Pereiry i in. dla Javy i Rusta omówiono w podrozdziale~\ref{sec:porownania-rust}.
+Wyniki Pereiry i in. dla Javy i Rusta omówiono w podrozdziale~\ref{sec:porownania-java-rust}.
 
 Inne podejście zastosowali Lion i in.~\cite{lion2022}, którzy napisali od początku 6 aplikacji w C++, Go, Javie, JavaScripcie i Pythonie, z wariantów utworzyli 12 testów (LangBench).
 Implementacje w poszczególnych językach mają te same algorytmy i ten sam przepływ danych, autorzy pisali kod idiomatyczny dla każdego języka.
@@ -42,7 +42,7 @@ Badanie dotyczy jakości kodu, ilustruje jednak ograniczenia danych obserwacyjny
 Metody porównywania języków są dobrze znane, natomiast interpretacja wyników badań pozostaje sporna.
 Rankingi oparte na CLBG są szeroko cytowane~\cite{pereira2021}, mimo że porównywane w nich programy nie są równoważne~\cite{vankempen2025}.
 Zestawy aplikacji pisanych od podstaw lepiej kontrolują równoważność implementacji~\cite{lion2022}, ale są nieliczne, a analizowany zestaw nie obejmuje Rusta.
-Javę i Rusta na programach napisanych według jednej specyfikacji porównali Zheng i Luo~\cite{zheng2026}, niestety wyłącznie na modelach obliczeniowych, z pomiarem czasu wewnątrz procesu - co wpływało na wyniki badń (podrozdział~\ref{sec:porownania-rust}).
+Javę i Rusta na programach napisanych według jednej specyfikacji porównali Zheng i Luo~\cite{zheng2026}, niestety wyłącznie na modelach obliczeniowych, z pomiarem czasu wewnątrz procesu - co wpływało na wyniki badń (podrozdział~\ref{sec:porownania-java-rust}).
 W przeanalizowanej literaturze nie znaleziono takiego porównania dla programów obciążających operacje wejścia-wyjścia ani porównania obejmującego czas całego procesu.
 
 \section{Pomiar wydajności programów w środowiskach z kompilacją JIT}
@@ -114,7 +114,7 @@ Emmerich i in.~\cite{emmerich2019} zestawili opóźnienia sterownika sieciowego 
 W przeanalizowanej literaturze nie znaleziono badania, które porównywałoby rozkład opóźnień programów w Javie z domyślnym kolektorem współczesnego JDK i w Ruście, implementujących ten sam algorytm, z pauzami GC odczytanymi z logów maszyny wirtualnej.
 Prace o GC porównują kolektory w obrębie JVM albo z ręcznym zwalnianiem pamięci na programach javy~\cite{hertz2005}, z kolei prace o wydajności Rusta odnoszą go głównie do C.
 
-\section{Współbieżność i skalowalność obliczeń równoległych}
+\section{Współbieżność i skalowalność obliczeń równoległych}  % TODO ten podrozdział nie zredagowany
 \label{sec:wspolbieznosc}
 
 Program równoległy ze wspólną pamięcią powinien zachować spójność wspólnych danych i jednocześnie skracać czas obliczeń wraz ze wzrostem liczby rdzeni.
@@ -142,8 +142,8 @@ Gwarancje bezpieczeństwa współbieżności obu języków są dobrze opisane~\c
 Sporne pozostaje, jaka część przewagi Rusta nad Javą w pracy Diehla i in.~\cite{diehl2024} wynika z samych języków, ponieważ obie wersje synchronizowano innymi mechanizmami, a autorzy znali poszczególne języki w różnym stopniu.
 W przeanalizowanej literaturze nie znaleziono porównania skalowalności Javy i Rusta na tym samym algorytmie dynamiki molekularnej, z tym samym podziałem pracy i tą samą barierą z biblioteki standardowej, obejmującego oprócz czasu całkowitego także rozkład czasu pojedynczego kroku.
 
-\section{Dotychczasowe porównania języka Rust z innymi językami}
-\label{sec:porownania-rust}
+\section{Porównania Javy i Rusta}
+\label{sec:porownania-java-rust}
 
 Rust porównuje się z innymi językami głównie pod względem czasu wykonania, zajętości pamięci i zużycia energii.
 W przeanalizowanej literaturze bezpośrednich porównań z Javą jest niewiele, a ich wyniki zależą od sposobu pomiaru programu działającego w maszynie wirtualnej.

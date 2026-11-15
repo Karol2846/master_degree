@@ -1,18 +1,3 @@
-%% pollubthesis.cls — praca dyplomowa, Politechnika Lubelska, Wydział Elektrotechniki i Informatyki
-%%
-%% Formatowanie zgodne z „Zasadami prowadzenia prac dyplomowych i dyplomowania na WEiI” (2025),
-%% Załącznik nr 7 „Wytyczne przygotowania pracy dyplomowej” (dalej: Wytyczne):
-%%   A4, Times 12 pt, interlinia 1,5, tekst wyjustowany, wcięcie akapitu 0,85 cm (Wytyczne 2.1–2.3),
-%%   marginesy lustrzane: wewn. 3,5 cm, zewn. 2 cm, góra 2,5 cm, dół 2 cm (2.2),
-%%   nagłówki „1.” 14 pt pogrubiony / „1.1.” 12 pt pogrubiony / „1.1.1.” 12 pt kursywa (2.3),
-%%   rysunki, tabele i wzory numerowane w obrębie rozdziału: „Rys. 2.1.”, „Tabela 2.1.”, „(2.1)” (2.4–2.6),
-%%   podpis rysunku pod nim, podpis tabeli nad nią, 10 pt; tabele 11 pt (2.4–2.5),
-%%   bibliografia APA 7 uporządkowana alfabetycznie, w tekście odwołania numeryczne [2, 4, 5] (2.7),
-%%   numer strony na środku stopki, bez numeru na stronie tytułowej (3.2).
-%%
-%% Opcje klasy:
-%%   twoside (domyślnie) — druk dwustronny: marginesy lustrzane + pusta strona za stroną tytułową
-%%   oneside             — druk jednostronny: lewy margines 3,5 cm na każdej stronie
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesClass{pollubthesis}[2026/10/10 Praca dyplomowa PL WEiI]
 
@@ -28,56 +13,43 @@
   \LoadClass[12pt,a4paper,oneside,openany]{report}
 \fi
 
-% ---------------------------------------------------------------------------
 % Język i czcionki
-% ---------------------------------------------------------------------------
 \RequirePackage[T1]{fontenc}
-\RequirePackage[english,polish]{babel}   % ostatni język = główny
-\RequirePackage{mathptmx}                % matematyka w stylu Times
-\RequirePackage{tgtermes}                % tekst: TeX Gyre Termes (klon Times New Roman)
-\RequirePackage{tgheros}                 % bezszeryfowa: TeX Gyre Heros (klon Arial) — strona tytułowa
-\renewcommand*\ttdefault{lmtt}           % maszynowa: Latin Modern Mono — listingi kodu
+\RequirePackage[english,polish]{babel}
+\RequirePackage{mathptmx}
+\RequirePackage{tgtermes}
+\RequirePackage{tgheros}
+\renewcommand*\ttdefault{lmtt}
 \RequirePackage{microtype}
 \RequirePackage{etoolbox}
 
-% ---------------------------------------------------------------------------
+
 % Strona
-% ---------------------------------------------------------------------------
-% Wytyczne 2.2: wewnętrzny (z oprawą) 3,5 cm, zewnętrzny 2 cm, górny 2,5 cm, dolny 2 cm.
-% Numer strony w stopce, 1 cm nad dolną krawędzią tekstu.
 \RequirePackage[a4paper,
   top=2.5cm, bottom=2cm,
-  inner=3.5cm, outer=2cm,        % przy opcji oneside: inner = lewy, outer = prawy
+  inner=3.5cm, outer=2cm,
   footskip=1cm]{geometry}
-\RequirePackage{emptypage}       % strony wstawiane przez \cleardoublepage bez numeru
+\RequirePackage{emptypage}
 \raggedbottom
-\RequirePackage[bottom]{footmisc} % przypisy zawsze na dole strony (mimo \raggedbottom)
+\RequirePackage[bottom]{footmisc}
 
-% ---------------------------------------------------------------------------
+
 % Akapit i interlinia
-% ---------------------------------------------------------------------------
-% Wytyczne 2.1 i 2.3: interlinia 1,5, akapit sygnalizowany tylko wcięciem (np. 0,85 cm), bez odstępów.
-% Word „1,5 wiersza” dla Times 12 pt = 20,7 pt między liniami (12 × 1,15 × 1,5).
-% Uwaga: punkt Worda to 1/72 cala (w LaTeX-u „bp”), a „pt” LaTeX-a to 1/72,27 cala.
-% 20,7 bp = 20,778 pt; LaTeX dla 12 pt ma 14,5 pt, stąd współczynnik 20,778 / 14,5 = 1,4329.
 \RequirePackage{setspace}
 \newcommand*{\pollub@stretch}{1.4329}
 \setstretch{\pollub@stretch}
 \setlength{\parindent}{0.85cm}
 \setlength{\parskip}{0pt}
-\RequirePackage{indentfirst}     % wcięcie także w pierwszym akapicie po nagłówku
+\RequirePackage{indentfirst}
 \clubpenalty=10000
 \widowpenalty=10000
-% Bez dzielenia wyrazów — jak w oryginale (Word nie dzieli, tylko rozciąga odstępy między słowami).
-% Aby włączyć dzielenie, usuń \hyphenpenalty=10000 poniżej.
-\AtBeginDocument{\hyphenpenalty=10000 \emergencystretch=3em \hbadness=10000} % hbadness: bez ostrzeżeń „Underfull” o rozciągniętych odstępach
+\AtBeginDocument{\hyphenpenalty=10000 \emergencystretch=3em \hbadness=10000}
 
-% ---------------------------------------------------------------------------
-% Kolory, grafika, tabele, matematyka
-% ---------------------------------------------------------------------------
+
+% Kolory, grafika, tabele, matematyka-
 \RequirePackage[table]{xcolor}
-\definecolor{pollubtekst}{HTML}{231F20}   % kolor tekstu ze strony tytułowej szablonu
-\definecolor{tabnaglowek}{HTML}{BFBFBF}   % tło wiersza nagłówkowego tabel
+\definecolor{pollubtekst}{HTML}{231F20}
+\definecolor{tabnaglowek}{HTML}{BFBFBF}
 \RequirePackage{graphicx}
 \graphicspath{{grafika/}}
 \RequirePackage{array}
@@ -87,19 +59,15 @@
 \RequirePackage{amsmath}
 \RequirePackage{amssymb}
 \RequirePackage{siunitx}
-\sisetup{output-decimal-marker={,}, group-separator={\,},  % polski przecinek dziesiętny
-  mode=text}                                               % liczby czcionką tekstu (Times)
+\sisetup{output-decimal-marker={,}, group-separator={\,},
+  mode=text}
 
-% ---------------------------------------------------------------------------
-% Nagłówki rozdziałów (Wytyczne 2.1, 2.3)
-% ---------------------------------------------------------------------------
-% Rozdział 14 pt pogrubiony, podrozdział 12 pt pogrubiony, punkt 12 pt kursywa; kropka po numerze,
-% bez kropki po tytule; rozdział od nowej strony. Dalszy podział Wytyczne uznają za niewskazany.
+
+% Nagłówki rozdziałów
 \RequirePackage{titlesec}
-\setcounter{secnumdepth}{2}   % numerowane: rozdział, podrozdział, punkt (1., 1.1., 1.1.1.)
-\setcounter{tocdepth}{2}      % w spisie treści te same trzy poziomy
+\setcounter{secnumdepth}{2}
+\setcounter{tocdepth}{2}
 
-% Numer w polu o stałej szerokości (jak tabulator w Wordzie); dłuższy numer po prostu się rozsuwa.
 \newsavebox{\pollub@numerbox}
 \newcommand{\pollub@numer}[2]{%
   \sbox{\pollub@numerbox}{#2}%
@@ -109,9 +77,6 @@
     \usebox{\pollub@numerbox}\hspace{0.5em}%
   \fi}
 
-% Dwa nagłówki pod rząd (np. rozdział → podrozdział): jak w oryginale obowiązuje większy z odstępów
-% „po” poprzednim i „przed” następnym. Każdy nagłówek zapamiętuje swój odstęp „po”, a następny
-% dokłada tylko brakującą różnicę (titlesec domyślnie pomija wtedy odstęp „przed”).
 \newskip\pollub@ostatniepo
 \newskip\pollub@roznica
 \renewcommand{\ttl@titlespace}[1]{%
@@ -119,41 +84,34 @@
   \advance\pollub@roznica-\pollub@ostatniepo
   \ifdim\pollub@roznica>\z@ \vspace{\pollub@roznica}\fi}
 
-% Rozdział: 14 pt, pogrubiony, zawsze od nowej strony.
 \titleformat{\chapter}[hang]
   {\normalfont\fontsize{14}{17}\selectfont\bfseries}
   {\pollub@numer{0.75cm}{\thechapter.}}{0pt}{}[\global\pollub@ostatniepo=18pt]
 \titleformat{name=\chapter,numberless}[hang]
   {\normalfont\fontsize{14}{17}\selectfont\bfseries}{}{0pt}{}[\global\pollub@ostatniepo=18pt]
-\titlespacing{\chapter}{0pt}{-24pt}{18pt}  % ujemne „przed”: tytuł przy górnym marginesie
+\titlespacing{\chapter}{0pt}{-24pt}{18pt}
 
-% Podrozdział: 12 pt, pogrubiony.
 \titleformat{\section}[hang]
   {\normalfont\normalsize\bfseries}
   {\pollub@numer{1cm}{\thesection.}}{0pt}{}[\global\pollub@ostatniepo=6pt]
 \titlespacing{\section}{0pt}{18pt}{6pt}
 
-% Punkt: 12 pt, kursywa.
 \titleformat{\subsection}[hang]
   {\normalfont\normalsize\itshape}
   {\pollub@numer{1.25cm}{\thesubsection.}}{0pt}{}[\global\pollub@ostatniepo=6pt]
 \titlespacing{\subsection}{0pt}{12pt}{6pt}
 
-% Czwarty poziom (\subsubsection): nienumerowany, poza spisem treści — Wytyczne go odradzają.
 \titleformat{\subsubsection}[hang]
   {\normalfont\normalsize\itshape}{}{0pt}{}[\global\pollub@ostatniepo=6pt]
 \titlespacing{\subsubsection}{0pt}{12pt}{6pt}
 
-% ---------------------------------------------------------------------------
 % Spis treści
-% ---------------------------------------------------------------------------
 \RequirePackage{tocloft}
 \renewcommand{\cfttoctitlefont}{\normalfont\fontsize{14}{17}\selectfont\bfseries}
 \renewcommand{\cftaftertoctitle}{}
-\setlength{\cftbeforetoctitleskip}{-17.7pt}  % ujemne wartości: pozycje jak w oryginale
+\setlength{\cftbeforetoctitleskip}{-17.7pt}
 \setlength{\cftaftertoctitleskip}{-8.6pt}
 \tocloftpagestyle{empty}
-% wszystkie poziomy zwykłą czcionką, z kropkami prowadzącymi i kropką po numerze
 \renewcommand{\cftchapfont}{\normalfont}
 \renewcommand{\cftchappagefont}{\normalfont}
 \renewcommand{\cftchapleader}{\normalfont\cftdotfill{\cftdotsep}}
@@ -167,9 +125,6 @@
 \setlength{\cftbeforechapskip}{6.25bp}
 \setlength{\cftbeforesecskip}{6.25bp}
 \setlength{\cftbeforesubsecskip}{6.25bp}
-
-% \spistresci — spis treści bez numerów stron w stopce (jak w oryginale).
-% Oryginał zawierał wpis „Spis treści” w samym spisie; usuń linię z \addcontentsline, jeśli zbędny.
 \newcommand{\spistresci}{%
   \clearpage
   \pagestyle{empty}%
@@ -179,50 +134,38 @@
   \clearpage
   \pagestyle{plain}}
 
-% ---------------------------------------------------------------------------
-% Podpisy i numeracja rysunków, tabel, wzorów i listingów (Wytyczne 2.4–2.6)
-% ---------------------------------------------------------------------------
-% „Rys. 2.1. Tytuł” pod rysunkiem, „Tabela 2.1. Tytuł” nad tabelą; czcionka tekstu, 10 pt (o 2 pt
-% mniejsza od tekstu), wyśrodkowane, bez kropki na końcu (nie stawiaj jej w \caption{…}).
-% Wykresy to też rysunki — wstawiaj je w figure.
+
+% Podpisy i numeracja rysunków, tabel, wzorów i listingów
 \RequirePackage{caption}
 \DeclareCaptionFont{pollubpodpis}{\fontsize{10}{12}\selectfont}
-% singlespacing musi być przed rozmiarem — inaczej przywraca 12 pt
 \captionsetup{font={singlespacing,pollubpodpis}, labelsep=period,
   justification=centering, skip=6pt}
-\captionsetup[table]{position=top}   % \caption{…} wpisuj PRZED tabular
+\captionsetup[table]{position=top}
 \addto\captionspolish{%
   \renewcommand{\figurename}{Rys.}%
   \renewcommand{\tablename}{Tabela}}
-% Numeracja w obrębie rozdziału (2.1, 2.2, …) — domyślna w klasie report, tu tylko dla jasności.
 \counterwithin{figure}{chapter}
 \counterwithin{table}{chapter}
 \counterwithin{equation}{chapter}
 
-% Tabele: zalecana czcionka 11 pt, pojedyncza interlinia w komórkach (jak w przykładzie z Wytycznych).
-% (Ustawiane po \@floatboxreset, bo ten wywołuje \normalsize.)
 \def\pollub@table{table}
 \g@addto@macro\@floatboxreset{%
   \ifx\@captype\pollub@table
     \fontsize{11}{13.2}\selectfont
   \fi}
 
-% Odstępy: 6 pt przed i za podpisem (Wytyczne 2.4), obiekt oddzielony od tekstu jednym wierszem.
 \setlength{\intextsep}{6pt}
 \setlength{\textfloatsep}{12pt}
 \setlength{\floatsep}{12pt}
 
-% Wzory: 6 pt przed i za równaniem (Wytyczne 2.6). \normalsize ustawia te odstępy od nowa, więc
-% dopisujemy je do niego.
 \g@addto@macro\normalsize{%
   \setlength{\abovedisplayskip}{6pt}%
   \setlength{\belowdisplayskip}{6pt}%
   \setlength{\abovedisplayshortskip}{6pt}%
   \setlength{\belowdisplayshortskip}{6pt}}
 
-% ---------------------------------------------------------------------------
-% Listy (punktory jak w Wordzie: • / o / ▪, punktor 0,635 cm, tekst 1,27 cm)
-% ---------------------------------------------------------------------------
+
+% Listy
 \RequirePackage{enumitem}
 \setlist{nosep}
 \setlist[itemize]{labelindent=0.635cm, labelwidth=0.635cm, labelsep=0pt, leftmargin=!, align=left}
@@ -233,9 +176,8 @@
 \setlist[enumerate,1]{label=\arabic*.}
 \setlist[enumerate,2]{label=\alph*)}
 
-% ---------------------------------------------------------------------------
+
 % Listingi kodu
-% ---------------------------------------------------------------------------
 \RequirePackage{listings}
 \renewcommand{\lstlistingname}{Listing}
 \renewcommand{\lstlistlistingname}{Spis listingów}
@@ -265,20 +207,13 @@
            {Ł}{{\L{}}}1 {Ń}{{\'N}}1 {Ó}{{\'O}}1 {Ś}{{\'S}}1 {Ź}{{\'Z}}1 {Ż}{{\.Z}}1,
 }
 
-% ---------------------------------------------------------------------------
-% Bibliografia (Wytyczne 2.7): wpisy w stylu APA 7, uporządkowane alfabetycznie według nazwisk
-% pierwszych autorów, ponumerowane; w tekście odwołania numeryczne w nawiasach kwadratowych:
-% [2] lub [2, 4, 5]. Wpisy formatuje biblatex-apa, polskie zwroty (W:, red., s., b.d., Pobrane … z:)
-% są w polish-apa.lbx.
-% ---------------------------------------------------------------------------
+
+% Bibliografia
 \RequirePackage{csquotes}
 \RequirePackage[backend=biber, bibstyle=apa, citestyle=numeric, labelnumber,
   sortcites]{biblatex}
 \renewcommand*{\bibfont}{\normalfont\raggedright}
 \setlength{\bibitemsep}{0pt}
-% Polskie odstępstwa od APA 7 przyjęte w Wytycznych (2.7):
-% autorzy rozdzielani przecinkami („Kowalski, J., Nowak, A. B.”), redaktorzy „i” („W: J. Kowalski
-% i A. B. Nowak (red.), …”); skrót „(red.)” małą literą; wydanie „wyd. 2”.
 \DeclareDelimFormat[bib,biblist]{finalnamedelim}{%
   \ifcurrentname{editor}
     {\addspace\bibstring{and}\space}
@@ -296,7 +231,6 @@
     {\bibstring{edition}\addnbspace#1}
     {#1\isdot}}
 \DeclareFieldFormat{labelnumberwidth}{\mkbibbrackets{#1}}
-% Numer „[1]” wysunięty na lewy margines listy, tekst wpisu wyrównany za numerami (jak w Wytycznych).
 \defbibenvironment{bibliography}
   {\list
      {\printtext[labelnumberwidth]{%
@@ -313,9 +247,7 @@
   {\endlist}
   {\item}
 
-% ---------------------------------------------------------------------------
-% Dane pracy (ustawiane w metadane.tex)
-% ---------------------------------------------------------------------------
+% Dane pracy
 \newcommand*{\autor}[1]{\gdef\PracaAutor{#1}}
 \newcommand*{\nralbumu}[1]{\gdef\PracaNrAlbumu{#1}}
 \newcommand*{\rodzajpracy}[1]{\gdef\PracaRodzaj{#1}}
@@ -337,10 +269,7 @@
 \miejscowosc{Lublin}
 \rok{\the\year}
 
-% ---------------------------------------------------------------------------
-% Streszczenie / Abstract — razem ze słowami kluczowymi na jednej stronie (Wytyczne 1.2 p. 1),
-% poza spisem treści. Pierwsze otwiera nową stronę, kolejne dopisuje się pod poprzednim.
-% ---------------------------------------------------------------------------
+% Streszczenie / Abstract
 \newif\if@pollub@pierwszestreszczenie \@pollub@pierwszestreszczenietrue
 \newenvironment{streszczenie}[1][Streszczenie]
   {\if@pollub@pierwszestreszczenie
@@ -352,13 +281,11 @@
    {\centering\normalfont\fontsize{14}{17}\selectfont\bfseries#1\par}%
    \vspace{6pt}}
   {\par}
-% \slowakluczowe{…} lub \slowakluczowe[Key words]{…}
 \newcommand{\slowakluczowe}[2][Słowa kluczowe]{%
   \par\vspace{\baselineskip}\noindent #1: #2\par}
 
-% ---------------------------------------------------------------------------
+
 % Hiperłącza (ładowane na końcu)
-% ---------------------------------------------------------------------------
 \RequirePackage[hidelinks, bookmarksnumbered, unicode]{hyperref}
 \RequirePackage{bookmark}
 \urlstyle{same}
