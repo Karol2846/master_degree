@@ -53,7 +53,7 @@ Maszyna wirtualna javy (JVM) najpierw interpretuje kod bajtowy Javy i zbiera pro
 Do zakończenia tej fazy, nazywanej rozgrzewaniem (ang. \textit{warmup}), program działa wolniej~\cite{jep515}.
 Wynik porównania zależy więc od sposobu pomiaru - czy pomiar obejmuje fazę rozgrzewnia JVM, czy nie.
 
-Przy pomiarze w stanie ustalonym (ang. \textit{steady state}) odrzuca się pierwsze iteracje testu, a test powtarza się w kilku osobnych procesach JVM.
+Przy pomiarze w stanie ustalonym (ang. \textit{steady state}) odrzuca się pierwsze iteracje testu, a test powtarza się w kilku osobnych procesach JVM~\cite{georges2007}.
 W narzędziu JMH (Java Microbenchmark Harness) liczbę iteracji rozgrzewających i procesów ustala autor testu~\cite{traini2023}.
 Traini i in.~\cite{traini2023} sprawdzili, czy konfiguracja obejmuje całe rozgrzewanie, na 586 ustawieniach JMH z 30 projektów.
 Każdy test wykonali w 10 procesach trwających co najmniej 6 minut, początek stanu ustalonego wyznaczali automatycznie.
@@ -69,13 +69,13 @@ Blackburn i in.~\cite{blackburn2025} opisując zestaw DaCapo Chopin, odróżniaj
 Według autorów wybór jednej z tych faz powinien być dokonany biorą pod uwagę tezy, jakie badanie ma uzasadnić.
 W ich badaniu z OpenJDK 21 wystarczało 10 uruchomień, aby w 95\% uzyskać rozgrzany JVM.
 
-Nowe wersje JDK przenoszą część kosztów startu i rozgrzewania do uruchomienia treningowego.
+Nowe wersje JDK przenoszą część kosztów startu i rozgrzewania do uruchomienia treningowego, a GraalVM do etapu budowania~\cite{wimmer2019}.
 JEP 483 wprowadził w JDK 24 pamięć podręczną AOT z klasami wczytanymi i połączonymi w trakcie takiego uruchomienia, co pozwoliło skrócić start aplikacji Spring PetClinic z 4,486 s do 2,604 s~\cite{jep483}.
 JEP 515 dodał w JDK 25 zapisywanie w pamięci profili metod, dzięki czemu kompilator JIT może generować kod maszynowy zaraz po starcie~\cite{jep515}.
 Wynik dla PetClinic jest oczywiście pojedynczym przykładem, bez informacji o szerszym znaczeniu statystycznym.
 Pokazuje jednak, że podział czasu programu w Javie na start, rozgrzewanie i stan ustalony zależy od wersji i konfiguracji JDK.
 
-Rozgrzewanie i brak gwarancji osiągnięcia stanu ustalonego są dobrze udokumentowane dla mikrobenchmarków Javy~\cite{traini2023}.
+Rozgrzewanie i brak gwarancji osiągnięcia stanu ustalonego są dobrze udokumentowane dla mikrobenchmarków Javy~\cite{barrett2017,traini2023}.
 Sporne pozostaje, którą fazę działania programu mierzyć, ponieważ zależy to od celu badania~\cite{blackburn2025}, a wybór ten zmienia wynik porównania języków~\cite{vankempen2025}.
 
 \section{Automatyczne odśmiecanie pamięci a model własności}
@@ -109,9 +109,10 @@ Badanie obejmuje małe programy testowe i porównuje Rust z C, nie z językiem z
 Pokazuje jednak, że bezpieczeństwo pamięci w Ruście również wiąże się z narzutem w czasie wykonania, choć ma on inną postać niż w Javie.
 
 Z jednej strony narzut GC w czasie wykonania jest więc dobrze zmierzony dla współczesnych kolektorów OpenJDK~\cite{cai2022}.
-Z drugiej strony znacznie mniej jasny jest wpływ GC na ogon rozkładu opóźnień, bo wyniki zależą od kolektora, rozmiaru sterty i obciążenia~\cite{cai2022,zhao2022}.
+Z drugiej strony znacznie mniej jasny jest wpływ GC na ogon rozkładu opóźnień, bo wyniki zależą od GC, rozmiaru sterty i obciążenia~\cite{cai2022,zhao2022}.
+Emmerich i in.~\cite{emmerich2019} zestawili opóźnienia sterownika sieciowego w Javie i Ruście, niestety, z Rustem porównali tylko wariant z GC Shenandoah w OpenJDK 12.
 W przeanalizowanej literaturze nie znaleziono badania, które porównywałoby rozkład opóźnień programów w Javie z domyślnym kolektorem współczesnego JDK i w Ruście, implementujących ten sam algorytm, z pauzami GC odczytanymi z logów maszyny wirtualnej.
-Prace o GC porównują kolektory w obrębie JVM, z kolei prace o wydajności Rusta odnoszą go głównie do C.
+Prace o GC porównują kolektory w obrębie JVM albo z ręcznym zwalnianiem pamięci na programach javy~\cite{hertz2005}, z kolei prace o wydajności Rusta odnoszą go głównie do C.
 
 \section{Współbieżność i skalowalność obliczeń równoległych}
 \label{sec:wspolbieznosc}
@@ -121,7 +122,7 @@ Specyfikacja Javy definiuje wyścig danych (ang. \textit{data race}) jako dwa do
 Program bez wyścigów ma gwarancję sekwencyjnej spójności, a w programie z wyścigami możliwe są zachowania trudne do przewidzenia.
 Relację \textit{happens-before} tworzą między innymi klasy pakietu \texttt{java.util.concurrent}, na przykład działania wątku przed wywołaniem \texttt{CyclicBarrier.await} poprzedzają działania innych wątków po powrocie z tej metody~\cite{oracle-juc-25}.
 W Ruście wartość można przekazać do innego wątku tylko wtedy, gdy jej typ implementuje cechę \texttt{Send}, a współdzielić przez referencję, gdy implementuje cechę \texttt{Sync}~\cite{klabnik-rustbook}.
-Według autorów dokumentacji system typów i mechanizm pożyczania wykluczają w ten sposób wyścigi danych, choć nie chronią przed zakleszczeniami.
+Według autorów dokumentacji system typów i mechanizm pożyczania wykluczają w ten sposób wyścigi danych, choć nie chronią przed zakleszczeniami, które Qin i in.~\cite{qin2020} znaleźli w dużych projektach open source.
 Oba źródła opisują gwarancje języka i nie podają kosztu ich zapewnienia.
 
 Skalowalność ocenia się na podstawie przyspieszenia, czyli ilorazu czasu wykonania na jednym wątku i na $P$ wątkach, oraz efektywności, czyli przyspieszenia podzielonego przez $P$.
@@ -172,7 +173,7 @@ Część różnic wynika jednak z niepełnej funkcjonalności sterowników w Ru�
 Badanie obejmuje kilka sterowników i nie dotyczy języka z GC.
 
 Wydajność Rusta względem C jest więc dość dobrze zbadana zarówno na programach testowych~\cite{zhang2022}, jak i w rzeczywistym systemie~\cite{li2024}, podobnie jak wydajność Javy względem C++~\cite{lion2022}.
-Bezpośrednie porównanie Rusta z Javą opiera się w przeanalizowanej literaturze głównie na rankingu Pereiry i in.~\cite{pereira2021} i pracy Zhenga i Luo~\cite{zheng2026}.
+Bezpośrednie porównanie Rusta z Javą opiera się w przeanalizowanej literaturze głównie na rankingu Pereiry i in.~\cite{pereira2021} i pracy Zhenga i Luo~\cite{zheng2026}, a poza programami testowymi na sterowniku sieciowym~\cite{emmerich2019} i mikroserwisach~\cite{saric2026}.
 W rankingu Pereiry i in. Rust był ok. 1,8 raza szybszy i zajmował ok. 4 razy mniej pamięci, a u Zhenga i Luo był szybszy od ok. 1,4 do ok. 12 razy.
 Sporne pozostaje, jaka część tej różnicy wynika z języków, a jaka z różnic między programami~\cite{vankempen2025}, ze sposobu pomiaru programu w maszynie wirtualnej oraz ze starszych wersji kompilatorów i maszyny wirtualnej.
 W przeanalizowanej literaturze nie znaleziono porównania obu języków na równoważnych programach obciążających operacje wejścia-wyjścia lub przetwarzających strumień danych, z domyślnym kolektorem G1.
@@ -181,10 +182,11 @@ W przeanalizowanej literaturze nie znaleziono porównania obu języków na równ
 \label{sec:podsumowanie-literatury}
 
 Przeanalizowane prace porównują Rusta przede wszystkim z C i C++~\cite{zhang2022,li2024,costanzo2021}, a Javę z C++~\cite{lion2022} albo różne konfiguracje maszyny wirtualnej między sobą~\cite{cai2022,zhao2022}.
-Spośród przeanalizowanych prac Javę i Rusta bezpośrednio zestawiają ranking Pereiry i in.~\cite{pereira2021}, badanie Diehla i in.~\cite{diehl2024} oraz praca Zhenga i Luo~\cite{zheng2026}.
+Spośród przeanalizowanych prac Javę i Rusta bezpośrednio zestawiają ranking Pereiry i in.~\cite{pereira2021}, badanie Diehla i in.~\cite{diehl2024} oraz praca Zhenga i Luo~\cite{zheng2026}, a poza programami obliczeniowymi także prace~\cite{emmerich2019,saric2026}.
 W dwóch pierwszych implementacje nie są równoważne, ponieważ programy CLBG mają różnych autorów i różny stopień optymalizacji~\cite{vankempen2025}, a u Diehla i in. wątki w Javie i Ruście synchronizowano innymi mechanizmami.
 Zheng i Luo zaimplementowali te same metody numeryczne, ale badali wyłącznie programy obliczeniowe i mierzyli czas wewnątrz procesu, bez startu maszyny wirtualnej i kompilacji JIT.
-Wszystkie trzy prace podają czas wykonania, a Pereira i in. oraz Zheng i Luo także pamięć szczytową, bez osobnej analizy pauz GC i rozkładu opóźnień.
+Emmerich i in. używali OpenJDK 12 i mierzyli przepustowość sterownika na jednym rdzeniu, a Šarić i in. tylko start i pamięć serwisu bez obciążenia.
+Trzy prace obliczeniowe podają czas wykonania, a Pereira i in. oraz Zheng i Luo także pamięć szczytową, bez osobnej analizy pauz GC i rozkładu opóźnień.
 Ranking Pereiry i in. powstał ponadto na starszych wersjach kompilatorów i maszyny wirtualnej.
 
 Na tej podstawie wyróżniono trzy obszary, w których podjęcie badań jest uzasadnione.
