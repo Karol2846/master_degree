@@ -1,66 +1,3 @@
-% Baza bibliografii (biblatex + biber, styl APA 7 — Wytyczne 2.7). Wpisy poniżej to fikcyjne
-% przykłady z Wytycznych, używane w rozdziale 99-przyklady.tex — zastąp je własnymi źródłami.
-% W bibliografii pojawiają się tylko pozycje zacytowane przez \cite{klucz}.
-%
-% Wskazówki dla APA:
-%  - DOI wpisuj w polu doi (bez https://doi.org/), zostanie wypisany jako link,
-%  - artykuł z numerem zamiast stron: eid = {452},
-%  - strona WWW bez daty: pomiń date/year i podaj urldate (→ „b.d.” i „Pobrane … z: …”),
-%  - wystąpienie konferencyjne (bez publikacji): @presentation z titleaddon = {referat} lub {plakat},
-%    eventtitle, venue i datą trwania konferencji — patrz przykład niżej; artykuł w materiałach
-%    konferencyjnych to zwykłe @inproceedings z booktitle,
-%  - polskie pozycje: langid = {polish}, angielskie: langid = {english}.
-
-@article{przyklad-artykul,
-  author    = {Kowalski, Jan and Nowakowska, Anna B. and Smith, Zoe},
-  title     = {Wykorzystanie sieci neuronowych do klasyfikacji sygnałów {EEG}},
-  journaltitle = {Pamięć},
-  volume    = {4},
-  number    = {13},
-  pages     = {21--34},
-  date      = {2020},
-  doi       = {10.1007/s12144-018-1955},
-  langid    = {polish},
-}
-
-@book{przyklad-ksiazka,
-  author    = {Kowalski, Jan and Nowakowska, Anna B.},
-  title     = {Zastosowania informatyki w inżynierii biomedycznej},
-  publisher = {WPWA},
-  date      = {2020},
-  langid    = {polish},
-}
-
-@incollection{przyklad-rozdzial,
-  author    = {Smith, Zoe},
-  title     = {Historia inżynierii biomedycznej i kierunki rozwoju cyfrowej medycyny},
-  editor    = {Kowalski, Jan and Nowakowski, Adam B.},
-  booktitle = {Zastosowania informatyki w inżynierii biomedycznej},
-  edition   = {2},
-  pages     = {12--23},
-  publisher = {WPWA},
-  date      = {2020},
-  langid    = {polish},
-}
-
-@presentation{przyklad-konferencja,
-  author    = {Andrzejewska, Wanda},
-  title     = {Zastosowanie eyetrackingu w analizie interakcji człowiek--interfejs},
-  titleaddon = {referat},
-  eventtitle = {XI Konferencja Inżynierii Interfejsów},
-  venue     = {Wrocław, Polska},
-  date      = {2019-09-18/2019-09-20},
-  langid    = {polish},
-}
-
-@online{przyklad-www,
-  author    = {Kowalski, Jan},
-  title     = {Przetwarzanie danych medycznych w systemach mobilnych},
-  url       = {https://liberilibri.pl},
-  urldate   = {2020-03-24},
-  langid    = {polish},
-}
-
 % ---------------------------------------------------------------------------------------------
 % 3.1 Metody porównywania języków programowania
 % ---------------------------------------------------------------------------------------------
@@ -112,90 +49,6 @@
 
 
 % ---------------------------------------------------------------------------------------------
-% 3.3 Automatyczne odśmiecanie pamięci a model własności
-% ---------------------------------------------------------------------------------------------
-
-
-
-@inproceedings{cai2022,
-  author    = {Cai, Zixian and Blackburn, Stephen M. and Bond, Michael D. and Maas, Martin},
-  title     = {Distilling the real cost of production garbage collectors},
-  booktitle = {2022 {IEEE} International Symposium on Performance Analysis of Systems and Software ({ISPASS})},
-  pages     = {46--57},
-  publisher = {IEEE},
-  date      = {2022},
-  doi       = {10.1109/ISPASS55109.2022.00005},
-  langid    = {english},
-}
-
-
-@inproceedings{zhao2022,
-  author    = {Zhao, Wenyu and Blackburn, Stephen M. and McKinley, Kathryn S.},
-  title     = {Low-latency, high-throughput garbage collection},
-  booktitle = {Proceedings of the 43rd {ACM} {SIGPLAN} International Conference on Programming Language Design and Implementation ({PLDI} '22)},
-  pages     = {76--91},
-  publisher = {ACM},
-  date      = {2022},
-  doi       = {10.1145/3519939.3523440},
-  langid    = {english},
-}
-
-
-@inproceedings{flood2016,
-  author    = {Flood, Christine H. and Kennke, Roman and Dinn, Andrew and Haley, Andrew and Westrelin, Roland},
-  title     = {Shenandoah: An open-source concurrent compacting garbage collector for {OpenJDK}},
-  booktitle = {Proceedings of the 13th International Conference on Principles and Practices of Programming on the Java Platform: Virtual Machines, Languages, and Tools ({PPPJ} '16)},
-  pages     = {1--9},
-  publisher = {ACM},
-  date      = {2016},
-  doi       = {10.1145/2972206.2972210},
-  langid    = {english},
-}
-
-
-@online{jep333,
-  author    = {Lidén, Per and Karlsson, Stefan},
-  title     = {{JEP} 333: {ZGC}: A scalable low-latency garbage collector (experimental)},
-  organization = {OpenJDK},
-  url       = {https://openjdk.org/jeps/333},
-  urldate   = {2026-11-09},
-  langid    = {english},
-}
-
-
-@online{oracle-g1-25,
-  author    = {{Oracle}},
-  title     = {{Garbage-First} ({G1}) garbage collector},
-  titleaddon = {{HotSpot Virtual Machine Garbage Collection Tuning Guide}, Release 25},
-  url       = {https://docs.oracle.com/en/java/javase/25/gctuning/},
-  urldate   = {2026-11-05},
-  langid    = {english},
-}
-
-
-
-@online{klabnik-rustbook,
-  author    = {Klabnik, Steve and Nichols, Carol and Krycho, Chris},
-  title     = {The {Rust} programming language},
-  url       = {https://doc.rust-lang.org/book/},
-  urldate   = {2026-11-05},
-  langid    = {english},
-}
-
-
-@inproceedings{zhang2022,
-  author    = {Zhang, Yuchen and Zhang, Yunhang and Portokalidis, Georgios and Xu, Jun},
-  title     = {Towards understanding the runtime performance of {Rust}},
-  booktitle = {Proceedings of the 37th {IEEE/ACM} International Conference on Automated Software Engineering ({ASE} '22)},
-  pages     = {1--6},
-  publisher = {ACM},
-  date      = {2022},
-  doi       = {10.1145/3551349.3559494},
-  langid    = {english},
-}
-
-
-% ---------------------------------------------------------------------------------------------
 % 3.2 Pomiar wydajności programów w środowiskach z kompilacją JIT
 % ---------------------------------------------------------------------------------------------
 
@@ -237,6 +90,127 @@
   organization = {OpenJDK},
   url       = {https://openjdk.org/jeps/515},
   urldate   = {2026-11-07},
+  langid    = {english},
+}
+
+@article{barrett2017,
+  author    = {Barrett, Edd and Bolz-Tereick, Carl Friedrich and Killick, Rebecca and Mount, Sarah and Tratt, Laurence},
+  title     = {Virtual machine warmup blows hot and cold},
+  journaltitle = {Proceedings of the ACM on Programming Languages},
+  volume    = {1},
+  number    = {OOPSLA},
+  pages     = {1--27},
+  date      = {2017},
+  doi       = {10.1145/3133876},
+  langid    = {english},
+}
+
+@inproceedings{georges2007,
+  author    = {Georges, Andy and Buytaert, Dries and Eeckhout, Lieven},
+  title     = {Statistically rigorous {Java} performance evaluation},
+  booktitle = {Proceedings of the 22nd Annual {ACM} {SIGPLAN} Conference on Object-Oriented Programming Systems, Languages and Applications ({OOPSLA} '07)},
+  pages     = {57--76},
+  publisher = {ACM},
+  date      = {2007},
+  doi       = {10.1145/1297027.1297033},
+  langid    = {english},
+}
+
+@article{wimmer2019,
+  author    = {Wimmer, Christian and Stancu, Codrut and Hofer, Peter and Jovanovic, Vojin and Wögerer, Paul and Kessler, Peter B. and Pliss, Oleg and Würthinger, Thomas},
+  title     = {Initialize once, start fast: Application initialization at build time},
+  journaltitle = {Proceedings of the ACM on Programming Languages},
+  volume    = {3},
+  number    = {OOPSLA},
+  pages     = {1--29},
+  date      = {2019},
+  doi       = {10.1145/3360610},
+  langid    = {english},
+}
+
+
+% ---------------------------------------------------------------------------------------------
+% 3.3 Automatyczne odśmiecanie pamięci a model własności
+% ---------------------------------------------------------------------------------------------
+
+@inproceedings{cai2022,
+  author    = {Cai, Zixian and Blackburn, Stephen M. and Bond, Michael D. and Maas, Martin},
+  title     = {Distilling the real cost of production garbage collectors},
+  booktitle = {2022 {IEEE} International Symposium on Performance Analysis of Systems and Software ({ISPASS})},
+  pages     = {46--57},
+  publisher = {IEEE},
+  date      = {2022},
+  doi       = {10.1109/ISPASS55109.2022.00005},
+  langid    = {english},
+}
+
+@inproceedings{zhao2022,
+  author    = {Zhao, Wenyu and Blackburn, Stephen M. and McKinley, Kathryn S.},
+  title     = {Low-latency, high-throughput garbage collection},
+  booktitle = {Proceedings of the 43rd {ACM} {SIGPLAN} International Conference on Programming Language Design and Implementation ({PLDI} '22)},
+  pages     = {76--91},
+  publisher = {ACM},
+  date      = {2022},
+  doi       = {10.1145/3519939.3523440},
+  langid    = {english},
+}
+
+@inproceedings{flood2016,
+  author    = {Flood, Christine H. and Kennke, Roman and Dinn, Andrew and Haley, Andrew and Westrelin, Roland},
+  title     = {Shenandoah: An open-source concurrent compacting garbage collector for {OpenJDK}},
+  booktitle = {Proceedings of the 13th International Conference on Principles and Practices of Programming on the Java Platform: Virtual Machines, Languages, and Tools ({PPPJ} '16)},
+  pages     = {1--9},
+  publisher = {ACM},
+  date      = {2016},
+  doi       = {10.1145/2972206.2972210},
+  langid    = {english},
+}
+
+@online{jep333,
+  author    = {Lidén, Per and Karlsson, Stefan},
+  title     = {{JEP} 333: {ZGC}: A scalable low-latency garbage collector (experimental)},
+  organization = {OpenJDK},
+  url       = {https://openjdk.org/jeps/333},
+  urldate   = {2026-11-09},
+  langid    = {english},
+}
+
+@online{oracle-g1-25,
+  author    = {{Oracle}},
+  title     = {{Garbage-First} ({G1}) garbage collector},
+  titleaddon = {{HotSpot Virtual Machine Garbage Collection Tuning Guide}, Release 25},
+  url       = {https://docs.oracle.com/en/java/javase/25/gctuning/},
+  urldate   = {2026-11-05},
+  langid    = {english},
+}
+
+@online{klabnik-rustbook,
+  author    = {Klabnik, Steve and Nichols, Carol and Krycho, Chris},
+  title     = {The {Rust} programming language},
+  url       = {https://doc.rust-lang.org/book/},
+  urldate   = {2026-11-05},
+  langid    = {english},
+}
+
+@inproceedings{zhang2022,
+  author    = {Zhang, Yuchen and Zhang, Yunhang and Portokalidis, Georgios and Xu, Jun},
+  title     = {Towards understanding the runtime performance of {Rust}},
+  booktitle = {Proceedings of the 37th {IEEE/ACM} International Conference on Automated Software Engineering ({ASE} '22)},
+  pages     = {1--6},
+  publisher = {ACM},
+  date      = {2022},
+  doi       = {10.1145/3551349.3559494},
+  langid    = {english},
+}
+
+@inproceedings{hertz2005,
+  author    = {Hertz, Matthew and Berger, Emery D.},
+  title     = {Quantifying the performance of garbage collection vs. explicit memory management},
+  booktitle = {Proceedings of the 20th Annual {ACM} {SIGPLAN} Conference on Object-Oriented Programming, Systems, Languages, and Applications ({OOPSLA} '05)},
+  pages     = {313--326},
+  publisher = {ACM},
+  date      = {2005},
+  doi       = {10.1145/1094811.1094836},
   langid    = {english},
 }
 
@@ -309,9 +283,20 @@
   langid    = {english},
 }
 
+@inproceedings{qin2020,
+  author    = {Qin, Boqin and Chen, Yilun and Yu, Zeming and Song, Linhai and Zhang, Yiying},
+  title     = {Understanding memory and thread safety practices and issues in real-world {Rust} programs},
+  booktitle = {Proceedings of the 41st {ACM} {SIGPLAN} Conference on Programming Language Design and Implementation ({PLDI} '20)},
+  pages     = {763--779},
+  publisher = {ACM},
+  date      = {2020},
+  doi       = {10.1145/3385412.3386036},
+  langid    = {english},
+}
+
 
 % ---------------------------------------------------------------------------------------------
-% 3.5 Dotychczasowe porównania języka Rust z innymi językami
+% 3.5 Porównania Javy i Rusta
 % ---------------------------------------------------------------------------------------------
 
 @article{zheng2026,
@@ -326,82 +311,29 @@
   langid    = {english},
 }
 
-@inproceedings{li2024,
-  author    = {Li, Hongyu and Guo, Liwei and Yang, Yexuan and Wang, Shangguang and Xu, Mengwei},
-  title     = {An empirical study of {Rust-for-Linux}: The success, dissatisfaction, and compromise},
-  booktitle = {2024 {USENIX} Annual Technical Conference ({USENIX} {ATC} 24)},
-  pages     = {425--443},
-  publisher = {USENIX Association},
+@inproceedings{georgiou2018,
+  author    = {Georgiou, Stefanos and Kechagia, Maria and Louridas, Panos and Spinellis, Diomidis},
+  title     = {What are your programming language's energy-delay implications?},
+  booktitle = {Proceedings of the 15th International Conference on Mining Software Repositories ({MSR} '18)},
+  pages     = {303--313},
+  publisher = {ACM},
+  date      = {2018},
+  doi       = {10.1145/3196398.3196414},
+  langid    = {english},
+}
+
+@article{antelmi2024,
+  author    = {Antelmi, Alessia and Caramante, Pasquale and Cordasco, Gennaro and D'Ambrosio, Giuseppe and De Vinco, Daniele and Foglia, Francesco and Postiglione, Luca and Spagnuolo, Carmine},
+  title     = {Reliable and efficient agent-based modeling and simulation},
+  journaltitle = {Journal of Artificial Societies and Social Simulation},
+  volume    = {27},
+  number    = {2},
+  eid       = {4},
   date      = {2024},
-  url       = {https://www.usenix.org/conference/atc24/presentation/li-hongyu},
+  doi       = {10.18564/jasss.5300},
   langid    = {english},
 }
 
-% ---------------------------------------------------------------------------------------------
-% Uzupełnienie do ~30 pozycji (artykuły i konferencje)
-% ---------------------------------------------------------------------------------------------
-
-% 3.2
-@article{barrett2017,
-  author    = {Barrett, Edd and Bolz-Tereick, Carl Friedrich and Killick, Rebecca and Mount, Sarah and Tratt, Laurence},
-  title     = {Virtual machine warmup blows hot and cold},
-  journaltitle = {Proceedings of the ACM on Programming Languages},
-  volume    = {1},
-  number    = {OOPSLA},
-  pages     = {1--27},
-  date      = {2017},
-  doi       = {10.1145/3133876},
-  langid    = {english},
-}
-
-@inproceedings{georges2007,
-  author    = {Georges, Andy and Buytaert, Dries and Eeckhout, Lieven},
-  title     = {Statistically rigorous {Java} performance evaluation},
-  booktitle = {Proceedings of the 22nd Annual {ACM} {SIGPLAN} Conference on Object-Oriented Programming Systems, Languages and Applications ({OOPSLA} '07)},
-  pages     = {57--76},
-  publisher = {ACM},
-  date      = {2007},
-  doi       = {10.1145/1297027.1297033},
-  langid    = {english},
-}
-
-@article{wimmer2019,
-  author    = {Wimmer, Christian and Stancu, Codrut and Hofer, Peter and Jovanovic, Vojin and Wögerer, Paul and Kessler, Peter B. and Pliss, Oleg and Würthinger, Thomas},
-  title     = {Initialize once, start fast: Application initialization at build time},
-  journaltitle = {Proceedings of the ACM on Programming Languages},
-  volume    = {3},
-  number    = {OOPSLA},
-  pages     = {1--29},
-  date      = {2019},
-  doi       = {10.1145/3360610},
-  langid    = {english},
-}
-
-% 3.3
-@inproceedings{hertz2005,
-  author    = {Hertz, Matthew and Berger, Emery D.},
-  title     = {Quantifying the performance of garbage collection vs. explicit memory management},
-  booktitle = {Proceedings of the 20th Annual {ACM} {SIGPLAN} Conference on Object-Oriented Programming, Systems, Languages, and Applications ({OOPSLA} '05)},
-  pages     = {313--326},
-  publisher = {ACM},
-  date      = {2005},
-  doi       = {10.1145/1094811.1094836},
-  langid    = {english},
-}
-
-% 3.4
-@inproceedings{qin2020,
-  author    = {Qin, Boqin and Chen, Yilun and Yu, Zeming and Song, Linhai and Zhang, Yiying},
-  title     = {Understanding memory and thread safety practices and issues in real-world {Rust} programs},
-  booktitle = {Proceedings of the 41st {ACM} {SIGPLAN} Conference on Programming Language Design and Implementation ({PLDI} '20)},
-  pages     = {763--779},
-  publisher = {ACM},
-  date      = {2020},
-  doi       = {10.1145/3385412.3386036},
-  langid    = {english},
-}
-
-% 3.5 (Java vs Rust)
 @inproceedings{emmerich2019,
   author    = {Emmerich, Paul and Ellmann, Simon and Bonk, Fabian and Egger, Alex and Sánchez-Torija, Esaú García and Günzel, Thomas and di Luzio, Sebastian and Obada, Alexandru and Stadlmeier, Maximilian and Voit, Sebastian and Carle, Georg},
   title     = {The case for writing network drivers in high-level programming languages},
