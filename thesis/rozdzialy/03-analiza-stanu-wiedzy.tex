@@ -145,8 +145,16 @@ W przeanalizowanej literaturze nie znaleziono porównania skalowalności Javy i 
 \section{Porównania Javy i Rusta}
 \label{sec:porownania-java-rust}
 
-Rust porównuje się z innymi językami głównie pod względem czasu wykonania, zajętości pamięci i zużycia energii.
-W przeanalizowanej literaturze bezpośrednich porównań z Javą jest niewiele, a ich wyniki zależą od sposobu pomiaru programu działającego w maszynie wirtualnej.
+Prac, które bezpośrednio porównują Javę i Rusta, jest niewiele, a ich wyniki mocno zależą od tego, czy pomiar obejmuje start JVM i kompilację JIT (podrozdział~\ref{sec:pomiar-jit}).
+
+W rankingu Pereiry i in.~\cite{pereira2021} Rust uzyskał, w porównaniu z najlepszym językiem 1,04 dla czasu wykonania, 1,03 dla energii i 1,54 dla pamięci szczytowej, Java w tym porównaniu miała 1,89, 1,98 i 6,01.
+Mierzono łączny czas programu, więc wynik Javy zawiera też start JVM i rozgrzewanie JIT-a.
+Niestety, programy CLBG nie są równoważne~\cite{vankempen2025}, dlatego różnicy nie można w 100\% przypisać samym językom.
+Georgiou i in.~\cite{georgiou2018} zmierzyli iloczyn energii i czasu (EDP) dla 25 zadań z Rosetta Code w 14 językach i otrzymali inne wyniki.
+Rust był w czołówce tylko na Raspberry Pi, na klasycznym laptopie i serwerze spadł w rankingu.
+Java była najwolniejszym językiem wśród języków kompilowanych do kodu pośredniego.
+Kod z Rosetta Code autorzy zostawili bez zmian, użyli Javy 8 i Rusta 1.18--1.21 z flagą \texttt{-O} (C kompilowali z \texttt{-O3}), nie mierzyli pamięci.
+
 
 Oba języki obejmuje ranking Pereiry i in.~\cite{pereira2021}, oparty na programach z CLBG omówionych w podrozdziale~\ref{sec:metody-porownywania}.
 W wynikach znormalizowanych względem najlepszego języka Rust uzyskał 1,04 dla czasu wykonania, 1,03 dla energii i 1,54 dla pamięci szczytowej, a Java odpowiednio 1,89, 1,98 i 6,01.
