@@ -42,15 +42,41 @@ def load(name):
     return json.loads((PARSED / name).read_text())
 
 
+def register_ubuntu_sans():
+    """Matplotlib can't pick weights from a variable font, so cut static Regular/Bold instances
+    of Ubuntu Sans (the slide font) into presentation/build/fonts and register them."""
+    from fontTools.ttLib import TTFont
+    from fontTools.varLib.instancer import instantiateVariableFont
+    from matplotlib import font_manager
+
+    src = Path("/usr/share/fonts/truetype/ubuntu/UbuntuSans[wdth,wght].ttf")
+    if not src.exists():
+        return
+    out_dir = ROOT / "presentation" / "build" / "fonts"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    for name, weight in [("Regular", 400), ("Bold", 700)]:
+        out = out_dir / f"UbuntuSans-{name}.ttf"
+        if not out.exists():
+            font = instantiateVariableFont(TTFont(src), {"wght": weight, "wdth": 100})
+            font["name"].setName(name, 2, 3, 1, 0x409)
+            font["OS/2"].usWeightClass = weight
+            font.save(out)
+        font_manager.fontManager.addfont(str(out))
+
+
 def presentation_style():
     setup_style()
+    register_ubuntu_sans()
     plt.rcParams.update({
-        "font.size": 15,
-        "axes.labelsize": 16,
-        "axes.titlesize": 17,
-        "xtick.labelsize": 14,
-        "ytick.labelsize": 14,
-        "legend.fontsize": 14,
+        # same sans-serif face as the slides (WEiI: one font type in the whole deck)
+        "font.family": "sans-serif",
+        "font.sans-serif": ["Ubuntu Sans", "Noto Sans", "DejaVu Sans"],
+        "font.size": 16,
+        "axes.labelsize": 17,
+        "axes.titlesize": 18,
+        "xtick.labelsize": 16,
+        "ytick.labelsize": 16,
+        "legend.fontsize": 16,
         "figure.dpi": DPI,
         "savefig.dpi": DPI,
     })
@@ -180,7 +206,7 @@ def chart_step_timeline():
 def chart_summary(timing, resources):
     mib = 1024 ** 2
     t, r = timing, resources
-    labels = ["S1\nCPU", "S2\nI/O", "S3 (P = 6)\nwspółbieżność", "S4\npamięć"]
+    labels = ["S1\nCPU", "S2\nI/O", "S3 (P = 6)\nwątki", "S4\npamięć"]
     time_ratio = [
         t["scenario1"]["java"]["median"] / t["scenario1"]["rust"]["median"],
         t["scenario2"]["java"]["median"] / t["scenario2"]["rust"]["median"],
@@ -214,6 +240,7 @@ def chart_summary(timing, resources):
         ax.set_title(title, loc="left")
         ax.grid(axis="x", visible=False)
     ax_t.set_ylim(0, 2.4)
+    ax_t.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:.1f}".replace(".", ",")))
     ax_t.set_ylabel("ile razy dłużej trwa Java")
     ax_m.set_yscale("log")
     ax_m.set_ylim(1, 120)
