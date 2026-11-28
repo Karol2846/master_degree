@@ -7,18 +7,109 @@
 %   - algorytmy przekształcania danych pierwotnych i obliczania poszukiwanych wielkości,
 %   - opis weryfikacji wyników obliczeń lub oceny statystycznej wyników.
 
+% TODO całe do sprawdzenia, może dalej trochę za długo
 \section{Środowisko badawcze i dane testowe}
+\label{sec:srodowisko}
 
-% TODO
+Badania obejmują cztery scenariusze, oznaczane dalej symbolami S1--S4: obliczenia zmiennoprzecinkowe (S1), filtrowanie dużego pliku CSV (S2), równoległą symulację dynamiki molekularnej (S3) i~wykrywanie anomalii w~strumieniu zdarzeń z~czujników (S4).
+Implementacje scenariuszy opisano w~rozdziale~\ref{chap:obiekt}.
+
+\subsection{Stanowisko pomiarowe}
+\label{subsec:stanowisko}
+
+Wszystkie pomiary wykonano na jednym komputerze o~konfiguracji przedstawionej w~tabeli~\ref{tab:stanowisko}.
+Scenariusze S1, S2 i~S4 zmierzono 25 maja 2026~r., a~S3 23 października 2026~r., po aktualizacji kompilatora Rusta do wersji 1.96.0.
+Każdy scenariusz zmierzono dla obu języków w~jednej sesji.
+
+% Wersje Pythona i bibliotek odczytano z maszyny pomiarowej 28.11.2026 — sprawdzić, czy w sesji majowej były te same.
+\begin{table}[htbp]
+  \centering
+  \caption{Konfiguracja stanowiska badawczego}
+  \label{tab:stanowisko}
+  \begin{tabularx}{\textwidth}{|l|>{\raggedright\arraybackslash}X|}
+    \hline
+    Element & Konfiguracja \\
+    \hline
+    Procesor & AMD Ryzen 5 7600X: 6 rdzeni, 12 wątków sprzętowych, taktowanie bazowe 4,7~GHz \\
+    \hline
+    Pamięć operacyjna & 32~GB DDR5 (2~×~16~GB), 4800~MT/s \\
+    \hline
+    Dysk & Lexar NM790 1~TB (SSD NVMe) \\
+    \hline
+    System operacyjny & Windows 11 Pro 25H2 (kompilacja 26200), plan zasilania „Zrównoważony” \\
+    \hline
+    Java & Oracle OpenJDK 25.0.2, kolektor G1, opcje \texttt{-Xms512m -Xmx8g} \\
+    \hline
+    Rust & rustc 1.95.0 (S1, S2, S4) i~1.96.0 (S3), edycja 2024, \mbox{\texttt{cargo build -{}-release}} \\
+    \hline
+    Pomiar czasu & hyperfine 1.20.0 [CYT: D.~Peter, hyperfine] \\
+    \hline
+    Skrypty pomiarowe & Python 3.14.3, psutil 7.2.2 [CYT: G.~Rodola, psutil], NumPy 2.4.4 [CYT: Harris i~in., 2020], Matplotlib 3.10.9 [CYT: Hunter, 2007], seaborn 0.13.2 [CYT: Waskom, 2021] \\
+    \hline
+  \end{tabularx}
+\end{table}
+
+Poza rozmiarem sterty w~Javie nie zmieniano domyślnych ustawień maszyny wirtualnej ani kompilatorów, a~profil \texttt{release} w~Ruście ma domyślnie poziom optymalizacji \mbox{\texttt{opt-level = 3}} [CYT: The Cargo Book, rozdział „Profiles”].
+Bez opcji \texttt{target-cpu} kompilator \texttt{rustc} generował kod dla bazowego zestawu instrukcji x86-64 (do SSE3), natomiast kompilator JIT na tym procesorze domyślnie korzysta z~AVX-512, co może sprzyjać Javie w~pętlach obliczeniowych S1 i~S3.
+Obie implementacje używają wyłącznie bibliotek standardowych.
+
+\subsection{Dane testowe}
+\label{subsec:dane-testowe}
+
+Scenariusz S1 nie ma danych wejściowych: obraz $4096 \times 4096$ pikseli obszaru $[-2;\, 1] \times [\num{-1.5};\, \num{1.5}]$ płaszczyzny zespolonej, z~limitem 1000 iteracji na piksel, opisują stałe w~kodzie programów.
+Dane S2--S4 wygenerowano syntetycznie skryptami z~katalogu \texttt{bench/}, korzystającymi z~generatora \texttt{random.Random} Pythona z~ziarnem 42.
+Każdy plik wygenerowano raz i~obie implementacje czytały te same bajty, a~ponowne uruchomienie generatora w~tej samej wersji Pythona odtwarza plik bajt w~bajt.
+Pliki zestawiono w~tabeli~\ref{tab:dane-wejsciowe}.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Dane wejściowe scenariuszy badawczych}
+  \label{tab:dane-wejsciowe}
+  \begin{tabular}{|l|l|r|r|}
+    \hline
+    Scenariusz & Format & Liczba rekordów & Rozmiar \\
+    \hline
+    S2 & tekst CSV, 7 kolumn & \num{50000000} & ok. 4,7~GB \\
+    \hline
+    S3, $N = \num{108000}$ & binarny & \num{108000} & 5,18~MB \\
+    \hline
+    S3, $N = 4000$ & binarny & 4000 & 0,19~MB \\
+    \hline
+    S4 & binarny, rekordy po 20~B & $10^9$ & 20~GB \\
+    \hline
+  \end{tabular}
+\end{table}
+
+Plik S2 symuluje rejestr transakcji finansowych (listing~\ref{lst:csv-s2}).
+Filtr korzysta tylko z~kwoty \texttt{amount}, która ma rozkład jednostajny od 1 do \num{99999.99} i~dwa miejsca po przecinku; obie implementacje zamieniają ją na liczbę podwójnej precyzji (\texttt{double}, \texttt{f64}).
+Pozostałe kolumny zawierają numer wiersza, rosnący znacznik czasu, losowe numery kont, jedną z~pięciu kategorii i~opis, a~program musi je wczytać i~przepisać do pliku wynikowego bez zmian.
+
+\begin{lstlisting}[caption={Nagłówek i~pierwszy wiersz pliku wejściowego S2}, label={lst:csv-s2}]
+transaction_id,timestamp_ms,amount,sender_id,receiver_id,category,description
+1,1700000000664,11133.99,ACC303832645883,ACC245864938384,TRANSFER,Payment ref #98847493
+\end{lstlisting}
+
+Plik S3 zawiera stan początkowy układu cząstek Lennarda-Jonesa w~jednostkach zredukowanych, o~gęstości $\rho^* = \num{0.8442}$ i~temperaturze $T^* = \num{1.44}$ przyjętych za benchmarkiem LJ programu LAMMPS~\cite{thompson2022} [CYT: LAMMPS, plik \texttt{bench/in.lj}].
+Cząstki zajmują węzły sieci regularnej ściennie centrowanej (FCC) z~$n^3$ komórek elementarnych, więc ich liczba wynosi $N = 4n^3$: \num{108000} dla $n = 30$ i~4000 dla $n = 10$.
+Prędkości wylosowano z~rozkładu normalnego, wyzerowano całkowity pęd układu i~przeskalowano je do temperatury $T^*$.
+Pozycje i~prędkości zapisano binarnie jako liczby \texttt{f64}, dlatego oba programy startują z~bitowo identycznego stanu.
+
+Plik S4 zawiera $10^9$ rekordów ze znacznikiem czasu (\texttt{u64}), numerem czujnika (\texttt{u32}, 1000 czujników) i~wartością pomiaru (\texttt{f64}).
+Każdy czujnik $i$ ma wartość bazową $b_i$ z~rozkładu jednostajnego na przedziale $[10;\, 90)$, a~zwykły pomiar wynosi $b_i + \xi$, gdzie $\xi \sim \mathcal{N}(0, 1)$.
+Z~prawdopodobieństwem 0,02 generator zastępuje go anomalią $b_i \pm u$, gdzie $u$ ma rozkład jednostajny na przedziale $[5;\, 10)$.
+Anomalia odbiega więc od wartości bazowej o~5--10 odchyleń standardowych szumu, czyli więcej niż próg $3\sigma$ stosowany przy wykrywaniu.
 
 \section{Metody oceny i metryki}
+\label{sec:metryki}
 
 % TODO
 
 \section{Procedura eksperymentu}
+\label{sec:procedura}
 
 % TODO
 
 \section{Weryfikacja i ocena statystyczna wyników}
+\label{sec:weryfikacja}
 
 % TODO
